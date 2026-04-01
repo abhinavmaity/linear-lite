@@ -96,7 +96,19 @@ The main planning and architecture references for this repository are:
 - [Objective.md](/Users/abhinavmaity/code/linear-lite/docs/Objective.md)
 - [Frontend_Planning.md](/Users/abhinavmaity/code/linear-lite/docs/Frontend_Planning.md)
 - [Technical_Architecture.md](/Users/abhinavmaity/code/linear-lite/docs/Technical_Architecture.md)
+- [Integration_Roadmap.md](/Users/abhinavmaity/code/linear-lite/docs/Integration_Roadmap.md)
+- [Backend_Task_Breakdown.md](/Users/abhinavmaity/code/linear-lite/docs/Backend_Task_Breakdown.md)
 
 ## Current Status
 
-The repository is currently in the planning and architecture-definition phase. The backend technical architecture has been expanded into a detailed implementation reference, and the frontend/user-flow planning has already been outlined. The next stage is execution: turning the documented product, screen flows, schema rules, and API contracts into the actual application.
+The repository has moved beyond pure planning. The frontend core MVP flows are already implemented, including auth screens, dashboard, issues list, board, issue detail, a create issue modal, and scaffolded supporting pages for projects, sprints, labels, and team views.
+
+Frontend development currently supports mock-backed workflows so the UI and screen flows can be exercised before the backend is available. The backend runtime is still pending implementation, but the backend architecture, API contracts, schema rules, and implementation boundaries are already specified in detail. The next major phase is backend execution followed by frontend/backend integration and hardening.
+
+## Implementation Snapshot
+
+- Product definition and architecture: complete
+- Frontend core shell and issue workflows: largely complete
+- Supporting resource screens: scaffolded
+- Backend runtime: not yet implemented
+- Integration, testing, and deployment hardening: pending

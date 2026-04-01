@@ -1,12 +1,13 @@
 import { ReactNode } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Spinner } from 'components/common/Spinner';
+import { isMockDataEnabled } from 'services/env';
 import { useAuthStore } from 'store/authStore';
 
 export function AuthGate({ requireAuth, children }: { requireAuth: boolean; children?: ReactNode }) {
   const location = useLocation();
   const { token, bootstrapped } = useAuthStore();
-  const bypassAuth = import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === 'true';
+  const bypassAuth = isMockDataEnabled;
 
   if (bypassAuth) {
     return <>{children ?? <Outlet />}</>;

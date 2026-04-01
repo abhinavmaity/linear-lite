@@ -1,9 +1,12 @@
 import { useEffect } from 'react';
+import { isMockDataEnabled } from 'services/env';
+import { getMockSession } from 'services/mockBackend';
 import { authApi } from 'services/authApi';
 import { useAuthStore } from 'store/authStore';
 
 export function useAuthBootstrap() {
   const token = useAuthStore((state) => state.token);
+  const setSession = useAuthStore((state) => state.setSession);
   const setUser = useAuthStore((state) => state.setUser);
   const clearSession = useAuthStore((state) => state.clearSession);
   const setBootstrapped = useAuthStore((state) => state.setBootstrapped);
@@ -13,6 +16,11 @@ export function useAuthBootstrap() {
 
     async function bootstrap() {
       if (!token) {
+        if (isMockDataEnabled) {
+          const session = getMockSession();
+          setSession(session.token, session.user);
+          return;
+        }
         setBootstrapped(true);
         return;
       }
@@ -35,5 +43,5 @@ export function useAuthBootstrap() {
     return () => {
       cancelled = true;
     };
-  }, [clearSession, setBootstrapped, setUser, token]);
+  }, [clearSession, setBootstrapped, setSession, setUser, token]);
 }
