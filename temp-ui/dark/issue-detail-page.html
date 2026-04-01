@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Work+Sans:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-on-surface": "#f1f1f1",
+                        "secondary-container": "#65a1ff",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#ffb3b1",
+                        "on-tertiary-fixed-variant": "#584400",
+                        "surface-container-high": "#e8e8e8",
+                        "inverse-primary": "#ffb3b1",
+                        "on-primary-container": "#fffbff",
+                        "outline-variant": "#e4bebc",
+                        "surface-bright": "#f9f9f9",
+                        "secondary-fixed-dim": "#aac7ff",
+                        "on-primary-fixed": "#410007",
+                        "inverse-surface": "#303030",
+                        "tertiary": "#745b00",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#003671",
+                        "on-surface-variant": "#5b403f",
+                        "surface-dim": "#dadada",
+                        "primary-container": "#db313f",
+                        "on-tertiary-container": "#4f3d00",
+                        "on-primary-fixed-variant": "#92001c",
+                        "secondary-fixed": "#d6e3ff",
+                        "on-surface": "#1b1b1b",
+                        "background": "#f9f9f9",
+                        "on-secondary-fixed": "#001b3e",
+                        "on-tertiary-fixed": "#241a00",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f3f3f3",
+                        "surface-container": "#eeeeee",
+                        "secondary": "#065db7",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#ffdad8",
+                        "surface-tint": "#bb152c",
+                        "primary": "#b7102a",
+                        "surface-variant": "#e2e2e2",
+                        "on-secondary-fixed-variant": "#00458d",
+                        "on-background": "#1b1b1b",
+                        "surface": "#f9f9f9",
+                        "tertiary-container": "#d0a600",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#f1c100",
+                        "surface-container-highest": "#e2e2e2",
+                        "outline": "#8f6f6e",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#ffe08b",
+                        "on-error-container": "#93000a"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Work Sans"],
+                        "label": ["Space Grotesk"],
+                        "mono": ["JetBrains Mono"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bauhaus-grid {
+            background-image: radial-gradient(circle, #ffffff10 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body class="bg-stone-950 text-stone-50 font-body selection:bg-primary selection:text-white">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full border-b-4 border-stone-50 z-50 bg-stone-950 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)]">
+    <div class="flex justify-between items-center h-16 px-6 w-full">
+        <div class="flex items-center gap-8">
+            <span class="text-2xl font-black text-stone-50 tracking-tightest font-headline uppercase">BauhausPM</span>
+            <div class="hidden md:flex gap-6">
+                <a class="font-['Space_Grotesk'] uppercase tracking-tighter font-bold text-[#E63946] border-b-4 border-[#E63946] py-1 transition-all duration-100 hover:bg-[#E63946] hover:text-white active:translate-x-1 active:translate-y-1" href="#">Issues</a>
+                <a class="font-['Space_Grotesk'] uppercase tracking-tighter font-bold text-stone-400 py-1 transition-all duration-100 hover:bg-[#E63946] hover:text-white active:translate-x-1 active:translate-y-1" href="#">Board</a>
+                <a class="font-['Space_Grotesk'] uppercase tracking-tighter font-bold text-stone-400 py-1 transition-all duration-100 hover:bg-[#E63946] hover:text-white active:translate-x-1 active:translate-y-1" href="#">Sprints</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="relative hidden lg:block">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">search</span>
+                <input class="bg-stone-900 border-2 border-stone-50 py-1 pl-10 pr-4 font-label uppercase text-xs focus:ring-0 focus:border-primary-container w-64" placeholder="SEARCH..." type="text"/>
+            </div>
+            <button class="bg-primary hover:bg-[#E63946] text-white px-4 py-2 font-headline font-bold uppercase tracking-tight text-sm border-2 border-stone-50 shadow-[2px_2px_0px_0px_white] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
+                Create Issue
+            </button>
+            <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">notifications</span>
+            <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">account_circle</span>
+        </div>
+    </div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 border-r-4 border-stone-50 bg-stone-900 hidden md:flex flex-col pt-20 pb-6 z-40">
+    <div class="px-6 mb-8">
+        <h2 class="text-xl font-black text-white font-headline uppercase tracking-tight">Project Alpha</h2>
+        <p class="text-[10px] font-mono text-stone-500 uppercase tracking-widest mt-1">v2.0.4</p>
+    </div>
+    <nav class="flex-1 space-y-1">
+        <a class="flex items-center gap-3 px-6 py-3 text-stone-300 font-label font-bold text-sm uppercase transition-all duration-75 hover:bg-blue-600 hover:text-stone-900 group" href="#">
+            <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">grid_view</span>
+            <span>Dashboard</span>
+        </a>
+        <a class="bg-[#E63946] text-stone-950 border-y-2 border-stone-50 flex items-center gap-3 px-6 py-3 font-label font-bold text-sm uppercase" href="#">
+            <span class="material-symbols-outlined text-xl">list_alt</span>
+            <span>Issues</span>
+        </a>
+        <a class="flex items-center gap-3 px-6 py-3 text-stone-300 font-label font-bold text-sm uppercase transition-all duration-75 hover:bg-blue-600 hover:text-stone-900 group" href="#">
+            <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">view_kanban</span>
+            <span>Board</span>
+        </a>
+        <a class="flex items-center gap-3 px-6 py-3 text-stone-300 font-label font-bold text-sm uppercase transition-all duration-75 hover:bg-blue-600 hover:text-stone-900 group" href="#">
+            <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">folder_special</span>
+            <span>Projects</span>
+        </a>
+        <a class="flex items-center gap-3 px-6 py-3 text-stone-300 font-label font-bold text-sm uppercase transition-all duration-75 hover:bg-blue-600 hover:text-stone-900 group" href="#">
+            <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">bolt</span>
+            <span>Sprints</span>
+        </a>
+    </nav>
+    <div class="mt-auto px-6 space-y-4">
+        <button class="w-full bg-yellow-400 text-stone-950 font-headline font-black uppercase py-3 border-2 border-stone-50 shadow-[4px_4px_0px_0px_white] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all text-xs tracking-widest">
+            New Sprint
+        </button>
+        <div class="pt-4 border-t-2 border-stone-800 space-y-2">
+            <a class="flex items-center gap-2 text-stone-500 font-label uppercase text-[10px] hover:text-stone-200 transition-colors" href="#">
+                <span class="material-symbols-outlined text-sm">settings</span> Settings
+            </a>
+            <a class="flex items-center gap-2 text-stone-500 font-label uppercase text-[10px] hover:text-stone-200 transition-colors" href="#">
+                <span class="material-symbols-outlined text-sm">help</span> Help
+            </a>
+        </div>
+    </div>
+</aside>
+<!-- Main Content -->
+<main class="md:ml-64 pt-16 min-h-screen bauhaus-grid">
+    <div class="max-w-[1600px] mx-auto p-6 md:p-8">
+        <!-- Breadcrumbs -->
+        <div class="flex items-center gap-2 mb-8 font-mono text-[10px] uppercase tracking-[0.2em] text-stone-500">
+            <a class="hover:text-primary transition-colors" href="#">Project Alpha</a>
+            <span class="material-symbols-outlined text-xs">chevron_right</span>
+            <a class="hover:text-primary transition-colors" href="#">Issues</a>
+            <span class="material-symbols-outlined text-xs">chevron_right</span>
+            <span class="text-stone-300">ISS-204</span>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-10 gap-8 items-start">
+            <!-- Left Column: Issue Detail (70%) -->
+            <div class="lg:col-span-7 space-y-8">
+                <header class="space-y-4 bg-stone-900 p-8 border-4 border-stone-50 shadow-[8px_8px_0px_0px_#E63946]">
+                    <div class="flex items-start justify-between">
+                        <h1 class="text-4xl md:text-5xl font-black font-headline uppercase leading-none tracking-tighter">
+                            Core Engine: Refactor <span class="text-primary">Collision</span> Physics Module
+                        </h1>
+                        <div class="flex gap-2">
+                            <button class="p-2 border-2 border-stone-50 hover:bg-stone-800 transition-colors"><span class="material-symbols-outlined">edit</span></button>
+                            <button class="p-2 border-2 border-stone-50 hover:bg-stone-800 transition-colors"><span class="material-symbols-outlined">share</span></button>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <span class="bg-primary text-white px-3 py-1 text-xs font-black uppercase font-label">Bug</span>
+                        <span class="bg-stone-50 text-stone-950 px-3 py-1 text-xs font-black uppercase font-label tracking-tighter">Priority: High</span>
+                    </div>
+                </header>
+                <!-- Markdown Editor Look -->
+                <section class="bg-stone-900 border-4 border-stone-50 overflow-hidden">
+                    <div class="bg-stone-800 border-b-2 border-stone-50 px-4 py-2 flex items-center justify-between">
+                        <div class="flex gap-4">
+                            <span class="text-xs font-black font-headline uppercase tracking-widest text-primary">Description</span>
+                            <span class="text-xs font-bold font-headline uppercase tracking-widest text-stone-500 hover:text-stone-300 cursor-pointer">Preview</span>
+                        </div>
+                        <div class="flex gap-3 text-stone-400">
+                            <span class="material-symbols-outlined text-sm cursor-pointer hover:text-white">format_bold</span>
+                            <span class="material-symbols-outlined text-sm cursor-pointer hover:text-white">format_italic</span>
+                            <span class="material-symbols-outlined text-sm cursor-pointer hover:text-white">code</span>
+                            <span class="material-symbols-outlined text-sm cursor-pointer hover:text-white">link</span>
+                        </div>
+                    </div>
+                    <div class="p-8 space-y-6 font-body leading-relaxed text-stone-300">
+                        <p class="text-lg">The current collision detection system is causing significant frame drops during high-density entity interactions in the <code class="bg-stone-800 px-1 font-mono text-primary text-sm">Zone_Delta</code> environment.</p>
+                        <h3 class="font-headline font-black uppercase text-xl text-white tracking-tight border-l-8 border-primary pl-4">Acceptance Criteria</h3>
+                        <ul class="space-y-3 list-none">
+                            <li class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-primary text-sm mt-1">check_box</span>
+                                <span>Implement spatial partitioning for static geometry.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-primary text-sm mt-1">check_box</span>
+                                <span>Optimize AABB intersection checks using SIMD instructions.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-stone-600 text-sm mt-1">check_box_outline_blank</span>
+                                <span class="text-stone-500">Benchmark results against v1.8 legacy module.</span>
+                            </li>
+                        </ul>
+                        <div class="bg-stone-950 p-6 border-2 border-stone-800 font-mono text-sm overflow-x-auto">
+                            <div class="flex gap-2 mb-4">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <span class="text-stone-500">// Optimized collision check loop</span><br/>
+                            <span class="text-primary">void</span> <span class="text-blue-400">ProcessCollisions</span>(Entity* entities, <span class="text-primary">size_t</span> count) {<br/>
+                              <span class="text-stone-500">/* Implementation of optimized KD-Tree traversal */</span><br/>
+                              <span class="text-yellow-400">#pragma omp parallel for</span><br/>
+                              <span class="text-primary">for</span> (<span class="text-primary">int</span> i = <span class="text-blue-500">0</span>; i &lt; count; ++i) {<br/>
+                                UpdateSpatialHash(entities[i]);<br/>
+                              }<br/>
+                            }
+                        </div>
+                    </div>
+                </section>
+                <!-- Activity Timeline -->
+                <section class="space-y-6">
+                    <div class="flex items-center gap-4">
+                        <h2 class="font-headline font-black uppercase text-2xl tracking-tighter">Activity History</h2>
+                        <div class="h-1 flex-1 bg-stone-50"></div>
+                    </div>
+                    <div class="space-y-0 relative border-l-4 border-stone-50 ml-4 pl-8 pb-4">
+                        <!-- Timeline Item -->
+                        <div class="relative mb-10">
+                            <div class="absolute -left-[42px] top-0 w-4 h-4 bg-primary border-4 border-stone-50"></div>
+                            <div class="bg-stone-900 border-2 border-stone-50 p-4 shadow-[4px_4px_0px_0px_#444] group hover:border-primary transition-colors">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 bg-stone-100 flex items-center justify-center text-stone-950 font-black text-xs">AM</div>
+                                        <p class="text-sm font-headline font-bold uppercase"><span class="text-primary">Alex Murphy</span> changed status to <span class="bg-stone-50 text-stone-950 px-2 py-0.5">IN REVIEW</span></p>
+                                    </div>
+                                    <span class="text-[10px] font-mono text-stone-500">2 HOURS AGO</span>
+                                </div>
+                                <p class="text-stone-400 text-sm pl-11">"Preliminary refactor completed. Needs verification on ARM64 builds."</p>
+                            </div>
+                        </div>
+                        <!-- Timeline Item -->
+                        <div class="relative mb-10">
+                            <div class="absolute -left-[42px] top-0 w-4 h-4 bg-stone-50 border-4 border-stone-50"></div>
+                            <div class="bg-stone-900 border-2 border-stone-50 p-4 shadow-[4px_4px_0px_0px_#444] group hover:border-primary transition-colors">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 bg-yellow-400 flex items-center justify-center text-stone-950 font-black text-xs">SK</div>
+                                        <p class="text-sm font-headline font-bold uppercase"><span class="text-primary">Sarah Konor</span> attached a file</p>
+                                    </div>
+                                    <span class="text-[10px] font-mono text-stone-500">5 HOURS AGO</span>
+                                </div>
+                                <div class="ml-11 flex items-center gap-3 p-3 bg-stone-950 border border-stone-800 w-fit">
+                                    <span class="material-symbols-outlined text-primary">analytics</span>
+                                    <div class="text-xs">
+                                        <p class="font-bold uppercase">performance_benchmarks.pdf</p>
+                                        <p class="text-stone-600">2.4 MB</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <!-- Right Column: Attributes (30%) -->
+            <aside class="lg:col-span-3 space-y-8 sticky top-24">
+                <div class="bg-stone-900 border-4 border-stone-50 p-6 shadow-[8px_8px_0px_0px_white]">
+                    <h3 class="font-headline font-black uppercase text-lg mb-6 tracking-tighter border-b-2 border-stone-800 pb-2">Status &amp; Control</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-[10px] font-mono text-stone-500 uppercase tracking-widest mb-2">Assignee</p>
+                            <div class="flex items-center gap-3 bg-stone-950 p-3 border-2 border-stone-800">
+                                <img alt="Assignee Avatar" class="w-10 h-10 border-2 border-primary" data-alt="portrait of a focused professional software engineer with glasses in a dark modern office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8DjGVIrbP40WS0hqlY_gYPIEMRSp4S3ZMTlXmv8gDb0vf7fd8V8VXoDfN_vHcX7OExumtqY--b9anO1AvMClQhq76GF4uxc63LodB4cpMJtxsrB_5uYWPykikA02uTQF5dkgnea7nkLSeDxbs9-Ca6PfJGAFLZKMMlFmJ51qID2l8q_9e0SAyAy14666NqHvPMuONsQJHR62K74yoLaUDcr2gPdLGPxQkurXSF9gicI39GP7GdSRfILY6YdY9GsK2rJpMZzA5B00I"/>
+                                <div>
+                                    <p class="font-headline font-bold text-sm uppercase">Alex Murphy</p>
+                                    <p class="text-[10px] text-stone-500 uppercase">Lead Architect</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-mono text-stone-500 uppercase tracking-widest mb-2">Labels</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-primary text-white px-3 py-1 text-[10px] font-black uppercase font-label">ENGINE</span>
+                                <span class="bg-primary text-white px-3 py-1 text-[10px] font-black uppercase font-label">PHYSICS</span>
+                                <span class="bg-primary text-white px-3 py-1 text-[10px] font-black uppercase font-label">OPTIMIZATION</span>
+                                <button class="border-2 border-stone-700 text-stone-500 hover:border-stone-50 hover:text-stone-50 px-2 py-0.5 transition-colors">
+                                    <span class="material-symbols-outlined text-sm">add</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-[10px] font-mono text-stone-500 uppercase tracking-widest mb-2">Sprint</p>
+                                <p class="font-headline font-black text-sm uppercase">Alpha-04</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-mono text-stone-500 uppercase tracking-widest mb-2">Story Points</p>
+                                <span class="inline-block bg-yellow-400 text-stone-950 font-black px-3 py-1 text-sm border-2 border-stone-50">13</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-mono text-stone-500 uppercase tracking-widest mb-2">Estimate</p>
+                            <div class="w-full bg-stone-950 h-3 border border-stone-800">
+                                <div class="bg-primary h-full w-[65%] border-r border-stone-50"></div>
+                            </div>
+                            <div class="flex justify-between mt-2 text-[10px] font-mono text-stone-500 uppercase">
+                                <span>24h Logged</span>
+                                <span>16h Remaining</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Relations/Links -->
+                <div class="bg-stone-900 border-4 border-stone-50 p-6 shadow-[8px_8px_0px_0px_#3b82f6]">
+                    <h3 class="font-headline font-black uppercase text-lg mb-4 tracking-tighter">Linked Issues</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3 group cursor-pointer">
+                            <span class="material-symbols-outlined text-blue-400 text-sm">link</span>
+                            <div class="flex-1">
+                                <p class="text-xs font-bold font-headline uppercase group-hover:text-blue-400 transition-colors">ISS-189</p>
+                                <p class="text-[10px] text-stone-500 uppercase truncate">Geometry Shader Leak</p>
+                            </div>
+                            <span class="bg-stone-800 text-[10px] px-2 py-0.5 uppercase">Blocked</span>
+                        </div>
+                        <div class="flex items-center gap-3 group cursor-pointer">
+                            <span class="material-symbols-outlined text-blue-400 text-sm">link</span>
+                            <div class="flex-1">
+                                <p class="text-xs font-bold font-headline uppercase group-hover:text-blue-400 transition-colors">ISS-212</p>
+                                <p class="text-[10px] text-stone-500 uppercase truncate">Audio Sync Latency</p>
+                            </div>
+                            <span class="bg-stone-800 text-[10px] px-2 py-0.5 uppercase">Relates</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Footer Info -->
+                <div class="p-6 border-l-4 border-yellow-400 bg-stone-900/50">
+                    <div class="flex items-center gap-2 text-[10px] font-mono text-stone-500 uppercase mb-2">
+                        <span class="material-symbols-outlined text-sm">calendar_today</span>
+                        <span>Created Dec 12, 2023</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-[10px] font-mono text-stone-500 uppercase">
+                        <span class="material-symbols-outlined text-sm">update</span>
+                        <span>Last Updated 24m ago</span>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</main>
+<!-- Bottom Nav for Mobile Only -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-stone-950 border-t-4 border-stone-50 flex justify-around items-center h-16 z-50">
+    <button class="text-primary transition-all p-2 flex flex-col items-center">
+        <span class="material-symbols-outlined">grid_view</span>
+        <span class="text-[8px] font-headline font-black uppercase">Dash</span>
+    </button>
+    <button class="text-stone-500 transition-all p-2 flex flex-col items-center">
+        <span class="material-symbols-outlined">list_alt</span>
+        <span class="text-[8px] font-headline font-black uppercase">Issues</span>
+    </button>
+    <div class="-mt-10">
+        <button class="bg-primary text-white p-4 border-4 border-stone-50 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)] active:translate-y-1 active:shadow-none transition-all">
+            <span class="material-symbols-outlined">add</span>
+        </button>
+    </div>
+    <button class="text-stone-500 transition-all p-2 flex flex-col items-center">
+        <span class="material-symbols-outlined">view_kanban</span>
+        <span class="text-[8px] font-headline font-black uppercase">Board</span>
+    </button>
+    <button class="text-stone-500 transition-all p-2 flex flex-col items-center">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="text-[8px] font-headline font-black uppercase">Set</span>
+    </button>
+</nav>
+</body></html>

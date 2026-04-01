@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&amp;family=Work+Sans:wght@300;400;500;600;700&amp;family=Space+Mono&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-on-surface": "#f1f1f1",
+                        "secondary-container": "#65a1ff",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#ffb3b1",
+                        "on-tertiary-fixed-variant": "#584400",
+                        "surface-container-high": "#e8e8e8",
+                        "inverse-primary": "#ffb3b1",
+                        "on-primary-container": "#fffbff",
+                        "outline-variant": "#e4bebc",
+                        "surface-bright": "#f9f9f9",
+                        "secondary-fixed-dim": "#aac7ff",
+                        "on-primary-fixed": "#410007",
+                        "inverse-surface": "#303030",
+                        "tertiary": "#745b00",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#003671",
+                        "on-surface-variant": "#5b403f",
+                        "surface-dim": "#dadada",
+                        "primary-container": "#db313f",
+                        "on-tertiary-container": "#4f3d00",
+                        "on-primary-fixed-variant": "#92001c",
+                        "secondary-fixed": "#d6e3ff",
+                        "on-surface": "#1b1b1b",
+                        "background": "#f9f9f9",
+                        "on-secondary-fixed": "#001b3e",
+                        "on-tertiary-fixed": "#241a00",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f3f3f3",
+                        "surface-container": "#eeeeee",
+                        "secondary": "#065db7",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#ffdad8",
+                        "surface-tint": "#bb152c",
+                        "primary": "#b7102a",
+                        "surface-variant": "#e2e2e2",
+                        "on-secondary-fixed-variant": "#00458d",
+                        "on-background": "#1b1b1b",
+                        "surface": "#f9f9f9",
+                        "tertiary-container": "#d0a600",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#f1c100",
+                        "surface-container-highest": "#e2e2e2",
+                        "outline": "#8f6f6e",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#ffe08b",
+                        "on-error-container": "#93000a"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Work Sans"],
+                        "label": ["Space Grotesk"],
+                        "mono": ["Space Mono"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    letterSpacing: {
+                        "tightest": "-.075em",
+                        "tighter": "-.05em",
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bauhaus-grid {
+            background-image: radial-gradient(circle, #1b1b1b 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-background min-h-screen">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full border-b-4 border-stone-900 bg-white z-50 flex justify-between items-center h-16 px-6 w-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+    <div class="flex items-center gap-8">
+        <span class="text-2xl font-black text-stone-900 tracking-tightest font-headline uppercase">BauhausPM</span>
+        <div class="hidden md:flex items-center gap-6 font-headline font-bold uppercase tracking-tighter text-sm">
+            <a class="text-stone-600 hover:bg-[#E63946] hover:text-white transition-colors duration-100 px-2 py-1" href="#">Dashboard</a>
+            <a class="text-stone-600 hover:bg-[#E63946] hover:text-white transition-colors duration-100 px-2 py-1" href="#">Issues</a>
+            <a class="text-[#E63946] border-b-4 border-[#E63946] px-2 py-1" href="#">Team</a>
+        </div>
+    </div>
+    <div class="flex items-center gap-4">
+        <div class="hidden lg:flex items-center bg-stone-100 border-2 border-stone-900 px-3 py-1">
+            <span class="material-symbols-outlined text-stone-900 mr-2" style="font-size: 20px;">search</span>
+            <input class="bg-transparent border-none focus:ring-0 text-xs font-headline font-bold uppercase w-32" placeholder="SEARCH..." type="text"/>
+        </div>
+        <button class="bg-[#E63946] text-white font-headline font-bold uppercase text-xs px-4 py-2 border-2 border-stone-900 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
+            Create Issue
+        </button>
+        <span class="material-symbols-outlined text-stone-900 cursor-pointer">notifications</span>
+        <span class="material-symbols-outlined text-stone-900 cursor-pointer">account_circle</span>
+    </div>
+</nav>
+<!-- SideNavBar (Desktop Only) -->
+<aside class="hidden md:flex fixed left-0 top-0 h-full w-64 border-r-4 border-stone-900 bg-stone-50 flex-col pt-20 pb-6 z-40">
+    <div class="px-6 mb-8">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 bg-primary-container border-2 border-stone-900 flex items-center justify-center text-white font-black text-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">A</div>
+            <div>
+                <h2 class="text-xl font-black text-stone-900 font-headline leading-none">Project Alpha</h2>
+                <p class="text-[10px] font-mono font-bold text-stone-500">v2.0.4</p>
+            </div>
+        </div>
+    </div>
+    <nav class="flex-1 font-headline font-bold text-sm uppercase">
+        <a class="flex items-center gap-3 px-6 py-3 text-stone-900 hover:bg-yellow-400 transition-all duration-75" href="#">
+            <span class="material-symbols-outlined">grid_view</span> Dashboard
+        </a>
+        <a class="flex items-center gap-3 px-6 py-3 text-stone-900 hover:bg-yellow-400 transition-all duration-75" href="#">
+            <span class="material-symbols-outlined">list_alt</span> Issues
+        </a>
+        <a class="flex items-center gap-3 px-6 py-3 text-stone-900 hover:bg-yellow-400 transition-all duration-75" href="#">
+            <span class="material-symbols-outlined">view_kanban</span> Board
+        </a>
+        <a class="flex items-center gap-3 px-6 py-3 text-stone-900 hover:bg-yellow-400 transition-all duration-75" href="#">
+            <span class="material-symbols-outlined">folder_special</span> Projects
+        </a>
+        <a class="flex items-center gap-3 px-6 py-3 text-stone-900 hover:bg-yellow-400 transition-all duration-75" href="#">
+            <span class="material-symbols-outlined">bolt</span> Sprints
+        </a>
+        <a class="flex items-center gap-3 px-6 py-3 text-stone-900 hover:bg-yellow-400 transition-all duration-75" href="#">
+            <span class="material-symbols-outlined">label</span> Labels
+        </a>
+        <a class="bg-[#E63946] text-white border-y-2 border-stone-900 flex items-center gap-3 px-6 py-3" href="#">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span> Team
+        </a>
+    </nav>
+    <div class="mt-auto px-6 space-y-2">
+        <button class="w-full bg-secondary-container border-2 border-stone-900 py-2 font-headline font-bold uppercase text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
+            New Sprint
+        </button>
+        <div class="pt-4 flex flex-col gap-2 font-headline font-bold text-xs uppercase text-stone-600">
+            <a class="flex items-center gap-2 hover:text-[#E63946]" href="#"><span class="material-symbols-outlined text-sm">settings</span> Settings</a>
+            <a class="flex items-center gap-2 hover:text-[#E63946]" href="#"><span class="material-symbols-outlined text-sm">help</span> Help</a>
+        </div>
+    </div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-64 pt-24 pb-12 px-6 lg:px-12 bauhaus-grid min-h-screen">
+    <!-- Header Section -->
+    <header class="mb-12 border-b-8 border-stone-900 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div class="max-w-2xl">
+            <h1 class="text-6xl md:text-8xl font-black font-headline uppercase leading-none tracking-tightest text-stone-900">
+                The<br/><span class="text-primary-container">Builders</span>
+            </h1>
+            <p class="mt-4 text-xl font-mono text-stone-700 leading-tight">
+                // Collective intelligence driving Project Alpha.
+                A geometric fusion of logic, art, and rapid engineering.
+            </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <div class="bg-yellow-400 border-4 border-stone-900 px-4 py-2 font-headline font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                Total: 12
+            </div>
+            <div class="bg-blue-600 text-white border-4 border-stone-900 px-4 py-2 font-headline font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                Active: 08
+            </div>
+        </div>
+    </header>
+    <!-- Team Grid (Bento Style) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <!-- Profile Card 1 -->
+        <div class="bg-white border-4 border-stone-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col group transition-all hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
+            <div class="h-64 relative border-b-4 border-stone-900 bg-stone-200">
+                <img alt="Profile" class="w-full h-full object-cover grayscale contrast-125" data-alt="close-up portrait of a designer with short hair and round glasses against a bright yellow geometric background with sharp shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAg5X8aJ5dHzWbPmSirVwOEXnSAVnNAuE--bqzPwh5if7GmwQpiZ1fZK1Gy1P_pWq1HxaNJTTQslSqvXKA79kq4IUiGtw1Wb5DTiOsowk5wH5WgLkHTulskQZG2Hg-70cPj01-tN9JjGunBNzMgIjOeKAcISOui0NeLtBZ0hkcHmZVQg-iutM9reUM5MT7xC_I4T_3s0-pGiOd33w9lN7qqo9ChJHDQ696a3w1ib6zIaHfnZ-Nzq9w6jWxzh7gpg3mg9-nm5phQ9D8d"/>
+                <div class="absolute top-0 right-0 w-16 h-16 bg-[#E63946] border-l-4 border-b-4 border-stone-900 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-3xl" style="font-variation-settings: 'FILL' 1;">architecture</span>
+                </div>
+            </div>
+            <div class="p-6 flex-1 flex flex-col">
+                <div class="mb-4">
+                    <span class="bg-stone-900 text-white font-mono text-[10px] px-2 py-0.5 uppercase tracking-widest">Lead Designer</span>
+                    <h3 class="text-3xl font-black font-headline uppercase mt-1 leading-none text-stone-900">Erik Van Lo</h3>
+                </div>
+                <p class="font-mono text-xs text-stone-600 mb-6 flex-1">
+                    &gt; Focus: Primary visual systems.<br/>
+                    &gt; Philosophy: Minimalism is the peak of complexity.
+                </p>
+                <div class="flex gap-2 border-t-2 border-stone-900 pt-4">
+                    <span class="w-6 h-6 rounded-full bg-primary-container border-2 border-stone-900"></span>
+                    <span class="w-6 h-6 rounded-full bg-yellow-400 border-2 border-stone-900"></span>
+                    <span class="w-6 h-6 rounded-full bg-blue-600 border-2 border-stone-900"></span>
+                </div>
+            </div>
+        </div>
+        <!-- Profile Card 2 (Hero/Large) -->
+        <div class="md:col-span-2 lg:col-span-2 bg-yellow-400 border-4 border-stone-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col md:flex-row group overflow-hidden">
+            <div class="md:w-1/2 border-b-4 md:border-b-0 md:border-r-4 border-stone-900 bg-stone-100">
+                <img alt="Profile" class="w-full h-full object-cover grayscale mix-blend-multiply" data-alt="serious tech lead man with beard in black turtleneck posing against a stark red circular graphic backdrop, high contrast" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLbX4u49W6hOiw8o4Hjykt3aAmEelciLvlKbtUl-bypTSEj2YctGQ5mNtviyRhvdMGcW-yTw36u8TnoeudwP7vbdx5MCQMZElj1LE0QjxLNvdD3NMX5H7zUYnkFvhYq3DZBEuQycKe8LSfjOly6l-U0WP2V2N5W9S3sUsykfIaY6kqbAV9qSoebJ2uGKCCcomJzJWPR2obYYf3t_XuZhh_NwPfpNWdZV8bHDV_9f62amBu-1wrQVsGnOsCF0FhaMjYU4omJ1K6hmBq"/>
+            </div>
+            <div class="md:w-1/2 p-8 flex flex-col">
+                <div class="mb-auto">
+                    <div class="inline-block bg-stone-900 text-white font-mono text-xs px-3 py-1 uppercase tracking-widest mb-4">Principal Architect</div>
+                    <h3 class="text-5xl font-black font-headline uppercase leading-none text-stone-900 mb-4">S. Hashimoto</h3>
+                    <p class="font-mono text-sm text-stone-800 leading-relaxed mb-6">
+                        Constructing digital infrastructure with the precision of structural steel. Hashimoto oversees all system logic and backend scalability.
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="border-2 border-stone-900 p-3 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <p class="text-[10px] font-mono font-bold uppercase text-stone-500 mb-1">Status</p>
+                        <p class="font-headline font-black uppercase text-xs">Deploying v2.1</p>
+                    </div>
+                    <div class="border-2 border-stone-900 p-3 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <p class="text-[10px] font-mono font-bold uppercase text-stone-500 mb-1">Local Time</p>
+                        <p class="font-headline font-black uppercase text-xs">TOKYO: 04:22</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Profile Card 3 -->
+        <div class="bg-blue-600 text-white border-4 border-stone-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col transition-all hover:-translate-y-1 hover:-translate-x-1">
+            <div class="h-48 border-b-4 border-stone-900 bg-white p-4">
+                <div class="w-full h-full border-2 border-dashed border-stone-300 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-stone-900 text-6xl">code_blocks</span>
+                </div>
+            </div>
+            <div class="p-6">
+                <span class="bg-white text-stone-900 font-mono text-[10px] px-2 py-0.5 uppercase tracking-widest">Rust Dev</span>
+                <h3 class="text-3xl font-black font-headline uppercase mt-1 leading-none">V. Petrova</h3>
+                <p class="mt-4 font-mono text-xs text-blue-100 italic">
+                    "If it compiles, it's art. If it's fast, it's Bauhaus."
+                </p>
+            </div>
+            <div class="mt-auto p-6 pt-0 flex justify-between items-center">
+                <div class="flex -space-x-3">
+                    <div class="w-8 h-8 rounded-full border-2 border-stone-900 bg-yellow-400"></div>
+                    <div class="w-8 h-8 rounded-full border-2 border-stone-900 bg-primary-container"></div>
+                </div>
+                <span class="material-symbols-outlined">terminal</span>
+            </div>
+        </div>
+        <!-- Profile Card 4 -->
+        <div class="bg-white border-4 border-stone-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col group">
+            <div class="aspect-square relative border-b-4 border-stone-900">
+                <img alt="Profile" class="w-full h-full object-cover contrast-150 saturate-0" data-alt="professional woman in sharp modern business attire against a background of blue and white angled shapes, studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGI-ODKB3eEgCtK29oFmYw2O1vUd7iJIQZ36RRDdUnyGXvU3NXT7rNlYZzZymXDaik7CMdOO_sxhVPr5qB26LC8a1Ku5z2t1uF4sJae39yrL5yjjKDDZ4g4n_iMMNro9KG-eJTmqksnzaE3tTuEnO8gCae5SRsL7BmjzH4anedx1p0qFh8E0MqsHWzucrZNbg5nngjz6-TToc_rCvV_oJ2Wy-unTgcIL4kvvg6a5VTXnDT5EDEl0nj9KffaojQ29tRSgolrfU4_LnU"/>
+            </div>
+            <div class="p-6">
+                <span class="text-primary-container font-headline font-black text-xs uppercase">Product Lead</span>
+                <h3 class="text-3xl font-black font-headline uppercase text-stone-900">L. Moreno</h3>
+                <div class="mt-4 p-3 bg-stone-100 border-2 border-stone-900 font-mono text-[10px] text-stone-600 uppercase">
+                    Current Sprint: Core Integration
+                </div>
+            </div>
+        </div>
+        <!-- Profile Card 5 -->
+        <div class="bg-stone-900 text-white border-4 border-stone-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col p-6 relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-yellow-400 rounded-full border-4 border-stone-900"></div>
+            <div class="relative z-10 flex flex-col h-full">
+                <span class="material-symbols-outlined text-4xl mb-4">bolt</span>
+                <h3 class="text-4xl font-black font-headline uppercase leading-none mb-4">Max Weber</h3>
+                <p class="font-mono text-xs text-stone-400 mb-8">
+                    The kinetic engine of the team. Weber manages sprint velocity and removes blockers with surgical precision.
+                </p>
+                <div class="mt-auto">
+                    <button class="w-full border-2 border-white py-2 font-headline font-bold uppercase text-xs hover:bg-white hover:text-stone-900 transition-colors">
+                        View Roadmap
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Placeholder / Join Us -->
+        <div class="border-4 border-dashed border-stone-400 flex flex-col items-center justify-center p-8 text-center bg-stone-50 group hover:border-stone-900 transition-colors">
+            <div class="w-16 h-16 border-4 border-stone-900 flex items-center justify-center mb-4 group-hover:bg-primary-container group-hover:text-white transition-all">
+                <span class="material-symbols-outlined text-4xl">add</span>
+            </div>
+            <h3 class="text-xl font-black font-headline uppercase text-stone-900">Join the Collective</h3>
+            <p class="font-mono text-[10px] text-stone-500 mt-2 uppercase">Seeking: UI/UX Geometrician</p>
+        </div>
+    </div>
+    <!-- Section Footer -->
+    <footer class="mt-20 pt-8 border-t-4 border-stone-900 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 bg-primary-container border border-stone-900"></span>
+                <span class="font-headline font-bold uppercase text-xs">Primary</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 bg-yellow-400 border border-stone-900"></span>
+                <span class="font-headline font-bold uppercase text-xs">Accent A</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 bg-blue-600 border border-stone-900"></span>
+                <span class="font-headline font-bold uppercase text-xs">Accent B</span>
+            </div>
+        </div>
+        <p class="font-mono text-[10px] text-stone-500 uppercase tracking-widest">
+            © 1923-2024 BAUHAUS_PM SYSTEMS. ALL RIGIDITY RESERVED.
+        </p>
+    </footer>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t-4 border-stone-900 flex justify-around items-center h-16 z-50 shadow-[0_-4px_0_0_rgba(0,0,0,1)]">
+    <a class="flex flex-col items-center justify-center text-stone-600" href="#">
+        <span class="material-symbols-outlined">grid_view</span>
+        <span class="text-[10px] font-headline font-bold uppercase">Home</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-stone-600" href="#">
+        <span class="material-symbols-outlined">list_alt</span>
+        <span class="text-[10px] font-headline font-bold uppercase">Issues</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-[#E63946]" href="#">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+        <span class="text-[10px] font-headline font-bold uppercase">Team</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-stone-600" href="#">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="text-[10px] font-headline font-bold uppercase">Prefs</span>
+    </a>
+</nav>
+</body></html>
