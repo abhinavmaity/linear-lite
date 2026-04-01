@@ -15,7 +15,7 @@ This specification is intentionally strict:
 - 26 MVP endpoints only
 - JWT Bearer authentication with access token only
 - Go + Gin + PostgreSQL as the primary runtime path
-- SQL-first repository layer using `pgx` and `sqlx`
+- GORM-based repository layer with selective raw SQL
 - Redis is optional and cache-only
 - Sprints are project-scoped
 - Issue deletion is archive-based and reversible through `PUT /issues/:id`
@@ -39,7 +39,7 @@ This specification is intentionally strict:
 | API | Gin | HTTP routing, middleware, JSON APIs |
 | Language | Go 1.21+ | Standard project runtime |
 | Database | PostgreSQL 15+ | Primary transactional store |
-| Data access | `pgx/v5` + `sqlx` | SQL-first repository layer |
+| Data access | `GORM 1.25+` | Primary ORM for CRUD, associations, pagination, and transactions; raw SQL remains allowed for advanced PostgreSQL queries |
 | Auth | JWT Bearer token | 24h access token only |
 | Password hashing | bcrypt | Configurable cost via env |
 | Caching | Redis 7+ | Optional, read-through cache only |
@@ -58,7 +58,7 @@ Responsibilities are fixed:
 
 - Handlers parse HTTP requests, bind JSON/query params, and write HTTP responses.
 - Services enforce validation, business rules, transactions, and activity logging.
-- Repositories execute SQL and return domain records.
+- Repositories use GORM as the default persistence layer and fall back to raw SQL when PostgreSQL-specific behavior, locking, or query complexity makes ORM usage less clear or less safe.
 - Cache adapters wrap selected read endpoints and are never required for correctness.
 
 ### 3.2 Layer responsibilities
@@ -69,7 +69,7 @@ Responsibilities are fixed:
 | Middleware | Request ID, logging, CORS, auth, recovery | Database writes except logging sinks |
 | Handlers | Parse params, call services, map service errors to HTTP | Raw SQL |
 | Services | Validation, permission checks, transactions, side effects | HTTP formatting |
-| Repositories | SQL queries, scans, row-level locking | Cross-resource business policy |
+| Repositories | GORM CRUD, explicit association loading, scoped transactions, and selective raw SQL | Cross-resource business policy |
 | Cache | Read caching and invalidation | Source-of-truth storage |
 
 ### 3.3 Canonical request lifecycle
@@ -351,6 +351,13 @@ backend/
       issue_repository.go
       activity_repository.go
     models/
+      user.go
+      project.go
+      sprint.go
+      label.go
+      issue.go
+      issue_label.go
+      issue_activity.go
     cache/
     errors/
     validation/
@@ -371,6 +378,9 @@ backend/
 - All IDs are immutable. All foreign keys use `ON UPDATE RESTRICT`.
 - The database is authoritative for structural integrity.
 - Application code is authoritative for cross-row rules that require business context.
+- GORM model structs may describe table mappings, associations, and field metadata, but they do not define the canonical schema.
+- Migrations remain the only authoritative schema-management mechanism.
+- Runtime schema mutation through GORM `AutoMigrate` is not allowed.
 - `updated_at` is maintained by a shared trigger function.
 - Search uses a stored `tsvector` column on `issues`.
 
@@ -1011,13 +1021,15 @@ Issue identifiers are generated transactionally per project.
 Algorithm:
 
 1. Start transaction.
-2. Load project row using `SELECT id, key, next_issue_number FROM projects WHERE id = $1 FOR UPDATE`.
-3. Build identifier as `project.key + '-' + project.next_issue_number`.
-4. Insert issue row with generated identifier.
-5. Insert any `issue_labels` rows.
-6. Insert `issue_activities` row for creation plus label activities.
-7. Increment `projects.next_issue_number`.
-8. Commit transaction.
+2. Open a GORM-managed transaction using `db.Transaction(...)`.
+3. Lock the project row using raw SQL `SELECT id, key, next_issue_number FROM projects WHERE id = ? FOR UPDATE`.
+4. Scan the locked row into the repository result.
+5. Build identifier as `project.key + '-' + project.next_issue_number`.
+6. Insert issue row through GORM or explicit SQL within the same transaction.
+7. Insert any `issue_labels` rows.
+8. Insert `issue_activities` row for creation plus label activities.
+9. Increment `projects.next_issue_number`.
+10. Commit transaction.
 
 Rules:
 
@@ -1155,13 +1167,29 @@ Error:
 - Maximum `limit=100`
 - Sort order values: `asc`, `desc`
 - Unsupported `sort_by` values return `400`
+- Repository list queries should default to GORM query builders for standard filtering and pagination.
+- Use explicit `Preload` only for relationships required by the response contract.
 
 ### 11.6 Search behavior
 
 - If `search` exactly matches an issue identifier pattern and a matching issue exists, that issue is returned at the top of results.
-- Otherwise, the API uses PostgreSQL full-text search over `issues.title` and `issues.description`.
+- Otherwise, the repository uses raw SQL with PostgreSQL full-text search over `issues.title` and `issues.description`.
 
-### 11.7 Concurrency
+### 11.7 Persistence strategy
+
+- GORM is the default repository implementation mechanism.
+- Use GORM for CRUD operations, pagination, transactions, and controlled association loading.
+- Use raw SQL from the repository layer for:
+  - `SELECT ... FOR UPDATE` issue identifier generation
+  - PostgreSQL full-text search
+  - dashboard aggregation queries
+  - partial-index-sensitive sprint queries
+  - any bulk association synchronization where hand-written SQL is clearer than generated ORM queries
+- Raw SQL must not appear in handlers.
+- Raw SQL should normally stay out of services unless a repository transaction wrapper requires it indirectly.
+- Every raw SQL repository method should include a short inline comment explaining why ORM usage was not selected.
+
+### 11.8 Concurrency
 
 - All resource updates use `last write wins`.
 - No optimistic locking column.
@@ -3130,6 +3158,7 @@ Validation:
 - Use `golang-migrate`.
 - Migrations are SQL-only.
 - No runtime auto-migrate is allowed.
+- GORM `AutoMigrate` must not be enabled in any environment.
 - Every migration must have matching `up` and `down` files.
 - Migration file names are ordered and immutable once shared.
 
@@ -3150,8 +3179,9 @@ Deployment rule:
 
 ## 19. Performance Notes
 
-- Use batched joins or carefully structured CTEs for `GET /issues/:id`.
+- Use GORM for common fetches, but prefer explicit joins or carefully structured CTEs when the ORM query would become opaque or inefficient.
 - Use aggregate subqueries for counts instead of N+1 loops.
+- Keep `Preload` usage explicit and bounded; do not preload broad association trees by default.
 - Select only required fields for list endpoints.
 - Use `FOR UPDATE` only on the project row during issue creation.
 - Exact identifier match should short-circuit before full-text search work.
@@ -3167,8 +3197,9 @@ Deployment rule:
 
 ### 20.2 Repository tests
 
-- CRUD tests for all repositories
-- Search query tests
+- GORM-backed CRUD tests for users, projects, sprints, labels, and standard issue mutations
+- Association loading tests for assignee, sprint, project, labels, and activities
+- Raw SQL search query tests
 - Transactional issue ID generation under concurrency
 - Archive and restore behavior
 
@@ -3197,7 +3228,7 @@ Deployment rule:
 
 - Build migrations exactly as specified.
 - Implement shared `updated_at` trigger.
-- Implement repository interfaces and SQL-first queries.
+- Implement repository interfaces with GORM first and selective raw SQL where documented.
 - Implement service transactions for issue create, update, archive, and restore.
 - Implement all 26 routes.
 - Implement standardized error envelope and request ID middleware.
