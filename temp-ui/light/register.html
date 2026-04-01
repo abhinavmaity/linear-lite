@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>BauhausPM - Join the Movement</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Work+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-on-surface": "#f1f1f1",
+                        "secondary-container": "#65a1ff",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#ffb3b1",
+                        "on-tertiary-fixed-variant": "#584400",
+                        "surface-container-high": "#e8e8e8",
+                        "inverse-primary": "#ffb3b1",
+                        "on-primary-container": "#fffbff",
+                        "outline-variant": "#e4bebc",
+                        "surface-bright": "#f9f9f9",
+                        "secondary-fixed-dim": "#aac7ff",
+                        "on-primary-fixed": "#410007",
+                        "inverse-surface": "#303030",
+                        "tertiary": "#745b00",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#003671",
+                        "on-surface-variant": "#5b403f",
+                        "surface-dim": "#dadada",
+                        "primary-container": "#db313f",
+                        "on-tertiary-container": "#4f3d00",
+                        "on-primary-fixed-variant": "#92001c",
+                        "secondary-fixed": "#d6e3ff",
+                        "on-surface": "#1b1b1b",
+                        "background": "#f9f9f9",
+                        "on-secondary-fixed": "#001b3e",
+                        "on-tertiary-fixed": "#241a00",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f3f3f3",
+                        "surface-container": "#eeeeee",
+                        "secondary": "#065db7",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#ffdad8",
+                        "surface-tint": "#bb152c",
+                        "primary": "#b7102a",
+                        "surface-variant": "#e2e2e2",
+                        "on-secondary-fixed-variant": "#00458d",
+                        "on-background": "#1b1b1b",
+                        "surface": "#f9f9f9",
+                        "tertiary-container": "#d0a600",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#f1c100",
+                        "surface-container-highest": "#e2e2e2",
+                        "outline": "#8f6f6e",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#ffe08b",
+                        "on-error-container": "#93000a"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Work Sans"],
+                        "label": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    letterSpacing: {
+                        'tightest': '-.075em',
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background-color: #f9f9f9;
+        }
+        .bauhaus-border {
+            border: 4px solid #1b1b1b;
+        }
+        .bauhaus-shadow {
+            box-shadow: 8px 8px 0px 0px #1b1b1b;
+        }
+        .bauhaus-shadow-sm {
+            box-shadow: 4px 4px 0px 0px #1b1b1b;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- TopNavBar Suppression: Page intent is Transactional (Login/Signup) -->
+<main class="flex min-h-screen flex-col lg:flex-row">
+    <!-- Left Column: Manifesto & Brand Identity -->
+    <section class="lg:w-1/2 p-8 lg:p-20 flex flex-col justify-between bg-stone-50 bauhaus-border border-t-0 border-l-0 border-b-0 border-r-4">
+        <div>
+            <h1 class="font-headline font-black text-6xl lg:text-8xl tracking-tightest uppercase mb-8">
+                Bauhaus<span class="text-primary">PM</span>
+            </h1>
+            <div class="max-w-md space-y-12 mt-16">
+                <div class="space-y-4">
+                    <span class="inline-block bg-secondary px-3 py-1 text-white font-headline font-bold text-sm uppercase">Principles</span>
+                    <p class="font-headline font-bold text-3xl leading-tight">
+                        "The ultimate aim of all creative activity is a building!"
+                    </p>
+                </div>
+                <div class="space-y-6 text-on-surface-variant leading-relaxed font-body">
+                    <p>
+                        We believe that form follows function. In the digital age, our productivity tools must be stripped of unnecessary ornamentation to reveal the core of human collaboration.
+                    </p>
+                    <p>
+                        BauhausPM is a system designed for clarity, built on the grid, and powered by the primary colors of progress. Join the workshop of the future.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="mt-20 lg:mt-0 flex gap-4 overflow-hidden">
+            <div class="w-24 h-24 bg-primary bauhaus-border"></div>
+            <div class="w-24 h-24 bg-secondary rounded-full bauhaus-border"></div>
+            <div class="w-24 h-24 bg-tertiary-container bauhaus-border rotate-45"></div>
+        </div>
+    </section>
+    <!-- Right Column: Register Form -->
+    <section class="lg:w-1/2 p-8 lg:p-20 flex items-center justify-center">
+        <div class="w-full max-w-lg">
+            <div class="bg-white bauhaus-border p-8 lg:p-12 bauhaus-shadow relative overflow-hidden">
+                <!-- Accent bar -->
+                <div class="absolute top-0 left-0 w-full h-3 bg-primary"></div>
+                <header class="mb-10">
+                    <h2 class="font-headline font-black text-4xl uppercase tracking-tighter">Enter the Workshop</h2>
+                    <p class="font-body text-on-surface-variant mt-2">Initialize your administrative identity.</p>
+                </header>
+                <form class="space-y-6">
+                    <div class="space-y-1">
+                        <label class="block font-headline font-bold text-sm uppercase tracking-wider text-on-surface">Full Name</label>
+                        <input class="w-full bg-white bauhaus-border p-4 focus:ring-0 focus:border-primary font-headline uppercase font-medium placeholder:text-stone-300" placeholder="WALTER GROPIUS" type="text"/>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block font-headline font-bold text-sm uppercase tracking-wider text-on-surface">Digital Archive (Email)</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-stone-400">alternate_email</span>
+                            <input class="w-full bg-white bauhaus-border p-4 pl-12 focus:ring-0 focus:border-secondary font-headline uppercase font-medium placeholder:text-stone-300" placeholder="ADMIN@BAUHAUS.PM" type="email"/>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-1">
+                            <label class="block font-headline font-bold text-sm uppercase tracking-wider text-on-surface">Secure Key</label>
+                            <input class="w-full bg-white bauhaus-border p-4 focus:ring-0 focus:border-tertiary font-headline uppercase font-medium" placeholder="••••••••" type="password"/>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block font-headline font-bold text-sm uppercase tracking-wider text-on-surface">Confirm Key</label>
+                            <input class="w-full bg-white bauhaus-border p-4 focus:ring-0 focus:border-tertiary font-headline uppercase font-medium" placeholder="••••••••" type="password"/>
+                        </div>
+                    </div>
+                    <div class="pt-4">
+                        <label class="flex items-start gap-4 cursor-pointer group">
+                            <div class="relative">
+                                <input class="sr-only peer" type="checkbox"/>
+                                <div class="w-6 h-6 bauhaus-border bg-white peer-checked:bg-primary transition-colors flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-white text-sm">check</span>
+                                </div>
+                            </div>
+                            <span class="text-xs font-body leading-tight text-on-surface-variant">
+                                    I AGREE TO THE <span class="font-bold text-on-surface underline">FUNCTIONALIST TERMS</span> AND DATA SOVEREIGNTY MANIFESTO.
+                                </span>
+                        </label>
+                    </div>
+                    <div class="pt-6">
+                        <button class="w-full bg-primary text-white font-headline font-black text-xl uppercase py-5 bauhaus-border bauhaus-shadow-sm hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-75 flex items-center justify-center gap-3 group" type="submit">
+                            Create New Identity
+                            <span class="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span>
+                        </button>
+                    </div>
+                </form>
+                <footer class="mt-12 pt-8 border-t-2 border-stone-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p class="text-sm font-body text-on-surface-variant uppercase font-medium">Existing archive?</p>
+                    <a class="text-secondary font-headline font-bold text-sm uppercase tracking-widest border-b-2 border-secondary hover:bg-secondary hover:text-white px-2 transition-colors" href="#">Return to Login</a>
+                </footer>
+            </div>
+            <!-- Functionalist Quote Card (Bento-style element) -->
+            <div class="mt-12 bg-tertiary-fixed text-on-tertiary-fixed p-6 bauhaus-border bauhaus-shadow-sm flex items-center gap-6">
+                <div class="bg-on-tertiary-fixed p-3 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-tertiary-fixed text-4xl" data-weight="fill">architecture</span>
+                </div>
+                <div>
+                    <h4 class="font-headline font-bold text-lg leading-none uppercase">Certified Tooling</h4>
+                    <p class="font-body text-xs mt-1 uppercase tracking-tighter opacity-80">Architecture • Design • Industry</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<!-- SideNavBar & BottomNavBar suppressed due to Transactional page intent -->
+</body></html>

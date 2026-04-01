@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>BauhausPM - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&amp;family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-on-surface": "#f1f1f1",
+                        "secondary-container": "#65a1ff",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#ffb3b1",
+                        "on-tertiary-fixed-variant": "#584400",
+                        "surface-container-high": "#e8e8e8",
+                        "inverse-primary": "#ffb3b1",
+                        "on-primary-container": "#fffbff",
+                        "outline-variant": "#e4bebc",
+                        "surface-bright": "#f9f9f9",
+                        "secondary-fixed-dim": "#aac7ff",
+                        "on-primary-fixed": "#410007",
+                        "inverse-surface": "#303030",
+                        "tertiary": "#745b00",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#003671",
+                        "on-surface-variant": "#5b403f",
+                        "surface-dim": "#dadada",
+                        "primary-container": "#db313f",
+                        "on-tertiary-container": "#4f3d00",
+                        "on-primary-fixed-variant": "#92001c",
+                        "secondary-fixed": "#d6e3ff",
+                        "on-surface": "#1b1b1b",
+                        "background": "#f9f9f9",
+                        "on-secondary-fixed": "#001b3e",
+                        "on-tertiary-fixed": "#241a00",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f3f3f3",
+                        "surface-container": "#eeeeee",
+                        "secondary": "#065db7",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#ffdad8",
+                        "surface-tint": "#bb152c",
+                        "primary": "#b7102a",
+                        "surface-variant": "#e2e2e2",
+                        "on-secondary-fixed-variant": "#00458d",
+                        "on-background": "#1b1b1b",
+                        "surface": "#f9f9f9",
+                        "tertiary-container": "#d0a600",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#f1c100",
+                        "surface-container-highest": "#e2e2e2",
+                        "outline": "#8f6f6e",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#ffe08b",
+                        "on-error-container": "#93000a"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Work Sans"],
+                        "label": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    letterSpacing: {
+                        'tightest': '-0.05em',
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Work Sans', sans-serif; }
+        h1, h2, h3, .bauhaus-font { font-family: 'Space Grotesk', sans-serif; }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-900">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full border-b-4 border-stone-900 z-50 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center h-16 px-6 w-full">
+    <div class="flex items-center gap-8">
+        <span class="text-2xl font-black text-stone-900 tracking-tightest uppercase">BauhausPM</span>
+        <nav class="hidden md:flex gap-6 h-full items-center">
+            <a class="font-['Space_Grotesk'] uppercase tracking-tighter font-bold text-[#E63946] border-b-4 border-[#E63946] h-16 flex items-center" href="#">Dashboard</a>
+            <a class="font-['Space_Grotesk'] uppercase tracking-tighter font-bold text-stone-600 hover:bg-[#E63946] hover:text-white transition-colors duration-100 px-2" href="#">Issues</a>
+            <a class="font-['Space_Grotesk'] uppercase tracking-tighter font-bold text-stone-600 hover:bg-[#E63946] hover:text-white transition-colors duration-100 px-2" href="#">Board</a>
+        </nav>
+    </div>
+    <div class="flex items-center gap-4">
+        <button class="bg-primary-container text-on-primary-container border-2 border-stone-900 px-4 py-1 font-bold uppercase text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
+            Create Issue
+        </button>
+        <span class="material-symbols-outlined text-stone-900 cursor-pointer">notifications</span>
+        <span class="material-symbols-outlined text-stone-900 cursor-pointer">account_circle</span>
+    </div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 border-r-4 border-stone-900 bg-stone-50 flex flex-col h-full pt-20 pb-6 hidden lg:flex">
+    <div class="px-6 mb-8">
+        <h2 class="text-xl font-black text-stone-900 uppercase">Project Alpha</h2>
+        <p class="text-xs font-bold text-stone-500 uppercase">v2.0.4</p>
+    </div>
+    <nav class="flex-grow font-['Space_Grotesk'] font-bold text-sm uppercase">
+        <a class="bg-[#E63946] text-white border-y-2 border-stone-900 flex items-center gap-3 px-4 py-3" href="#">
+            <span class="material-symbols-outlined">grid_view</span> Dashboard
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-stone-900 hover:bg-yellow-400 hover:text-stone-900 transition-all duration-75" href="#">
+            <span class="material-symbols-outlined">list_alt</span> Issues
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-stone-900 hover:bg-yellow-400 hover:text-stone-900 transition-all duration-75" href="#">
+            <span class="material-symbols-outlined">view_kanban</span> Board
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-stone-900 hover:bg-yellow-400 hover:text-stone-900 transition-all duration-75" href="#">
+            <span class="material-symbols-outlined">folder_special</span> Projects
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-stone-900 hover:bg-yellow-400 hover:text-stone-900 transition-all duration-75" href="#">
+            <span class="material-symbols-outlined">bolt</span> Sprints
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-stone-900 hover:bg-yellow-400 hover:text-stone-900 transition-all duration-75" href="#">
+            <span class="material-symbols-outlined">label</span> Labels
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-stone-900 hover:bg-yellow-400 hover:text-stone-900 transition-all duration-75" href="#">
+            <span class="material-symbols-outlined">group</span> Team
+        </a>
+    </nav>
+    <div class="mt-auto px-4 space-y-2">
+        <button class="w-full bg-secondary-container text-on-secondary-container border-2 border-stone-900 py-3 font-black uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-blue-600 hover:text-white transition-all">
+            New Sprint
+        </button>
+        <div class="pt-4 border-t-2 border-stone-900">
+            <a class="flex items-center gap-3 px-4 py-2 text-stone-900 font-bold uppercase text-xs" href="#">
+                <span class="material-symbols-outlined text-sm">settings</span> Settings
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2 text-stone-900 font-bold uppercase text-xs" href="#">
+                <span class="material-symbols-outlined text-sm">help</span> Help
+            </a>
+        </div>
+    </div>
+</aside>
+<!-- Main Canvas -->
+<main class="lg:ml-64 pt-24 px-6 pb-12 min-h-screen">
+    <!-- Welcome Header -->
+    <div class="mb-10 flex flex-col md:flex-row justify-between items-end gap-6">
+        <div>
+            <h1 class="text-6xl font-black uppercase tracking-tightest leading-none">Dashboard</h1>
+            <p class="text-lg font-bold text-stone-500 mt-2 uppercase tracking-widest">Efficiency through geometry</p>
+        </div>
+        <div class="flex gap-4">
+            <div class="border-4 border-stone-900 p-4 bg-yellow-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <p class="text-xs font-bold uppercase">Active Sprint</p>
+                <p class="text-2xl font-black">SP-24</p>
+            </div>
+            <div class="border-4 border-stone-900 p-4 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <p class="text-xs font-bold uppercase">Days Left</p>
+                <p class="text-2xl font-black">04</p>
+            </div>
+        </div>
+    </div>
+    <!-- Bento Grid Layout -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <!-- Sprint Progress - Large Card -->
+        <div class="md:col-span-8 border-4 border-stone-900 bg-white p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-between min-h-[400px]">
+            <div class="flex justify-between items-start">
+                <h3 class="text-3xl font-black uppercase">Sprint Velocity</h3>
+                <span class="bg-secondary px-3 py-1 text-white text-xs font-bold uppercase border-2 border-stone-900">Live</span>
+            </div>
+            <div class="flex items-end gap-2 h-48 mt-8">
+                <div class="flex-1 bg-stone-900 h-[40%] hover:bg-primary transition-colors cursor-pointer group relative">
+                    <span class="absolute -top-8 left-1/2 -translate-x-1/2 font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity">12pts</span>
+                </div>
+                <div class="flex-1 bg-stone-900 h-[65%] hover:bg-secondary transition-colors cursor-pointer group relative">
+                    <span class="absolute -top-8 left-1/2 -translate-x-1/2 font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity">18pts</span>
+                </div>
+                <div class="flex-1 bg-stone-900 h-[50%] hover:bg-tertiary-container transition-colors cursor-pointer group relative">
+                    <span class="absolute -top-8 left-1/2 -translate-x-1/2 font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity">15pts</span>
+                </div>
+                <div class="flex-1 bg-stone-900 h-[90%] hover:bg-primary transition-colors cursor-pointer group relative">
+                    <span class="absolute -top-8 left-1/2 -translate-x-1/2 font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity">24pts</span>
+                </div>
+                <div class="flex-1 bg-stone-900 h-[75%] hover:bg-secondary transition-colors cursor-pointer group relative">
+                    <span class="absolute -top-8 left-1/2 -translate-x-1/2 font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity">21pts</span>
+                </div>
+                <div class="flex-1 bg-[#E63946] h-[95%] cursor-pointer group relative">
+                    <span class="absolute -top-8 left-1/2 -translate-x-1/2 font-bold text-xs">28pts</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 pt-8 border-t-4 border-stone-900 mt-8">
+                <div>
+                    <p class="text-xs font-bold uppercase text-stone-500">Completed</p>
+                    <p class="text-2xl font-black">42</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold uppercase text-stone-500">In Progress</p>
+                    <p class="text-2xl font-black">12</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold uppercase text-stone-500">Backlog</p>
+                    <p class="text-2xl font-black">89</p>
+                </div>
+            </div>
+        </div>
+        <!-- Team Section - Sidebar Card -->
+        <div class="md:col-span-4 border-4 border-stone-900 bg-tertiary-container p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-6">
+            <h3 class="text-2xl font-black uppercase">Active Team</h3>
+            <div class="space-y-4">
+                <div class="flex items-center gap-4 bg-white border-2 border-stone-900 p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div class="w-12 h-12 bg-stone-900 border-2 border-stone-900 overflow-hidden">
+                        <img class="w-full h-full object-cover" data-alt="portrait of a focused professional designer in a bright studio with minimalist aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwIk0474Z39bAAiUBrrHeKksAhvsXlLYGenjGIxvHlAUaok4mM0S0CKRWMzXM3lB1X5BcOmRbpXbMobonvWn4lMLo65rZDVX0xF_y0ii5xok5G9cA2QBvXgtlxYA_MG3uiPEcPfpa5WUmTl9zc7eF-GdhrnVPYaTNULd8KNaPcBKFkNNAE6etoiFdYvuWYpB-U_ucgeMkZUHHtcOdIYgPwNw_ijaJS3OA83vfBLfnayOwnrYfE-nyz2yMhydSh_iCFMe1jyXWWVirX"/>
+                    </div>
+                    <div>
+                        <p class="font-black uppercase text-sm">L. Moholy-Nagy</p>
+                        <p class="text-[10px] font-bold text-stone-500 uppercase">Design Lead</p>
+                    </div>
+                    <div class="ml-auto w-3 h-3 rounded-full bg-green-500 border-2 border-stone-900"></div>
+                </div>
+                <div class="flex items-center gap-4 bg-white border-2 border-stone-900 p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div class="w-12 h-12 bg-stone-900 border-2 border-stone-900 overflow-hidden">
+                        <img class="w-full h-full object-cover" data-alt="portrait of a creative woman with glasses in a modern architect office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHq91x3Qug9kfTl8iUoIpgQPszTPdbsHYZjsDHgvcO2BkY8BOgigeS4A6ret3AaIcIdhZL-t-3Z-5TjIblJ947SPZUAWLreydJotZeK4l17TEUd8oh5QZBD4XQTV0iyu0MF8aRcXr1jlVFcYgdgCzM3euTm7SFXzqBF6_K10J8E4iSN7qYQS07W22gQX7tKEyOSC2WFptxg7l2dw8abJYKZw7ANGwxRouAeEetr1hZOTFw1SeQ6htCz1EJHqd5xAWQ4POfncx7dlOr"/>
+                    </div>
+                    <div>
+                        <p class="font-black uppercase text-sm">Anni Albers</p>
+                        <p class="text-[10px] font-bold text-stone-500 uppercase">Lead Dev</p>
+                    </div>
+                    <div class="ml-auto w-3 h-3 rounded-full bg-green-500 border-2 border-stone-900"></div>
+                </div>
+                <div class="flex items-center gap-4 bg-white border-2 border-stone-900 p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] opacity-60">
+                    <div class="w-12 h-12 bg-stone-900 border-2 border-stone-900 overflow-hidden grayscale">
+                        <img class="w-full h-full object-cover" data-alt="professional headshot of a developer in a dark turtleneck against a plain gray background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRFqZJR6XytK9UJuOHnbjzx1jr7jSGU8m0WFi-bpVQqATwBCO99NX0Yjse_OSB6daNJdOtCMHvqHoJaxdCE4a2HWqzd4mu4Ht18vephZ6APGtacE9UtGqZ4tkg2kNxOI99tHYJPd8JzvTmdFLNjTRxitBNOJcehDyljXXo7h37u82h828e_q1sXrnsA9aALmthxz7gwFNwY0ZCWfjDuNDAGc83JUtsEMsckH93EnUhEI67VboamhMPhiVoIdt5-YAmdt9U6Dt5IKj8"/>
+                    </div>
+                    <div>
+                        <p class="font-black uppercase text-sm">W. Gropius</p>
+                        <p class="text-[10px] font-bold text-stone-500 uppercase">Product</p>
+                    </div>
+                    <div class="ml-auto w-3 h-3 rounded-full bg-stone-300 border-2 border-stone-900"></div>
+                </div>
+            </div>
+            <button class="mt-auto w-full py-3 border-4 border-stone-900 font-black uppercase bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                View All Members
+            </button>
+        </div>
+        <!-- Recent Activity Feed - Medium Card -->
+        <div class="md:col-span-6 border-4 border-stone-900 bg-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black uppercase">Recent Activity</h3>
+                <span class="material-symbols-outlined font-bold">history</span>
+            </div>
+            <div class="space-y-0 border-l-4 border-stone-900">
+                <div class="relative pl-8 pb-8">
+                    <div class="absolute -left-[10px] top-0 w-4 h-4 bg-[#E63946] border-2 border-stone-900"></div>
+                    <p class="text-xs font-bold text-stone-500 uppercase">10:42 AM</p>
+                    <p class="font-black uppercase">Issue #842 - Navigation Refactor</p>
+                    <p class="text-sm">Moved to <span class="bg-yellow-400 px-1 border border-stone-900 font-bold uppercase text-[10px]">Testing</span> by Anni Albers</p>
+                </div>
+                <div class="relative pl-8 pb-8">
+                    <div class="absolute -left-[10px] top-0 w-4 h-4 bg-secondary border-2 border-stone-900"></div>
+                    <p class="text-xs font-bold text-stone-500 uppercase">Yesterday</p>
+                    <p class="font-black uppercase">Sprint 24 Planning</p>
+                    <p class="text-sm">New sprint document published by W. Gropius</p>
+                </div>
+                <div class="relative pl-8">
+                    <div class="absolute -left-[10px] top-0 w-4 h-4 bg-stone-900 border-2 border-stone-900"></div>
+                    <p class="text-xs font-bold text-stone-500 uppercase">Yesterday</p>
+                    <p class="font-black uppercase">System Core Update</p>
+                    <p class="text-sm">Merged 14 commits to <span class="bg-stone-200 px-1 border border-stone-900 font-bold uppercase text-[10px]">main</span></p>
+                </div>
+            </div>
+        </div>
+        <!-- Task Distribution - Medium Card -->
+        <div class="md:col-span-6 border-4 border-stone-900 bg-stone-900 text-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
+            <div class="relative z-10">
+                <h3 class="text-2xl font-black uppercase mb-8">Task Type Distribution</h3>
+                <div class="flex gap-1 h-32 border-4 border-white mb-6">
+                    <div class="h-full bg-[#E63946] flex-[0.4] flex items-center justify-center font-black">40%</div>
+                    <div class="h-full bg-secondary flex-[0.3] flex items-center justify-center font-black">30%</div>
+                    <div class="h-full bg-yellow-400 text-stone-900 flex-[0.2] flex items-center justify-center font-black">20%</div>
+                    <div class="h-full bg-stone-200 text-stone-900 flex-[0.1] flex items-center justify-center font-black">10%</div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 bg-[#E63946]"></div>
+                        <span class="text-xs font-bold uppercase">Features</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 bg-secondary"></div>
+                        <span class="text-xs font-bold uppercase">Bug Fixes</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 bg-yellow-400"></div>
+                        <span class="text-xs font-bold uppercase">Maintenance</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 bg-stone-200"></div>
+                        <span class="text-xs font-bold uppercase">Research</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Abstract Geometric Decoration -->
+            <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white opacity-10 rounded-full"></div>
+            <div class="absolute top-10 right-10 w-20 h-20 border-4 border-white opacity-10 rotate-45"></div>
+        </div>
+    </div>
+    <!-- Floating Quick Action (Only for Primary Dash) -->
+    <button class="fixed bottom-8 right-8 w-16 h-16 bg-[#E63946] border-4 border-stone-900 text-white flex items-center justify-center shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all group">
+        <span class="material-symbols-outlined text-4xl group-hover:rotate-90 transition-transform">add</span>
+    </button>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full bg-white border-t-4 border-stone-900 flex justify-around items-center h-16 z-50">
+    <a class="flex flex-col items-center justify-center text-[#E63946]" href="#">
+        <span class="material-symbols-outlined">grid_view</span>
+        <span class="text-[10px] font-black uppercase">Home</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-stone-500" href="#">
+        <span class="material-symbols-outlined">list_alt</span>
+        <span class="text-[10px] font-black uppercase">Tasks</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-stone-500" href="#">
+        <span class="material-symbols-outlined">group</span>
+        <span class="text-[10px] font-black uppercase">Team</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-stone-500" href="#">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="text-[10px] font-black uppercase">Set</span>
+    </a>
+</nav>
+</body></html>
