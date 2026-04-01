@@ -1,11 +1,18 @@
 import { getStoredToken, useAuthStore } from 'store/authStore';
 import { ApiError, CollectionResponse, ErrorEnvelope, SingleResponse } from 'types/api';
 import { cleanParams } from 'utils/query';
+import { isMockDataEnabled } from './env';
+import { mockRequest } from './mockBackend';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api/v1';
 
 async function request<T>(path: string, init?: RequestInit) {
   const token = getStoredToken();
+
+  if (isMockDataEnabled) {
+    return mockRequest<T>(path, init, token);
+  }
+
   const response = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers: {
