@@ -1,12 +1,22 @@
 package middleware
 
 import (
-	"net/http"
 	"strings"
 
+	apperrors "github.com/abhinavmaity/linear-lite/backend/internal/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
+
+const (
+	ContextKeyAuthUserID = "auth_user_id"
+	ContextKeyAuthEmail  = "auth_email"
+)
+
+type AccessTokenClaims struct {
+	Email string `json:"email"`
+	jwt.RegisteredClaims
+}
 
 func RequireAuth(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -28,7 +38,8 @@ func RequireAuth(secret string) gin.HandlerFunc {
 			return
 		}
 
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		claims := &AccessTokenClaims{}
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, jwt.ErrTokenSignatureInvalid
 			}
@@ -38,17 +49,18 @@ func RequireAuth(secret string) gin.HandlerFunc {
 			unauthorized(c)
 			return
 		}
+		if claims.Subject == "" {
+			unauthorized(c)
+			return
+		}
+
+		c.Set(ContextKeyAuthUserID, claims.Subject)
+		c.Set(ContextKeyAuthEmail, claims.Email)
 
 		c.Next()
 	}
 }
 
 func unauthorized(c *gin.Context) {
-	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-		"error": gin.H{
-			"code":       "unauthorized",
-			"message":    "authentication is required",
-			"request_id": GetRequestID(c),
-		},
-	})
+	apperrors.Write(c, apperrors.Unauthorized("authentication is required"), GetRequestID(c))
 }

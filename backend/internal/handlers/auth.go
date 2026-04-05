@@ -1,34 +1,18 @@
 package handlers
 
 import (
-	"net/http"
-
+	apperrors "github.com/abhinavmaity/linear-lite/backend/internal/errors"
 	"github.com/gin-gonic/gin"
 )
 
 func Register(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, gin.H{
-		"error": gin.H{
-			"code":    "not_implemented",
-			"message": "register handler is not implemented yet",
-		},
-	})
+	apperrors.Write(c, apperrors.NotImplemented("register handler is not implemented yet"), requestID(c))
 }
 
 func Login(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, gin.H{
-		"error": gin.H{
-			"code":    "not_implemented",
-			"message": "login handler is not implemented yet",
-		},
-	})
+	apperrors.Write(c, apperrors.NotImplemented("login handler is not implemented yet"), requestID(c))
 }
 
 func Me(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, gin.H{
-		"error": gin.H{
-			"code":    "not_implemented",
-			"message": "me handler is not implemented yet",
-		},
-	})
+	apperrors.Write(c, apperrors.NotImplemented("me handler is not implemented yet"), requestID(c))
 }

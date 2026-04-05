@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"log/slog"
-	"net/http"
 	"runtime/debug"
 
+	apperrors "github.com/abhinavmaity/linear-lite/backend/internal/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,13 +18,7 @@ func Recovery() gin.HandlerFunc {
 					"stack", string(debug.Stack()),
 				)
 
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-					"error": gin.H{
-						"code":       "internal_error",
-						"message":    "unexpected server error",
-						"request_id": GetRequestID(c),
-					},
-				})
+				apperrors.Write(c, apperrors.Internal("unexpected server error"), GetRequestID(c))
 			}
 		}()
 

@@ -53,3 +53,27 @@ Run a limited rollback:
 MIGRATION_DIRECTION=down MIGRATION_STEPS=1 go run ./cmd/migrate
 ```
 
+## Response Envelopes
+
+- Success (resource): `{ "data": ... }`
+- Success (collection): `{ "items": [...], "pagination": ... }`
+- Error: `{ "error": { "code": "...", "message": "...", "fields"?: {...}, "request_id"?: "..." } }`
+
+Shared helpers:
+- `internal/errors` centralizes `AppError` and HTTP code mapping.
+- `internal/handlers/response.go` provides success envelope writers.
+- `internal/validation/helpers.go` provides reusable UUID/pagination/sort/date/repeated-query helpers.
+
+## Docker Baseline
+
+From repo root:
+
+```bash
+docker compose -f docker-compose.backend.yml up --build
+```
+
+Then run migrations in a one-off backend container:
+
+```bash
+docker compose -f docker-compose.backend.yml run --rm backend migrate
+```
