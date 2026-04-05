@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"time"
 
 	"github.com/abhinavmaity/linear-lite/backend/internal/cache"
 	"github.com/abhinavmaity/linear-lite/backend/internal/config"
@@ -47,7 +46,10 @@ func New() (*App, error) {
 	httpServer := &http.Server{
 		Addr:              cfg.ListenAddr(),
 		Handler:           router,
-		ReadHeaderTimeout: 10 * time.Second,
+		ReadHeaderTimeout: cfg.HTTPReadHeaderTimeout,
+		ReadTimeout:       cfg.HTTPReadTimeout,
+		WriteTimeout:      cfg.HTTPWriteTimeout,
+		IdleTimeout:       cfg.HTTPIdleTimeout,
 	}
 
 	return &App{
@@ -70,6 +72,7 @@ func (a *App) Run(ctx context.Context) error {
 
 	select {
 	case <-ctx.Done():
+		slog.Info("shutdown signal received")
 		return a.shutdown()
 	case err := <-errCh:
 		_ = a.shutdown()
@@ -78,7 +81,7 @@ func (a *App) Run(ctx context.Context) error {
 }
 
 func (a *App) shutdown() error {
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), a.cfg.HTTPShutdownTimeout)
 	defer cancel()
 
 	var joined error

@@ -21,6 +21,11 @@ func NewPostgres(cfg config.Config) (*gorm.DB, error) {
 		return nil, fmt.Errorf("get postgres sql db: %w", err)
 	}
 
+	sqlDB.SetMaxOpenConns(cfg.DBMaxOpenConns)
+	sqlDB.SetMaxIdleConns(cfg.DBMaxIdleConns)
+	sqlDB.SetConnMaxLifetime(cfg.DBConnMaxLifetime)
+	sqlDB.SetConnMaxIdleTime(cfg.DBConnMaxIdleTime)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

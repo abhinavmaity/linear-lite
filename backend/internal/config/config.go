@@ -19,6 +19,17 @@ type Config struct {
 	CORSOrigins []string
 	LogLevel    string
 	BcryptCost  int
+
+	HTTPReadHeaderTimeout time.Duration
+	HTTPReadTimeout       time.Duration
+	HTTPWriteTimeout      time.Duration
+	HTTPIdleTimeout       time.Duration
+	HTTPShutdownTimeout   time.Duration
+
+	DBMaxOpenConns    int
+	DBMaxIdleConns    int
+	DBConnMaxLifetime time.Duration
+	DBConnMaxIdleTime time.Duration
 }
 
 func Load() (Config, error) {
@@ -42,6 +53,44 @@ func Load() (Config, error) {
 		return Config{}, err
 	}
 	cfg.BcryptCost = bcryptCost
+
+	cfg.HTTPReadHeaderTimeout, err = getDuration("HTTP_READ_HEADER_TIMEOUT", 10*time.Second)
+	if err != nil {
+		return Config{}, err
+	}
+	cfg.HTTPReadTimeout, err = getDuration("HTTP_READ_TIMEOUT", 15*time.Second)
+	if err != nil {
+		return Config{}, err
+	}
+	cfg.HTTPWriteTimeout, err = getDuration("HTTP_WRITE_TIMEOUT", 30*time.Second)
+	if err != nil {
+		return Config{}, err
+	}
+	cfg.HTTPIdleTimeout, err = getDuration("HTTP_IDLE_TIMEOUT", 60*time.Second)
+	if err != nil {
+		return Config{}, err
+	}
+	cfg.HTTPShutdownTimeout, err = getDuration("HTTP_SHUTDOWN_TIMEOUT", 10*time.Second)
+	if err != nil {
+		return Config{}, err
+	}
+
+	cfg.DBMaxOpenConns, err = getInt("DB_MAX_OPEN_CONNS", 25)
+	if err != nil {
+		return Config{}, err
+	}
+	cfg.DBMaxIdleConns, err = getInt("DB_MAX_IDLE_CONNS", 10)
+	if err != nil {
+		return Config{}, err
+	}
+	cfg.DBConnMaxLifetime, err = getDuration("DB_CONN_MAX_LIFETIME", 30*time.Minute)
+	if err != nil {
+		return Config{}, err
+	}
+	cfg.DBConnMaxIdleTime, err = getDuration("DB_CONN_MAX_IDLE_TIME", 5*time.Minute)
+	if err != nil {
+		return Config{}, err
+	}
 
 	cfg.CORSOrigins = parseCSV(os.Getenv("CORS_ORIGINS"))
 
@@ -78,6 +127,36 @@ func (c Config) Validate() error {
 	}
 	if strings.TrimSpace(c.Port) == "" {
 		issues = append(issues, "PORT must not be empty")
+	}
+	if c.HTTPReadHeaderTimeout <= 0 {
+		issues = append(issues, "HTTP_READ_HEADER_TIMEOUT must be greater than 0")
+	}
+	if c.HTTPReadTimeout <= 0 {
+		issues = append(issues, "HTTP_READ_TIMEOUT must be greater than 0")
+	}
+	if c.HTTPWriteTimeout <= 0 {
+		issues = append(issues, "HTTP_WRITE_TIMEOUT must be greater than 0")
+	}
+	if c.HTTPIdleTimeout <= 0 {
+		issues = append(issues, "HTTP_IDLE_TIMEOUT must be greater than 0")
+	}
+	if c.HTTPShutdownTimeout <= 0 {
+		issues = append(issues, "HTTP_SHUTDOWN_TIMEOUT must be greater than 0")
+	}
+	if c.DBMaxOpenConns <= 0 {
+		issues = append(issues, "DB_MAX_OPEN_CONNS must be greater than 0")
+	}
+	if c.DBMaxIdleConns < 0 {
+		issues = append(issues, "DB_MAX_IDLE_CONNS must be greater than or equal to 0")
+	}
+	if c.DBMaxIdleConns > c.DBMaxOpenConns {
+		issues = append(issues, "DB_MAX_IDLE_CONNS must be less than or equal to DB_MAX_OPEN_CONNS")
+	}
+	if c.DBConnMaxLifetime <= 0 {
+		issues = append(issues, "DB_CONN_MAX_LIFETIME must be greater than 0")
+	}
+	if c.DBConnMaxIdleTime <= 0 {
+		issues = append(issues, "DB_CONN_MAX_IDLE_TIME must be greater than 0")
 	}
 
 	if len(issues) > 0 {
