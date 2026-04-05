@@ -41,7 +41,7 @@ No backend runtime exists in the repository today. This milestone creates the im
 **Risks and watchouts**
 - Do not let runtime scaffolding drift from the architecture’s layered monolith responsibilities.
 - Do not introduce schema management through GORM auto-migration.
-- Keep Redis optional from the start; do not make cache required for correctness.
+- Treat Redis as required infrastructure from the start and align the runtime around it.
 
 ### Milestone 2: Database Schema and Core Auth
 **Goal**
@@ -123,7 +123,7 @@ After the issue workflow is integrated, the remaining MVP gaps are the dashboard
 - Implement remaining label endpoints: `POST /labels`, `GET /labels/:id`, `PUT /labels/:id`, `DELETE /labels/:id`.
 - Keep the team/users flow read-only from the frontend perspective while still supporting `/users` and `/users/:id`.
 - Enforce sprint project-scope rules, one-active-sprint-per-project rules, project deletion rules, and label validation/deletion rules.
-- Add optional cache boundaries only where the architecture allows them.
+- Add Redis-backed cache boundaries only where the architecture allows them.
 
 **Parallelizable tasks**
 - Dashboard service work and supporting resource CRUD can proceed in parallel once repositories and shared validation are stable.

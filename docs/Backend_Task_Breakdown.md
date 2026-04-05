@@ -8,7 +8,7 @@ This document is the execution-oriented backend implementation checklist for Lin
 - Implement exactly the MVP route surface defined in the architecture. Do not add extra MVP-adjacent endpoints.
 - Use SQL migrations as the only schema-management mechanism. Do not use GORM `AutoMigrate`.
 - Use JWT bearer authentication with access token only. Do not introduce refresh tokens, cookie auth, or RBAC.
-- Keep Redis optional and cache-only. Do not make cache required for correctness.
+- Treat Redis as required cache infrastructure for the supported runtime while keeping PostgreSQL as the source of truth.
 - Enforce business rules in services and structural integrity in the database.
 - Return architecture-defined success and error envelopes consistently across all endpoints.
 - Preserve single-tenant assumptions and MVP permission simplification: every authenticated user may perform all MVP actions.
@@ -24,7 +24,7 @@ Implement the backend repository structure exactly as documented:
 - Create `backend/internal/services` for validation, business rules, transactions, and side effects.
 - Create `backend/internal/repositories` for GORM-backed persistence and selective raw SQL.
 - Create `backend/internal/models` for GORM table mappings only.
-- Create `backend/internal/cache` for optional cache adapters.
+- Create `backend/internal/cache` for Redis-backed cache adapters.
 - Create `backend/internal/errors` for shared application/service errors.
 - Create `backend/internal/validation` for reusable validation helpers.
 - Create `backend/migrations` for SQL-only migrations.
@@ -42,13 +42,13 @@ Implement explicit runtime configuration for:
 - PostgreSQL DSN or equivalent structured connection fields.
 - JWT secret and access-token expiry duration.
 - bcrypt hashing cost.
-- Optional Redis connection settings.
+- Redis connection settings.
 - Environment name or mode for local/dev/prod behavior.
 
 Enforce these rules:
 - Fail fast on missing required config.
 - Keep JWT secret mandatory outside test-only setups.
-- Make Redis configuration optional; disable cache adapters cleanly when absent.
+- Require Redis configuration in supported runtime environments and fail fast when it is missing or invalid.
 - Keep environment handling simple and explicit rather than magic defaults.
 - Document the expected local `.env` or compose-level variable set when implementation begins.
 
@@ -454,12 +454,12 @@ Implement handlers so they only:
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/dashboard/stats` | Yes | Return dashboard metrics and recent activity | Dashboard Service | auth context only | `200` | `401`, `500` |
 
-### 9. Caching and Optional Infrastructure
-Implement cache behavior as optional wrappers around selected read endpoints only.
+### 9. Caching and Redis Infrastructure
+Implement cache behavior as Redis-backed wrappers around selected read endpoints only.
 
-Keep Redis optional:
-- The application must run correctly without Redis.
-- Cache misses must never break request correctness.
+Keep Redis required:
+- The application startup must fail if Redis is unavailable in supported runtime environments.
+- Cache misses must never break request correctness once Redis is connected.
 - Cache invalidation must follow successful writes; failed writes must not invalidate as though they succeeded.
 
 Identify candidate read endpoints for later cache wrapping:
@@ -482,13 +482,13 @@ Implement the local runtime baseline so frontend, backend, and database can run 
 
 Deliver these expectations:
 - Docker and Docker Compose support for local full-stack startup.
-- Explicit relationship between frontend container, backend container, PostgreSQL, and optional Redis.
+- Explicit relationship between frontend container, backend container, PostgreSQL, and Redis.
 - Clear startup expectation for applying migrations during local bootstrapping.
 - Environment variables documented for backend startup, frontend API targeting, and local database connectivity.
 
 Enforce these deployment rules:
 - Keep PostgreSQL as the primary transactional store.
-- Do not require Redis in the default local path.
+- Require Redis in the default local path and document it as part of the standard stack.
 - Make migration execution part of the documented local setup flow.
 - Keep frontend/backend port mapping aligned with the architecture and current frontend expectations.
 

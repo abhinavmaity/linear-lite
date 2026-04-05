@@ -2,7 +2,7 @@
 
 Ultra-Detailed Backend Technical Architecture Specification
 
-Version: 2.0  
+Version: 2.1  
 Status: Implementation Source of Truth  
 Scope: MVP backend contract and supporting infrastructure
 
@@ -16,7 +16,7 @@ This specification is intentionally strict:
 - JWT Bearer authentication with access token only
 - Go + Gin + PostgreSQL as the primary runtime path
 - GORM-based repository layer with selective raw SQL
-- Redis is optional and cache-only
+- Redis is required and cache-backed runtime behavior is part of the baseline
 - Sprints are project-scoped
 - Issue deletion is archive-based and reversible through `PUT /issues/:id`
 - Multi-workspace, comments, attachments, notifications, realtime updates, refresh tokens, cookie auth, and RBAC are out of scope
@@ -42,7 +42,7 @@ This specification is intentionally strict:
 | Data access | `GORM 1.25+` | Primary ORM for CRUD, associations, pagination, and transactions; raw SQL remains allowed for advanced PostgreSQL queries |
 | Auth | JWT Bearer token | 24h access token only |
 | Password hashing | bcrypt | Configurable cost via env |
-| Caching | Redis 7+ | Optional, read-through cache only |
+| Caching | Redis 7+ | Required cache infrastructure for supported runtime behavior; PostgreSQL remains the source of truth |
 | Migrations | `golang-migrate` | SQL-only `up`/`down` migrations |
 | Containers | Docker + Docker Compose | Local dev and deployable baseline |
 
@@ -59,7 +59,7 @@ Responsibilities are fixed:
 - Handlers parse HTTP requests, bind JSON/query params, and write HTTP responses.
 - Services enforce validation, business rules, transactions, and activity logging.
 - Repositories use GORM as the default persistence layer and fall back to raw SQL when PostgreSQL-specific behavior, locking, or query complexity makes ORM usage less clear or less safe.
-- Cache adapters wrap selected read endpoints and are never required for correctness.
+- Cache adapters wrap selected read endpoints and are required infrastructure in the supported runtime, while PostgreSQL remains the source of truth.
 
 ### 3.2 Layer responsibilities
 
@@ -87,7 +87,7 @@ flowchart TD
     H --> I["Service"]
     I --> J["Repository"]
     J --> K["PostgreSQL"]
-    I --> L["Redis Cache (Optional)"]
+    I --> L["Redis Cache"]
     K --> J
     J --> I
     I --> H
@@ -134,7 +134,7 @@ flowchart LR
     end
 
     DB["PostgreSQL"]
-    Redis["Redis (Optional)"]
+    Redis["Redis"]
 
     SPA --> Query
     SPA --> Store
@@ -256,7 +256,7 @@ flowchart LR
     Browser["Browser"] --> FE["Frontend Container :3000"]
     FE --> API["Backend Container :8080"]
     API --> PG["PostgreSQL :5432"]
-    API --> RC["Redis :6379 (Optional)"]
+    API --> RC["Redis :6379"]
 ```
 
 ## 4. Project Structure
@@ -3102,11 +3102,11 @@ Examples:
 
 ## 16. Caching Strategy
 
-Redis is optional. If Redis is unavailable:
+Redis is required infrastructure for the supported backend runtime.
 
-- the application still starts
-- all endpoints remain functional
-- only cache misses and cache writes are skipped
+- the application must fail fast if Redis configuration is missing or the connection cannot be established during startup
+- cache-backed read paths must use Redis according to the cache rules below
+- PostgreSQL remains the source of truth, and cache invalidation must follow successful writes
 
 ### 16.1 Cacheable endpoints
 
@@ -3139,8 +3139,7 @@ Note: issue list and issue detail responses are not cached in Redis in MVP becau
 | `APP_ENV` | No | `development` | environment name |
 | `PORT` | No | `8080` | API listen port |
 | `DATABASE_URL` | Yes | none | PostgreSQL DSN |
-| `REDIS_URL` | No | none | Redis DSN |
-| `CACHE_ENABLED` | No | `true` | enables cache adapter |
+| `REDIS_URL` | Yes | none | Redis DSN |
 | `JWT_SECRET` | Yes | none | HMAC signing key |
 | `JWT_TTL` | No | `24h` | token lifetime |
 | `CORS_ORIGINS` | Yes | none | comma-separated allowed origins |
@@ -3150,6 +3149,7 @@ Note: issue list and issue detail responses are not cached in Redis in MVP becau
 Validation:
 
 - App must fail fast on missing required configuration.
+- `REDIS_URL` is mandatory in all non-test application environments.
 - `JWT_SECRET` must be at least 32 chars in non-development environments.
 - `BCRYPT_COST` must be between 10 and 14.
 
@@ -3222,7 +3222,7 @@ Deployment rule:
 - Register -> login -> me flow
 - Project -> sprint -> issue -> archive -> restore flow
 - Dashboard stats updates after issue mutations
-- Redis disabled fallback behavior
+- Redis-backed cache behavior and invalidation
 
 ## 21. Implementation Checklist
 
@@ -3232,7 +3232,7 @@ Deployment rule:
 - Implement service transactions for issue create, update, archive, and restore.
 - Implement all 26 routes.
 - Implement standardized error envelope and request ID middleware.
-- Implement optional cache adapter and invalidation logic.
+- Implement required cache adapter and invalidation logic.
 - Add automated tests for schema, services, handlers, and integration flows.
 
 ## 22. Non-Goals for MVP
