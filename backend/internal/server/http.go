@@ -21,7 +21,10 @@ func New(cfg config.Config, deps Dependencies) *gin.Engine {
 	_ = deps
 
 	router := gin.New()
-	router.Use(gin.Recovery())
+	router.Use(middleware.RequestID())
+	router.Use(middleware.Logger())
+	router.Use(middleware.Recovery())
+	router.Use(middleware.CORS(cfg.CORSOrigins))
 
 	registerRoutes(router, cfg)
 

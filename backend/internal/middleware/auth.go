@@ -46,8 +46,9 @@ func RequireAuth(secret string) gin.HandlerFunc {
 func unauthorized(c *gin.Context) {
 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 		"error": gin.H{
-			"code":    "unauthorized",
-			"message": "authentication is required",
+			"code":       "unauthorized",
+			"message":    "authentication is required",
+			"request_id": GetRequestID(c),
 		},
 	})
 }
