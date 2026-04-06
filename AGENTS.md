@@ -7,8 +7,8 @@ This file defines how AI coding agents should operate in the `linear-lite` repos
 ## Project Snapshot
 
 - Product: Linear-lite (lightweight issue/project tracker MVP).
-- Current implementation status: frontend exists; backend is primarily architecture/planning.
-- Primary stack in code today: React + TypeScript + Vite + Zustand + TanStack Query.
+- Current implementation status: frontend exists and backend Milestone 1 runtime skeleton is in place.
+- Primary stack in code today: React + TypeScript + Vite + Zustand + TanStack Query, plus Go + Gin + PostgreSQL + Redis for backend runtime.
 
 ## Source of Truth (Read First)
 
@@ -24,6 +24,7 @@ When implementation details conflict with assumptions, trust documented architec
 ## Repository Layout
 
 - `frontend/`: React app (active implementation area)
+- `backend/`: Go API runtime skeleton, middleware, config, and migrations baseline
 - `docs/`: product, UX flow, and architecture references
 
 ## Working Rules for Agents
@@ -57,12 +58,25 @@ Run from `frontend/`:
 - Build/type-check: `npm run build`
 - Preview build: `npm run preview`
 
+Run from `backend/`:
+
+- Install/sync deps: `go mod tidy`
+- Build/compile check: `go build ./...`
+- Run API: `go run ./cmd/api`
+- Run migrations: `go run ./cmd/migrate`
+
+Run from repo root (backend local stack):
+
+- Docker baseline: `docker compose -f docker-compose.backend.yml up --build`
+
 ## Change Validation
 
 Before finishing a task, agents should:
 
-1. Run `npm run build` in `frontend/` for compile/type validation.
-2. Confirm changed screens/components load without obvious runtime errors.
+1. Run relevant compile/type validation for touched area:
+   - frontend changes: `npm run build` in `frontend/`
+   - backend changes: `go build ./...` in `backend/`
+2. Confirm changed behavior loads without obvious runtime errors for the touched area.
 3. Summarize:
    - files changed
    - behavior change

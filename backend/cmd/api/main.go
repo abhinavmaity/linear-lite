@@ -1,0 +1,27 @@
+package main
+
+import (
+	"context"
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/abhinavmaity/linear-lite/backend/internal/app"
+)
+
+func main() {
+	application, err := app.New()
+	if err != nil {
+		slog.Error("failed to initialize application", "error", err)
+		os.Exit(1)
+	}
+
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	if err := application.Run(ctx); err != nil {
+		slog.Error("application stopped with error", "error", err)
+		os.Exit(1)
+	}
+}

@@ -1,0 +1,9 @@
+.git
+.gitignore
+.idea
+tmp
+dist
+node_modules
+*.log
+.env
+
