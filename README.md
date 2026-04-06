@@ -103,12 +103,19 @@ The main planning and architecture references for this repository are:
 
 The repository has moved beyond pure planning. The frontend core MVP flows are already implemented, including auth screens, dashboard, issues list, board, issue detail, a create issue modal, and scaffolded supporting pages for projects, sprints, labels, and team views.
 
-Frontend development currently supports mock-backed workflows so the UI and screen flows can be exercised before the backend is available. The backend runtime is still pending implementation, but the backend architecture, API contracts, schema rules, and implementation boundaries are already specified in detail. The next major phase is backend execution followed by frontend/backend integration and hardening.
+Backend Milestone 1 (runtime foundation) and Milestone 2 (database auth foundation + core auth flow) are now implemented. The backend has SQL migrations in place for auth foundations and the canonical `users` table, plus working `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, and `GET /api/v1/auth/me` endpoints with JWT bearer auth.
+
+Frontend auth flows are wired to the real backend contract (not mock auth): register, login, session restore on refresh, and logout redirect behavior.
+
+Non-auth frontend domains may still use mock-backed data while the remaining backend milestones are completed.
 
 ## Implementation Snapshot
 
 - Product definition and architecture: complete
 - Frontend core shell and issue workflows: largely complete
+- Frontend auth integration with real backend: complete
+- Backend Milestone 1 runtime foundation: complete
+- Backend Milestone 2 auth foundation and core auth endpoints: complete
 - Supporting resource screens: scaffolded
-- Backend runtime: not yet implemented
-- Integration, testing, and deployment hardening: pending
+- Remaining backend domain implementation (issues/projects/sprints/labels/dashboard): in progress
+- Full integration parity and deployment hardening: pending

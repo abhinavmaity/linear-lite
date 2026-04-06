@@ -19,20 +19,27 @@ type AccessTokenClaims struct {
 }
 
 func RequireAuth(secret string) gin.HandlerFunc {
+	secret = strings.TrimSpace(secret)
+
 	return func(c *gin.Context) {
+		if secret == "" {
+			unauthorized(c)
+			return
+		}
+
 		authHeader := strings.TrimSpace(c.GetHeader("Authorization"))
 		if authHeader == "" {
 			unauthorized(c)
 			return
 		}
 
-		const prefix = "Bearer "
-		if !strings.HasPrefix(authHeader, prefix) {
+		parts := strings.Fields(authHeader)
+		if len(parts) != 2 || parts[0] != "Bearer" {
 			unauthorized(c)
 			return
 		}
 
-		tokenString := strings.TrimSpace(strings.TrimPrefix(authHeader, prefix))
+		tokenString := strings.TrimSpace(parts[1])
 		if tokenString == "" {
 			unauthorized(c)
 			return
@@ -40,16 +47,16 @@ func RequireAuth(secret string) gin.HandlerFunc {
 
 		claims := &AccessTokenClaims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			if token.Method != jwt.SigningMethodHS256 {
 				return nil, jwt.ErrTokenSignatureInvalid
 			}
 			return []byte(secret), nil
-		})
+		}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}), jwt.WithExpirationRequired())
 		if err != nil || !token.Valid {
 			unauthorized(c)
 			return
 		}
-		if claims.Subject == "" {
+		if claims.Subject == "" || claims.Email == "" || claims.ExpiresAt == nil || claims.IssuedAt == nil {
 			unauthorized(c)
 			return
 		}

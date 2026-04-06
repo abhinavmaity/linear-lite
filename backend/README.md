@@ -1,6 +1,13 @@
 # Backend Runtime Quickstart
 
-This folder contains the Linear-lite backend runtime skeleton for Milestone 1.
+This folder contains the Linear-lite backend runtime through Milestone 2.
+
+Implemented in backend so far:
+- Milestone 1: runtime foundation (config, server bootstrap, middleware, migration runner)
+- Milestone 2: auth database foundation and core auth endpoints
+  - `POST /api/v1/auth/register`
+  - `POST /api/v1/auth/login`
+  - `GET /api/v1/auth/me`
 
 ## Environment Variables
 
@@ -53,6 +60,21 @@ Run a limited rollback:
 MIGRATION_DIRECTION=down MIGRATION_STEPS=1 go run ./cmd/migrate
 ```
 
+## Auth Endpoints (Milestone 2)
+
+Public:
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
+
+Protected:
+- `GET /api/v1/auth/me` with `Authorization: Bearer <token>`
+
+Behavior:
+- Access token only (no refresh token, no cookie auth)
+- Passwords hashed with bcrypt
+- Email uniqueness enforced case-insensitively
+- Error codes follow architecture envelopes (`validation_error`, `unauthorized`, `conflict`, `internal_error`)
+
 ## Response Envelopes
 
 - Success (resource): `{ "data": ... }`
@@ -77,3 +99,13 @@ Then run migrations in a one-off backend container:
 ```bash
 docker compose -f docker-compose.backend.yml run --rm backend migrate
 ```
+
+## Manual Auth Validation Checklist
+
+After startup and migrations, verify this sequence:
+1. `POST /api/v1/auth/register` -> `201`
+2. Duplicate `POST /api/v1/auth/register` with same email -> `409`
+3. `POST /api/v1/auth/login` with valid credentials -> `200`
+4. `POST /api/v1/auth/login` with invalid credentials -> `401`
+5. `GET /api/v1/auth/me` without token -> `401`
+6. `GET /api/v1/auth/me` with bearer token from login -> `200`
