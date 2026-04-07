@@ -103,11 +103,17 @@ The main planning and architecture references for this repository are:
 
 The repository has moved beyond pure planning. The frontend core MVP flows are already implemented, including auth screens, dashboard, issues list, board, issue detail, a create issue modal, and scaffolded supporting pages for projects, sprints, labels, and team views.
 
-Backend Milestone 1 (runtime foundation) and Milestone 2 (database auth foundation + core auth flow) are now implemented. The backend has SQL migrations in place for auth foundations and the canonical `users` table, plus working `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, and `GET /api/v1/auth/me` endpoints with JWT bearer auth.
+Backend Milestone 1 (runtime foundation), Milestone 2 (database auth foundation + core auth flow), and Milestone 3 (core issue workflow backend) are now implemented.
+
+The backend now includes:
+- canonical SQL schema support for `users`, `projects`, `sprints`, `labels`, `issues`, `issue_labels`, and `issue_activities`
+- auth endpoints: `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `GET /api/v1/auth/me`
+- selector endpoints used by issue workflows: `GET /api/v1/users`, `GET /api/v1/projects`, `GET /api/v1/sprints`, `GET /api/v1/labels`
+- issue workflow endpoints: `GET /api/v1/issues`, `POST /api/v1/issues`, `GET /api/v1/issues/:id`, `PUT /api/v1/issues/:id`, `DELETE /api/v1/issues/:id`
 
 Frontend auth flows are wired to the real backend contract (not mock auth): register, login, session restore on refresh, and logout redirect behavior.
 
-Non-auth frontend domains may still use mock-backed data while the remaining backend milestones are completed.
+Dashboard and supporting resource CRUD domains (Milestone 4 scope) remain in progress.
 
 ## Implementation Snapshot
 
@@ -116,6 +122,18 @@ Non-auth frontend domains may still use mock-backed data while the remaining bac
 - Frontend auth integration with real backend: complete
 - Backend Milestone 1 runtime foundation: complete
 - Backend Milestone 2 auth foundation and core auth endpoints: complete
+- Backend Milestone 3 core issue workflow backend: complete
 - Supporting resource screens: scaffolded
-- Remaining backend domain implementation (issues/projects/sprints/labels/dashboard): in progress
+- Remaining backend domain implementation (dashboard + supporting resource CRUD): in progress
 - Full integration parity and deployment hardening: pending
+
+## Backend Smoke Validation
+
+A reproducible backend issue-workflow smoke script is available at:
+- [smoke_issue_workflow.sh](/Users/abhinavmaity/code/linear-lite/scripts/smoke_issue_workflow.sh)
+
+Run from repo root:
+
+```bash
+./scripts/smoke_issue_workflow.sh
+```

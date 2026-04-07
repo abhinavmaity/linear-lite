@@ -1,6 +1,6 @@
 # Backend Runtime Quickstart
 
-This folder contains the Linear-lite backend runtime through Milestone 2.
+This folder contains the Linear-lite backend runtime through Milestone 3.
 
 Implemented in backend so far:
 - Milestone 1: runtime foundation (config, server bootstrap, middleware, migration runner)
@@ -8,6 +8,10 @@ Implemented in backend so far:
   - `POST /api/v1/auth/register`
   - `POST /api/v1/auth/login`
   - `GET /api/v1/auth/me`
+- Milestone 3: core issue workflow backend
+  - selector endpoints: `GET /api/v1/users`, `GET /api/v1/projects`, `GET /api/v1/sprints`, `GET /api/v1/labels`
+  - issue endpoints: `GET /api/v1/issues`, `POST /api/v1/issues`, `GET /api/v1/issues/:id`, `PUT /api/v1/issues/:id`, `DELETE /api/v1/issues/:id`
+  - issue identifier generation, filtering/sorting/pagination, activity logging, archive/restore behavior
 
 ## Environment Variables
 
@@ -75,6 +79,25 @@ Behavior:
 - Email uniqueness enforced case-insensitively
 - Error codes follow architecture envelopes (`validation_error`, `unauthorized`, `conflict`, `internal_error`)
 
+## Issue Workflow Endpoints (Milestone 3)
+
+Protected:
+- `GET /api/v1/users`
+- `GET /api/v1/projects`
+- `GET /api/v1/sprints`
+- `GET /api/v1/labels`
+- `GET /api/v1/issues`
+- `POST /api/v1/issues`
+- `GET /api/v1/issues/:id`
+- `PUT /api/v1/issues/:id`
+- `DELETE /api/v1/issues/:id`
+
+Behavior:
+- list and board views share the same issue query source of truth
+- `DELETE /issues/:id` archives issues
+- `PUT /issues/:id` with `{ "archived": false }` restores archived issues
+- `PUT /issues/:id` with `{ "archived": true }` returns `400 validation_error`
+
 ## Response Envelopes
 
 - Success (resource): `{ "data": ... }`
@@ -109,3 +132,21 @@ After startup and migrations, verify this sequence:
 4. `POST /api/v1/auth/login` with invalid credentials -> `401`
 5. `GET /api/v1/auth/me` without token -> `401`
 6. `GET /api/v1/auth/me` with bearer token from login -> `200`
+
+## Smoke Validation Checklist (Milestone 3)
+
+From repo root:
+
+```bash
+./scripts/smoke_issue_workflow.sh
+```
+
+This validates:
+1. auth register
+2. issue create
+3. issue list
+4. issue detail
+5. issue update
+6. issue archive
+7. issue restore
+8. archive contract checks (`archived=true` rejected, `include_archived` behavior)
