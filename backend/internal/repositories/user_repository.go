@@ -66,6 +66,77 @@ func (r *UserRepository) FindByID(ctx context.Context, id string) (*models.User,
 	return &user, nil
 }
 
+func (r *UserRepository) ExistsByID(ctx context.Context, id string) (bool, error) {
+	var count int64
+	err := r.db.WithContext(ctx).Model(&models.User{}).
+		Where("id = ?", strings.TrimSpace(id)).
+		Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (r *UserRepository) List(ctx context.Context, filter UserListFilter) ([]models.User, int64, error) {
+	query := r.db.WithContext(ctx).Model(&models.User{})
+
+	if search := strings.TrimSpace(filter.Search); search != "" {
+		pattern := "%" + search + "%"
+		query = query.Where("name ILIKE ? OR email ILIKE ?", pattern, pattern)
+	}
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	if total == 0 {
+		return []models.User{}, 0, nil
+	}
+
+	sortBy := filter.By
+	if sortBy == "" {
+		sortBy = "name"
+	}
+	order := strings.ToLower(strings.TrimSpace(filter.Order))
+	if order != "desc" {
+		order = "asc"
+	}
+
+	orderClause := "name asc"
+	switch sortBy {
+	case "name":
+		orderClause = "name " + order
+	case "created_at":
+		orderClause = "created_at " + order
+	}
+
+	var users []models.User
+	err := query.Order(orderClause).
+		Offset((filter.Page - 1) * filter.Limit).
+		Limit(filter.Limit).
+		Find(&users).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return users, total, nil
+}
+
+func (r *UserRepository) FindByIDs(ctx context.Context, ids []string) ([]models.User, error) {
+	if len(ids) == 0 {
+		return []models.User{}, nil
+	}
+
+	var users []models.User
+	err := r.db.WithContext(ctx).
+		Where("id IN ?", ids).
+		Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 func isUniqueViolation(err error, constraint string) bool {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {

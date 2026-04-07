@@ -1,6 +1,8 @@
 package validation
 
 import (
+	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -67,6 +69,23 @@ func ParseSortOrder(raw string) (string, *apperrors.AppError) {
 	return value, nil
 }
 
+func ParseSortField(raw, defaultValue string, allowed []string) (string, *apperrors.AppError) {
+	value := strings.TrimSpace(raw)
+	if value == "" {
+		return defaultValue, nil
+	}
+
+	for _, option := range allowed {
+		if value == option {
+			return value, nil
+		}
+	}
+
+	return "", apperrors.Validation("invalid sort field", apperrors.FieldErrors{
+		"sort_by": "must be one of: " + strings.Join(allowed, ", "),
+	})
+}
+
 func ValidateEnum(field string, raw string, allowed []string) *apperrors.AppError {
 	value := strings.TrimSpace(raw)
 	if value == "" {
@@ -113,6 +132,77 @@ func ParseRepeatedQuery(c *gin.Context, key string) []string {
 		}
 	}
 	return out
+}
+
+func ParseOptionalUUIDQuery(c *gin.Context, key string) (*uuid.UUID, *apperrors.AppError) {
+	value := strings.TrimSpace(c.Query(key))
+	if value == "" {
+		return nil, nil
+	}
+
+	parsed, err := uuid.Parse(value)
+	if err != nil {
+		return nil, apperrors.Validation("invalid query parameter", apperrors.FieldErrors{
+			key: "must be a valid UUID",
+		})
+	}
+
+	return &parsed, nil
+}
+
+func ParseOptionalBoolQuery(c *gin.Context, key string, defaultValue bool) (bool, *apperrors.AppError) {
+	rawValues, exists := c.GetQueryArray(key)
+	if !exists || len(rawValues) == 0 {
+		return defaultValue, nil
+	}
+
+	value := strings.ToLower(strings.TrimSpace(rawValues[len(rawValues)-1]))
+	if value == "true" || value == "1" {
+		return true, nil
+	}
+	if value == "false" || value == "0" {
+		return false, nil
+	}
+
+	return false, apperrors.Validation("invalid query parameter", apperrors.FieldErrors{
+		key: "must be a boolean",
+	})
+}
+
+func ParseDistinctUUIDArray(field string, raw []string) ([]uuid.UUID, *apperrors.AppError) {
+	if len(raw) == 0 {
+		return nil, nil
+	}
+
+	out := make([]uuid.UUID, 0, len(raw))
+	seen := make(map[uuid.UUID]struct{}, len(raw))
+	for idx, value := range raw {
+		clean := strings.TrimSpace(value)
+		parsed, err := uuid.Parse(clean)
+		if err != nil {
+			return nil, apperrors.Validation("invalid query parameter", apperrors.FieldErrors{
+				field: fmt.Sprintf("item %d must be a valid UUID", idx+1),
+			})
+		}
+		if _, ok := seen[parsed]; ok {
+			return nil, apperrors.Validation("invalid query parameter", apperrors.FieldErrors{
+				field: "must not contain duplicates",
+			})
+		}
+		seen[parsed] = struct{}{}
+		out = append(out, parsed)
+	}
+
+	return out, nil
+}
+
+func QueryHasKey(c *gin.Context, key string) bool {
+	parsed, err := url.ParseQuery(c.Request.URL.RawQuery)
+	if err != nil {
+		return false
+	}
+	_, ok := parsed[key]
+	return ok
 }
 
 func parsePositiveInt(raw string) (int, error) {

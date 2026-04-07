@@ -6,6 +6,17 @@ This roadmap defines the milestone-based path from the current frontend-heavy pr
 ## Current Baseline
 Linear-lite has clear product scope, frontend planning, design direction, and a detailed backend architecture contract. The frontend already includes the core authenticated shell, auth screens, dashboard, issues list, board, issue detail, create issue modal, and scaffolded supporting pages. Frontend development currently supports mock-backed workflows. The main gap is backend execution and real frontend/backend integration.
 
+## Execution Status Update
+
+Completed:
+- Milestone 1: Backend Foundation and Runtime Skeleton
+- Milestone 2: Database Schema and Core Auth
+- Milestone 3: Core Issue Workflow Backend
+
+Current focus:
+- Milestone 4: Dashboard and Supporting Resource APIs
+- Milestone 5 and 6 remain pending until Milestone 4 contract surface is stable
+
 ## Milestones
 
 ### Milestone 1: Backend Foundation and Runtime Skeleton
