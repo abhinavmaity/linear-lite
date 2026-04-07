@@ -20,8 +20,21 @@ type Dependencies struct {
 
 func New(cfg config.Config, deps Dependencies) *gin.Engine {
 	userRepo := repositories.NewUserRepository(deps.DB)
+	projectRepo := repositories.NewProjectRepository(deps.DB)
+	sprintRepo := repositories.NewSprintRepository(deps.DB)
+	labelRepo := repositories.NewLabelRepository(deps.DB)
+
 	authService := services.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTTTL, cfg.BcryptCost)
+	userService := services.NewUserService(userRepo)
+	projectService := services.NewProjectService(projectRepo)
+	sprintService := services.NewSprintService(sprintRepo)
+	labelService := services.NewLabelService(labelRepo)
+
 	authHandler := handlers.NewAuthHandler(authService)
+	userHandler := handlers.NewUserHandler(userService)
+	projectHandler := handlers.NewProjectHandler(projectService)
+	sprintHandler := handlers.NewSprintHandler(sprintService)
+	labelHandler := handlers.NewLabelHandler(labelService)
 
 	router := gin.New()
 	router.Use(middleware.RequestID())
@@ -29,12 +42,20 @@ func New(cfg config.Config, deps Dependencies) *gin.Engine {
 	router.Use(middleware.Recovery())
 	router.Use(middleware.CORS(cfg.CORSOrigins))
 
-	registerRoutes(router, cfg, authHandler)
+	registerRoutes(router, cfg, authHandler, userHandler, projectHandler, sprintHandler, labelHandler)
 
 	return router
 }
 
-func registerRoutes(router *gin.Engine, cfg config.Config, authHandler *handlers.AuthHandler) {
+func registerRoutes(
+	router *gin.Engine,
+	cfg config.Config,
+	authHandler *handlers.AuthHandler,
+	userHandler *handlers.UserHandler,
+	projectHandler *handlers.ProjectHandler,
+	sprintHandler *handlers.SprintHandler,
+	labelHandler *handlers.LabelHandler,
+) {
 	router.GET("/healthz", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "ok",
@@ -50,4 +71,8 @@ func registerRoutes(router *gin.Engine, cfg config.Config, authHandler *handlers
 	protected := v1.Group("")
 	protected.Use(middleware.RequireAuth(cfg.JWTSecret))
 	protected.GET("/auth/me", authHandler.Me)
+	protected.GET("/users", userHandler.List)
+	protected.GET("/projects", projectHandler.List)
+	protected.GET("/sprints", sprintHandler.List)
+	protected.GET("/labels", labelHandler.List)
 }

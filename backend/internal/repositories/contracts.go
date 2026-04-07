@@ -77,14 +77,14 @@ type UserReadRepository interface {
 
 // ProjectRepository defines project persistence contracts used in Milestone 3+.
 type ProjectRepository interface {
-	List(ctx context.Context, filter ProjectListFilter) ([]models.Project, int64, error)
+	List(ctx context.Context, filter ProjectListFilter) ([]ProjectSummaryRow, int64, error)
 	FindByID(ctx context.Context, id string) (*models.Project, error)
 	ExistsByID(ctx context.Context, id string) (bool, error)
 }
 
 // SprintRepository defines sprint persistence contracts used in Milestone 3+.
 type SprintRepository interface {
-	List(ctx context.Context, filter SprintListFilter) ([]models.Sprint, int64, error)
+	List(ctx context.Context, filter SprintListFilter) ([]SprintSummaryRow, int64, error)
 	FindByID(ctx context.Context, id string) (*models.Sprint, error)
 	ExistsByID(ctx context.Context, id string) (bool, error)
 }
