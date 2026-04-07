@@ -23,18 +23,21 @@ func New(cfg config.Config, deps Dependencies) *gin.Engine {
 	projectRepo := repositories.NewProjectRepository(deps.DB)
 	sprintRepo := repositories.NewSprintRepository(deps.DB)
 	labelRepo := repositories.NewLabelRepository(deps.DB)
+	issueRepo := repositories.NewIssueRepository(deps.DB)
 
 	authService := services.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTTTL, cfg.BcryptCost)
 	userService := services.NewUserService(userRepo)
 	projectService := services.NewProjectService(projectRepo)
 	sprintService := services.NewSprintService(sprintRepo)
 	labelService := services.NewLabelService(labelRepo)
+	issueService := services.NewIssueService(issueRepo, userRepo, projectRepo, sprintRepo, labelRepo)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	userHandler := handlers.NewUserHandler(userService)
 	projectHandler := handlers.NewProjectHandler(projectService)
 	sprintHandler := handlers.NewSprintHandler(sprintService)
 	labelHandler := handlers.NewLabelHandler(labelService)
+	issueHandler := handlers.NewIssueHandler(issueService)
 
 	router := gin.New()
 	router.Use(middleware.RequestID())
@@ -42,7 +45,7 @@ func New(cfg config.Config, deps Dependencies) *gin.Engine {
 	router.Use(middleware.Recovery())
 	router.Use(middleware.CORS(cfg.CORSOrigins))
 
-	registerRoutes(router, cfg, authHandler, userHandler, projectHandler, sprintHandler, labelHandler)
+	registerRoutes(router, cfg, authHandler, userHandler, projectHandler, sprintHandler, labelHandler, issueHandler)
 
 	return router
 }
@@ -55,6 +58,7 @@ func registerRoutes(
 	projectHandler *handlers.ProjectHandler,
 	sprintHandler *handlers.SprintHandler,
 	labelHandler *handlers.LabelHandler,
+	issueHandler *handlers.IssueHandler,
 ) {
 	router.GET("/healthz", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -75,4 +79,9 @@ func registerRoutes(
 	protected.GET("/projects", projectHandler.List)
 	protected.GET("/sprints", sprintHandler.List)
 	protected.GET("/labels", labelHandler.List)
+	protected.GET("/issues", issueHandler.List)
+	protected.POST("/issues", issueHandler.Create)
+	protected.GET("/issues/:id", issueHandler.Get)
+	protected.PUT("/issues/:id", issueHandler.Update)
+	protected.DELETE("/issues/:id", issueHandler.Delete)
 }

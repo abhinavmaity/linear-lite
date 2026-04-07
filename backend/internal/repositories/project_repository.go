@@ -125,6 +125,56 @@ func (r *ProjectRepositoryDB) List(ctx context.Context, filter ProjectListFilter
 	return rows, total, nil
 }
 
+func (r *ProjectRepositoryDB) SummariesByIDs(ctx context.Context, ids []string) (map[string]ProjectSummaryRow, error) {
+	out := make(map[string]ProjectSummaryRow, len(ids))
+	if len(ids) == 0 {
+		return out, nil
+	}
+
+	var projects []models.Project
+	if err := r.db.WithContext(ctx).Where("id IN ?", ids).Find(&projects).Error; err != nil {
+		return nil, err
+	}
+
+	projectIDs := make([]string, 0, len(projects))
+	for _, p := range projects {
+		projectIDs = append(projectIDs, p.ID)
+	}
+	projectCounts, err := r.loadIssueCountsByProject(ctx, projectIDs)
+	if err != nil {
+		return nil, err
+	}
+	activeSprints, err := r.loadActiveSprintsByProject(ctx, projectIDs)
+	if err != nil {
+		return nil, err
+	}
+	sprintCounts, err := r.loadIssueCountsBySprint(ctx, activeSprints)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, p := range projects {
+		row := ProjectSummaryRow{
+			ID:           p.ID,
+			Name:         p.Name,
+			Description:  p.Description,
+			Key:          p.Key,
+			CreatedBy:    p.CreatedBy,
+			CreatedAt:    p.CreatedAt,
+			UpdatedAt:    p.UpdatedAt,
+			IssueCounts:  projectCounts[p.ID],
+			ActiveSprint: nil,
+		}
+		if active, ok := activeSprints[p.ID]; ok {
+			active.IssueCounts = sprintCounts[active.ID]
+			row.ActiveSprint = active
+		}
+		out[p.ID] = row
+	}
+
+	return out, nil
+}
+
 type issueCountsRow struct {
 	ResourceID string `gorm:"column:resource_id"`
 	Total      int    `gorm:"column:total"`

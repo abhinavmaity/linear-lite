@@ -54,3 +54,42 @@ type LabelSummary struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
+
+type IssueActivity struct {
+	ID        string       `json:"id"`
+	IssueID   string       `json:"issue_id"`
+	UserID    string       `json:"user_id"`
+	Action    string       `json:"action"`
+	FieldName *string      `json:"field_name"`
+	OldValue  *string      `json:"old_value"`
+	NewValue  *string      `json:"new_value"`
+	CreatedAt time.Time    `json:"created_at"`
+	User      *UserSummary `json:"user"`
+}
+
+type IssueSummary struct {
+	ID          string         `json:"id"`
+	Identifier  string         `json:"identifier"`
+	Title       string         `json:"title"`
+	Description *string        `json:"description"`
+	Status      string         `json:"status"`
+	Priority    string         `json:"priority"`
+	ProjectID   string         `json:"project_id"`
+	SprintID    *string        `json:"sprint_id"`
+	AssigneeID  *string        `json:"assignee_id"`
+	CreatedBy   string         `json:"created_by"`
+	ArchivedAt  *time.Time     `json:"archived_at"`
+	ArchivedBy  *string        `json:"archived_by"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	Project     ProjectSummary `json:"project"`
+	Sprint      *SprintSummary `json:"sprint"`
+	Assignee    *UserSummary   `json:"assignee"`
+	Creator     UserSummary    `json:"creator"`
+	Labels      []LabelSummary `json:"labels"`
+}
+
+type IssueDetail struct {
+	IssueSummary
+	Activities []IssueActivity `json:"activities"`
+}

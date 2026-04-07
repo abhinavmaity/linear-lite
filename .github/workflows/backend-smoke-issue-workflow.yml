@@ -1,0 +1,42 @@
+name: Backend Smoke Issue Workflow
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "backend/**"
+      - "scripts/smoke_issue_workflow.sh"
+      - "docker-compose.backend.yml"
+      - ".github/workflows/backend-smoke-issue-workflow.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "scripts/smoke_issue_workflow.sh"
+      - "docker-compose.backend.yml"
+      - ".github/workflows/backend-smoke-issue-workflow.yml"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure script executable
+        run: chmod +x scripts/smoke_issue_workflow.sh
+
+      - name: Run backend issue workflow smoke
+        run: ./scripts/smoke_issue_workflow.sh
+
+      - name: Show backend container logs on failure
+        if: failure()
+        run: |
+          docker compose -f docker-compose.backend.yml logs backend || true
+          docker compose -f docker-compose.backend.yml logs postgres || true
+          docker compose -f docker-compose.backend.yml logs redis || true
+
+      - name: Tear down stack
+        if: always()
+        run: docker compose -f docker-compose.backend.yml down -v

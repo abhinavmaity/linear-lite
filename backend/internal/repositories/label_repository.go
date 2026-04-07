@@ -88,3 +88,18 @@ func (r *LabelRepositoryDB) List(ctx context.Context, filter LabelListFilter) ([
 
 	return labels, total, nil
 }
+
+func (r *LabelRepositoryDB) FindByIDs(ctx context.Context, ids []string) ([]models.Label, error) {
+	if len(ids) == 0 {
+		return []models.Label{}, nil
+	}
+
+	var labels []models.Label
+	err := r.db.WithContext(ctx).
+		Where("id IN ?", ids).
+		Find(&labels).Error
+	if err != nil {
+		return nil, err
+	}
+	return labels, nil
+}

@@ -121,6 +121,45 @@ func (r *SprintRepositoryDB) List(ctx context.Context, filter SprintListFilter) 
 	return rows, total, nil
 }
 
+func (r *SprintRepositoryDB) SummariesByIDs(ctx context.Context, ids []string) (map[string]SprintSummaryRow, error) {
+	out := make(map[string]SprintSummaryRow, len(ids))
+	if len(ids) == 0 {
+		return out, nil
+	}
+
+	var sprints []models.Sprint
+	err := r.db.WithContext(ctx).Where("id IN ?", ids).Find(&sprints).Error
+	if err != nil {
+		return nil, err
+	}
+
+	sprintIDs := make([]string, 0, len(sprints))
+	for _, sprint := range sprints {
+		sprintIDs = append(sprintIDs, sprint.ID)
+	}
+	countsBySprint, err := r.loadIssueCountsBySprint(ctx, sprintIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, sprint := range sprints {
+		out[sprint.ID] = SprintSummaryRow{
+			ID:          sprint.ID,
+			Name:        sprint.Name,
+			Description: sprint.Description,
+			ProjectID:   sprint.ProjectID,
+			StartDate:   sprint.StartDate,
+			EndDate:     sprint.EndDate,
+			Status:      sprint.Status,
+			CreatedAt:   sprint.CreatedAt,
+			UpdatedAt:   sprint.UpdatedAt,
+			IssueCounts: countsBySprint[sprint.ID],
+		}
+	}
+
+	return out, nil
+}
+
 func (r *SprintRepositoryDB) loadIssueCountsBySprint(ctx context.Context, sprintIDs []string) (map[string]IssueCounts, error) {
 	out := make(map[string]IssueCounts, len(sprintIDs))
 	if len(sprintIDs) == 0 {
