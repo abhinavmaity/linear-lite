@@ -3,7 +3,9 @@ package services
 import (
 	"context"
 	"errors"
+	"time"
 
+	cachepkg "github.com/abhinavmaity/linear-lite/backend/internal/cache"
 	apperrors "github.com/abhinavmaity/linear-lite/backend/internal/errors"
 	"github.com/abhinavmaity/linear-lite/backend/internal/repositories"
 )
@@ -17,14 +19,33 @@ type UserListInput struct {
 }
 
 type UserService struct {
-	repo repositories.UserReadRepository
+	repo  repositories.UserReadRepository
+	cache *cachepkg.Store
 }
 
-func NewUserService(repo repositories.UserReadRepository) *UserService {
-	return &UserService{repo: repo}
+func NewUserService(repo repositories.UserReadRepository, cache *cachepkg.Store) *UserService {
+	return &UserService{repo: repo, cache: cache}
 }
 
 func (s *UserService) List(ctx context.Context, input UserListInput) ([]UserSummary, int64, *apperrors.AppError) {
+	cacheKey := buildListCacheKey(
+		"users",
+		intToCachePart(input.Page),
+		intToCachePart(input.Limit),
+		input.Search,
+		input.SortBy,
+		input.SortOrder,
+	)
+	if s.cache != nil {
+		var cached struct {
+			Items []UserSummary `json:"items"`
+			Total int64         `json:"total"`
+		}
+		if found, err := s.cache.GetJSON(ctx, cacheKey, &cached); err == nil && found {
+			return cached.Items, cached.Total, nil
+		}
+	}
+
 	users, total, err := s.repo.List(ctx, repositories.UserListFilter{
 		PaginationInput: repositories.PaginationInput{
 			Page:  input.Page,
@@ -50,6 +71,16 @@ func (s *UserService) List(ctx context.Context, input UserListInput) ([]UserSumm
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
 		})
+	}
+
+	if s.cache != nil {
+		_ = s.cache.SetJSON(ctx, cacheKey, struct {
+			Items []UserSummary `json:"items"`
+			Total int64         `json:"total"`
+		}{
+			Items: items,
+			Total: total,
+		}, 5*time.Minute)
 	}
 
 	return items, total, nil

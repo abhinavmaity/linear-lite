@@ -7,6 +7,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	cachepkg "github.com/abhinavmaity/linear-lite/backend/internal/cache"
 	apperrors "github.com/abhinavmaity/linear-lite/backend/internal/errors"
 	"github.com/abhinavmaity/linear-lite/backend/internal/models"
 	"github.com/abhinavmaity/linear-lite/backend/internal/repositories"
@@ -48,19 +49,50 @@ type SprintUpdateInput struct {
 type SprintService struct {
 	repo     repositories.SprintRepository
 	projects repositories.ProjectRepository
+	cache    *cachepkg.Store
 }
 
 func NewSprintService(
 	repo repositories.SprintRepository,
 	projects repositories.ProjectRepository,
+	cache *cachepkg.Store,
 ) *SprintService {
 	return &SprintService{
 		repo:     repo,
 		projects: projects,
+		cache:    cache,
 	}
 }
 
 func (s *SprintService) List(ctx context.Context, input SprintListInput) ([]SprintSummary, int64, *apperrors.AppError) {
+	projectID := ""
+	if input.ProjectID != nil {
+		projectID = *input.ProjectID
+	}
+	status := ""
+	if input.Status != nil {
+		status = *input.Status
+	}
+	cacheKey := buildListCacheKey(
+		"sprints",
+		intToCachePart(input.Page),
+		intToCachePart(input.Limit),
+		projectID,
+		status,
+		input.Search,
+		input.SortBy,
+		input.SortOrder,
+	)
+	if s.cache != nil {
+		var cached struct {
+			Items []SprintSummary `json:"items"`
+			Total int64           `json:"total"`
+		}
+		if found, err := s.cache.GetJSON(ctx, cacheKey, &cached); err == nil && found {
+			return cached.Items, cached.Total, nil
+		}
+	}
+
 	sprints, total, err := s.repo.List(ctx, repositories.SprintListFilter{
 		PaginationInput: repositories.PaginationInput{
 			Page:  input.Page,
@@ -92,6 +124,16 @@ func (s *SprintService) List(ctx context.Context, input SprintListInput) ([]Spri
 			UpdatedAt:   sprint.UpdatedAt,
 			IssueCounts: mapIssueCounts(sprint.IssueCounts),
 		})
+	}
+
+	if s.cache != nil {
+		_ = s.cache.SetJSON(ctx, cacheKey, struct {
+			Items []SprintSummary `json:"items"`
+			Total int64           `json:"total"`
+		}{
+			Items: items,
+			Total: total,
+		}, 2*time.Minute)
 	}
 
 	return items, total, nil
@@ -167,10 +209,20 @@ func (s *SprintService) Create(ctx context.Context, input SprintCreateInput) (*S
 		return nil, apperrors.Internal("failed to create sprint")
 	}
 
+	s.invalidateSprintCaches(ctx)
+
 	return s.Get(ctx, sprint.ID)
 }
 
 func (s *SprintService) Get(ctx context.Context, id string) (*SprintDetail, *apperrors.AppError) {
+	cacheKey := buildDetailCacheKey("sprints", id)
+	if s.cache != nil {
+		var cached SprintDetail
+		if found, err := s.cache.GetJSON(ctx, cacheKey, &cached); err == nil && found {
+			return &cached, nil
+		}
+	}
+
 	sprintMap, err := s.repo.SummariesByIDs(ctx, []string{id})
 	if err != nil {
 		return nil, apperrors.Internal("failed to load sprint")
@@ -204,6 +256,10 @@ func (s *SprintService) Get(ctx context.Context, id string) (*SprintDetail, *app
 	}
 	if projectRow.ActiveSprint != nil {
 		detail.Project.ActiveSprint = mapSprintRow(*projectRow.ActiveSprint)
+	}
+
+	if s.cache != nil {
+		_ = s.cache.SetJSON(ctx, cacheKey, detail, 2*time.Minute)
 	}
 	return &detail, nil
 }
@@ -282,6 +338,8 @@ func (s *SprintService) Update(ctx context.Context, id string, input SprintUpdat
 		return nil, apperrors.Internal("failed to update sprint")
 	}
 
+	s.invalidateSprintCaches(ctx)
+
 	return s.Get(ctx, id)
 }
 
@@ -317,7 +375,18 @@ func (s *SprintService) Delete(ctx context.Context, id string) *apperrors.AppErr
 		return apperrors.Internal("failed to delete sprint")
 	}
 
+	s.invalidateSprintCaches(ctx)
+
 	return nil
+}
+
+func (s *SprintService) invalidateSprintCaches(ctx context.Context) {
+	if s.cache == nil {
+		return
+	}
+	_ = s.cache.DeleteByPrefix(ctx, "sprints:")
+	_ = s.cache.DeleteByPrefix(ctx, "projects:")
+	_ = s.cache.DeleteByPrefix(ctx, "dashboard:")
 }
 
 func validateSprintStatus(status string) *apperrors.AppError {

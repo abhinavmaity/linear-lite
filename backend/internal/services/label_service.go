@@ -5,8 +5,10 @@ import (
 	"errors"
 	"regexp"
 	"strings"
+	"time"
 	"unicode/utf8"
 
+	cachepkg "github.com/abhinavmaity/linear-lite/backend/internal/cache"
 	apperrors "github.com/abhinavmaity/linear-lite/backend/internal/errors"
 	"github.com/abhinavmaity/linear-lite/backend/internal/models"
 	"github.com/abhinavmaity/linear-lite/backend/internal/repositories"
@@ -40,14 +42,33 @@ type LabelUpdateInput struct {
 }
 
 type LabelService struct {
-	repo repositories.LabelRepository
+	repo  repositories.LabelRepository
+	cache *cachepkg.Store
 }
 
-func NewLabelService(repo repositories.LabelRepository) *LabelService {
-	return &LabelService{repo: repo}
+func NewLabelService(repo repositories.LabelRepository, cache *cachepkg.Store) *LabelService {
+	return &LabelService{repo: repo, cache: cache}
 }
 
 func (s *LabelService) List(ctx context.Context, input LabelListInput) ([]LabelSummary, int64, *apperrors.AppError) {
+	cacheKey := buildListCacheKey(
+		"labels",
+		intToCachePart(input.Page),
+		intToCachePart(input.Limit),
+		input.Search,
+		input.SortBy,
+		input.SortOrder,
+	)
+	if s.cache != nil {
+		var cached struct {
+			Items []LabelSummary `json:"items"`
+			Total int64          `json:"total"`
+		}
+		if found, err := s.cache.GetJSON(ctx, cacheKey, &cached); err == nil && found {
+			return cached.Items, cached.Total, nil
+		}
+	}
+
 	labels, total, err := s.repo.List(ctx, repositories.LabelListFilter{
 		PaginationInput: repositories.PaginationInput{
 			Page:  input.Page,
@@ -73,6 +94,16 @@ func (s *LabelService) List(ctx context.Context, input LabelListInput) ([]LabelS
 			CreatedAt:   label.CreatedAt,
 			UpdatedAt:   label.UpdatedAt,
 		})
+	}
+
+	if s.cache != nil {
+		_ = s.cache.SetJSON(ctx, cacheKey, struct {
+			Items []LabelSummary `json:"items"`
+			Total int64          `json:"total"`
+		}{
+			Items: items,
+			Total: total,
+		}, 10*time.Minute)
 	}
 
 	return items, total, nil
@@ -117,6 +148,8 @@ func (s *LabelService) Create(ctx context.Context, input LabelCreateInput) (*Lab
 		}
 		return nil, apperrors.Internal("failed to create label")
 	}
+
+	s.invalidateLabelCaches(ctx)
 
 	return &LabelSummary{
 		ID:          label.ID,
@@ -207,6 +240,8 @@ func (s *LabelService) Update(ctx context.Context, id string, input LabelUpdateI
 		return nil, apperrors.Internal("failed to update label")
 	}
 
+	s.invalidateLabelCaches(ctx)
+
 	return &LabelSummary{
 		ID:          label.ID,
 		Name:        label.Name,
@@ -241,7 +276,15 @@ func (s *LabelService) Delete(ctx context.Context, id string) *apperrors.AppErro
 		}
 		return apperrors.Internal("failed to delete label")
 	}
+	s.invalidateLabelCaches(ctx)
 	return nil
+}
+
+func (s *LabelService) invalidateLabelCaches(ctx context.Context) {
+	if s.cache == nil {
+		return
+	}
+	_ = s.cache.DeleteByPrefix(ctx, "labels:")
 }
 
 func normalizeLabelOptional(value *string) *string {

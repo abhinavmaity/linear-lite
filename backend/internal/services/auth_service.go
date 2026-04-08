@@ -8,6 +8,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	cachepkg "github.com/abhinavmaity/linear-lite/backend/internal/cache"
 	apperrors "github.com/abhinavmaity/linear-lite/backend/internal/errors"
 	"github.com/abhinavmaity/linear-lite/backend/internal/models"
 	"github.com/abhinavmaity/linear-lite/backend/internal/repositories"
@@ -62,15 +63,23 @@ type authClaims struct {
 
 type AuthService struct {
 	users      UserAuthRepository
+	cache      *cachepkg.Store
 	jwtSecret  []byte
 	jwtTTL     time.Duration
 	bcryptCost int
 	now        func() time.Time
 }
 
-func NewAuthService(users UserAuthRepository, jwtSecret string, jwtTTL time.Duration, bcryptCost int) *AuthService {
+func NewAuthService(
+	users UserAuthRepository,
+	jwtSecret string,
+	jwtTTL time.Duration,
+	bcryptCost int,
+	cache *cachepkg.Store,
+) *AuthService {
 	return &AuthService{
 		users:      users,
+		cache:      cache,
 		jwtSecret:  []byte(strings.TrimSpace(jwtSecret)),
 		jwtTTL:     jwtTTL,
 		bcryptCost: bcryptCost,
@@ -120,6 +129,10 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (*AuthS
 			})
 		}
 		return nil, apperrors.Internal("failed to create user")
+	}
+
+	if s.cache != nil {
+		_ = s.cache.DeleteByPrefix(ctx, "users:")
 	}
 
 	token, expiresAt, appErr := s.issueAccessToken(user.ID, user.Email)

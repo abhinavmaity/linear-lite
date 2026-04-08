@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	cachepkg "github.com/abhinavmaity/linear-lite/backend/internal/cache"
 	"github.com/abhinavmaity/linear-lite/backend/internal/config"
 	"github.com/abhinavmaity/linear-lite/backend/internal/handlers"
 	"github.com/abhinavmaity/linear-lite/backend/internal/middleware"
@@ -19,19 +20,21 @@ type Dependencies struct {
 }
 
 func New(cfg config.Config, deps Dependencies) *gin.Engine {
+	cacheStore := cachepkg.NewStore(deps.Redis)
+
 	userRepo := repositories.NewUserRepository(deps.DB)
 	projectRepo := repositories.NewProjectRepository(deps.DB)
 	sprintRepo := repositories.NewSprintRepository(deps.DB)
 	labelRepo := repositories.NewLabelRepository(deps.DB)
 	issueRepo := repositories.NewIssueRepository(deps.DB)
 
-	authService := services.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTTTL, cfg.BcryptCost)
-	userService := services.NewUserService(userRepo)
-	projectService := services.NewProjectService(projectRepo, userRepo)
-	sprintService := services.NewSprintService(sprintRepo, projectRepo)
-	labelService := services.NewLabelService(labelRepo)
-	issueService := services.NewIssueService(issueRepo, userRepo, projectRepo, sprintRepo, labelRepo)
-	dashboardService := services.NewDashboardService(issueRepo, sprintRepo, userRepo)
+	authService := services.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTTTL, cfg.BcryptCost, cacheStore)
+	userService := services.NewUserService(userRepo, cacheStore)
+	projectService := services.NewProjectService(projectRepo, userRepo, cacheStore)
+	sprintService := services.NewSprintService(sprintRepo, projectRepo, cacheStore)
+	labelService := services.NewLabelService(labelRepo, cacheStore)
+	issueService := services.NewIssueService(issueRepo, userRepo, projectRepo, sprintRepo, labelRepo, cacheStore)
+	dashboardService := services.NewDashboardService(issueRepo, sprintRepo, userRepo, cacheStore)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	userHandler := handlers.NewUserHandler(userService)

@@ -8,6 +8,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	cachepkg "github.com/abhinavmaity/linear-lite/backend/internal/cache"
 	apperrors "github.com/abhinavmaity/linear-lite/backend/internal/errors"
 	"github.com/abhinavmaity/linear-lite/backend/internal/models"
 	"github.com/abhinavmaity/linear-lite/backend/internal/repositories"
@@ -43,19 +44,40 @@ type ProjectUpdateInput struct {
 type ProjectService struct {
 	repo  repositories.ProjectRepository
 	users repositories.UserReadRepository
+	cache *cachepkg.Store
 }
 
 func NewProjectService(
 	repo repositories.ProjectRepository,
 	users repositories.UserReadRepository,
+	cache *cachepkg.Store,
 ) *ProjectService {
 	return &ProjectService{
 		repo:  repo,
 		users: users,
+		cache: cache,
 	}
 }
 
 func (s *ProjectService) List(ctx context.Context, input ProjectListInput) ([]ProjectSummary, int64, *apperrors.AppError) {
+	cacheKey := buildListCacheKey(
+		"projects",
+		intToCachePart(input.Page),
+		intToCachePart(input.Limit),
+		input.Search,
+		input.SortBy,
+		input.SortOrder,
+	)
+	if s.cache != nil {
+		var cached struct {
+			Items []ProjectSummary `json:"items"`
+			Total int64            `json:"total"`
+		}
+		if found, err := s.cache.GetJSON(ctx, cacheKey, &cached); err == nil && found {
+			return cached.Items, cached.Total, nil
+		}
+	}
+
 	projects, total, err := s.repo.List(ctx, repositories.ProjectListFilter{
 		PaginationInput: repositories.PaginationInput{
 			Page:  input.Page,
@@ -87,6 +109,16 @@ func (s *ProjectService) List(ctx context.Context, input ProjectListInput) ([]Pr
 			item.ActiveSprint = mapSprintRow(*project.ActiveSprint)
 		}
 		items = append(items, item)
+	}
+
+	if s.cache != nil {
+		_ = s.cache.SetJSON(ctx, cacheKey, struct {
+			Items []ProjectSummary `json:"items"`
+			Total int64            `json:"total"`
+		}{
+			Items: items,
+			Total: total,
+		}, 2*time.Minute)
 	}
 
 	return items, total, nil
@@ -160,10 +192,20 @@ func (s *ProjectService) Create(ctx context.Context, actorID string, input Proje
 		return nil, apperrors.Internal("failed to create project")
 	}
 
+	s.invalidateProjectCaches(ctx)
+
 	return s.Get(ctx, project.ID)
 }
 
 func (s *ProjectService) Get(ctx context.Context, id string) (*ProjectDetail, *apperrors.AppError) {
+	cacheKey := buildDetailCacheKey("projects", id)
+	if s.cache != nil {
+		var cached ProjectDetail
+		if found, err := s.cache.GetJSON(ctx, cacheKey, &cached); err == nil && found {
+			return &cached, nil
+		}
+	}
+
 	summaryMap, err := s.repo.SummariesByIDs(ctx, []string{id})
 	if err != nil {
 		return nil, apperrors.Internal("failed to load project")
@@ -215,6 +257,10 @@ func (s *ProjectService) Get(ctx context.Context, id string) (*ProjectDetail, *a
 
 	if projectRow.ActiveSprint != nil {
 		detail.ActiveSprint = mapSprintRow(*projectRow.ActiveSprint)
+	}
+
+	if s.cache != nil {
+		_ = s.cache.SetJSON(ctx, cacheKey, detail, 2*time.Minute)
 	}
 
 	return &detail, nil
@@ -281,6 +327,8 @@ func (s *ProjectService) Update(ctx context.Context, id string, input ProjectUpd
 		return nil, apperrors.Internal("failed to update project")
 	}
 
+	s.invalidateProjectCaches(ctx)
+
 	return s.Get(ctx, id)
 }
 
@@ -319,7 +367,17 @@ func (s *ProjectService) Delete(ctx context.Context, id string) *apperrors.AppEr
 		return apperrors.Internal("failed to delete project")
 	}
 
+	s.invalidateProjectCaches(ctx)
+
 	return nil
+}
+
+func (s *ProjectService) invalidateProjectCaches(ctx context.Context) {
+	if s.cache == nil {
+		return
+	}
+	_ = s.cache.DeleteByPrefix(ctx, "projects:")
+	_ = s.cache.DeleteByPrefix(ctx, "dashboard:")
 }
 
 func normalizeProjectOptional(value *string) *string {

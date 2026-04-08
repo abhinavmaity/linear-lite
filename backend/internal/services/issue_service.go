@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	cachepkg "github.com/abhinavmaity/linear-lite/backend/internal/cache"
 	apperrors "github.com/abhinavmaity/linear-lite/backend/internal/errors"
 	"github.com/abhinavmaity/linear-lite/backend/internal/models"
 	"github.com/abhinavmaity/linear-lite/backend/internal/repositories"
@@ -61,6 +62,7 @@ type IssueService struct {
 	projects *repositories.ProjectRepositoryDB
 	sprints  *repositories.SprintRepositoryDB
 	labels   *repositories.LabelRepositoryDB
+	cache    *cachepkg.Store
 }
 
 func NewIssueService(
@@ -69,6 +71,7 @@ func NewIssueService(
 	projects *repositories.ProjectRepositoryDB,
 	sprints *repositories.SprintRepositoryDB,
 	labels *repositories.LabelRepositoryDB,
+	cache *cachepkg.Store,
 ) *IssueService {
 	return &IssueService{
 		issues:   issues,
@@ -76,6 +79,7 @@ func NewIssueService(
 		projects: projects,
 		sprints:  sprints,
 		labels:   labels,
+		cache:    cache,
 	}
 }
 
@@ -186,6 +190,8 @@ func (s *IssueService) Create(ctx context.Context, actorID string, input CreateI
 		return nil, apperrors.Internal("failed to create issue")
 	}
 
+	s.invalidateIssueMutationCaches(ctx)
+
 	return s.Get(ctx, created.ID, true)
 }
 
@@ -292,6 +298,8 @@ func (s *IssueService) Update(ctx context.Context, actorID string, input UpdateI
 		return nil, apperrors.Internal("failed to update issue")
 	}
 
+	s.invalidateIssueMutationCaches(ctx)
+
 	return s.Get(ctx, updated.ID, true)
 }
 
@@ -303,7 +311,17 @@ func (s *IssueService) Archive(ctx context.Context, actorID string, id string) *
 		}
 		return apperrors.Internal("failed to archive issue")
 	}
+	s.invalidateIssueMutationCaches(ctx)
 	return nil
+}
+
+func (s *IssueService) invalidateIssueMutationCaches(ctx context.Context) {
+	if s.cache == nil {
+		return
+	}
+	_ = s.cache.DeleteByPrefix(ctx, "dashboard:")
+	_ = s.cache.DeleteByPrefix(ctx, "projects:")
+	_ = s.cache.DeleteByPrefix(ctx, "sprints:")
 }
 
 func (s *IssueService) validateIssueReferences(

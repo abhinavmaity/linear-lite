@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	cachepkg "github.com/abhinavmaity/linear-lite/backend/internal/cache"
 	apperrors "github.com/abhinavmaity/linear-lite/backend/internal/errors"
 	"github.com/abhinavmaity/linear-lite/backend/internal/models"
 	"github.com/abhinavmaity/linear-lite/backend/internal/repositories"
@@ -14,6 +15,7 @@ type DashboardService struct {
 	issues  *repositories.IssueRepositoryDB
 	sprints repositories.SprintRepository
 	users   repositories.UserReadRepository
+	cache   *cachepkg.Store
 	now     func() time.Time
 }
 
@@ -21,11 +23,13 @@ func NewDashboardService(
 	issues *repositories.IssueRepositoryDB,
 	sprints repositories.SprintRepository,
 	users repositories.UserReadRepository,
+	cache *cachepkg.Store,
 ) *DashboardService {
 	return &DashboardService{
 		issues:  issues,
 		sprints: sprints,
 		users:   users,
+		cache:   cache,
 		now:     time.Now,
 	}
 }
@@ -34,6 +38,13 @@ func (s *DashboardService) GetStats(ctx context.Context, userID string) (*Dashbo
 	cleanUserID := strings.TrimSpace(userID)
 	if cleanUserID == "" {
 		return nil, apperrors.Unauthorized("authentication is required")
+	}
+	cacheKey := "dashboard:stats:" + cleanUserID
+	if s.cache != nil {
+		var cached DashboardStats
+		if found, err := s.cache.GetJSON(ctx, cacheKey, &cached); err == nil && found {
+			return &cached, nil
+		}
 	}
 
 	doneSince := s.now().UTC().AddDate(0, 0, -7)
@@ -67,14 +78,20 @@ func (s *DashboardService) GetStats(ctx context.Context, userID string) (*Dashbo
 		return nil, appErr
 	}
 
-	return &DashboardStats{
+	result := &DashboardStats{
 		TotalIssues:    metrics.TotalIssues,
 		MyIssues:       metrics.MyIssues,
 		InProgress:     metrics.InProgress,
 		DoneThisWeek:   metrics.DoneThisWeek,
 		ActiveSprint:   activeSprint,
 		RecentActivity: recentActivity,
-	}, nil
+	}
+
+	if s.cache != nil {
+		_ = s.cache.SetJSON(ctx, cacheKey, result, 30*time.Second)
+	}
+
+	return result, nil
 }
 
 func (s *DashboardService) hydrateDashboardActivities(
