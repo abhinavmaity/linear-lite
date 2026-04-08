@@ -103,17 +103,26 @@ The main planning and architecture references for this repository are:
 
 The repository has moved beyond pure planning. The frontend core MVP flows are already implemented, including auth screens, dashboard, issues list, board, issue detail, a create issue modal, and scaffolded supporting pages for projects, sprints, labels, and team views.
 
-Backend Milestone 1 (runtime foundation), Milestone 2 (database auth foundation + core auth flow), and Milestone 3 (core issue workflow backend) are now implemented.
+Backend Milestones 1 through 4 are now implemented:
+- Milestone 1: runtime foundation
+- Milestone 2: database auth foundation + core auth flow
+- Milestone 3: core issue workflow backend
+- Milestone 4: dashboard and supporting resource APIs
 
 The backend now includes:
 - canonical SQL schema support for `users`, `projects`, `sprints`, `labels`, `issues`, `issue_labels`, and `issue_activities`
 - auth endpoints: `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `GET /api/v1/auth/me`
-- selector endpoints used by issue workflows: `GET /api/v1/users`, `GET /api/v1/projects`, `GET /api/v1/sprints`, `GET /api/v1/labels`
+- user endpoints: `GET /api/v1/users`, `GET /api/v1/users/:id`
+- project endpoints: `GET /api/v1/projects`, `POST /api/v1/projects`, `GET /api/v1/projects/:id`, `PUT /api/v1/projects/:id`, `DELETE /api/v1/projects/:id`
+- sprint endpoints: `GET /api/v1/sprints`, `POST /api/v1/sprints`, `GET /api/v1/sprints/:id`, `PUT /api/v1/sprints/:id`, `DELETE /api/v1/sprints/:id`
+- label endpoints: `GET /api/v1/labels`, `POST /api/v1/labels`, `GET /api/v1/labels/:id`, `PUT /api/v1/labels/:id`, `DELETE /api/v1/labels/:id`
 - issue workflow endpoints: `GET /api/v1/issues`, `POST /api/v1/issues`, `GET /api/v1/issues/:id`, `PUT /api/v1/issues/:id`, `DELETE /api/v1/issues/:id`
+- dashboard endpoint: `GET /api/v1/dashboard/stats`
+- Redis-backed cache paths and invalidation for users, projects, sprints, labels, and dashboard read endpoints
 
 Frontend auth flows are wired to the real backend contract (not mock auth): register, login, session restore on refresh, and logout redirect behavior.
 
-Dashboard and supporting resource CRUD domains (Milestone 4 scope) remain in progress.
+Dashboard and supporting resource CRUD backend domains are no longer in-progress and now match the Milestone 4 contract surface.
 
 ## Implementation Snapshot
 
@@ -123,17 +132,20 @@ Dashboard and supporting resource CRUD domains (Milestone 4 scope) remain in pro
 - Backend Milestone 1 runtime foundation: complete
 - Backend Milestone 2 auth foundation and core auth endpoints: complete
 - Backend Milestone 3 core issue workflow backend: complete
+- Backend Milestone 4 dashboard and supporting resource APIs: complete
 - Supporting resource screens: scaffolded
-- Remaining backend domain implementation (dashboard + supporting resource CRUD): in progress
-- Full integration parity and deployment hardening: pending
+- Remaining frontend integration parity for supporting screens: in progress
+- Full integration parity and deployment hardening: pending (Milestones 5 and 6)
 
 ## Backend Smoke Validation
 
 A reproducible backend issue-workflow smoke script is available at:
 - [smoke_issue_workflow.sh](/Users/abhinavmaity/code/linear-lite/scripts/smoke_issue_workflow.sh)
+- [smoke_cache.sh](/Users/abhinavmaity/code/linear-lite/scripts/smoke_cache.sh)
 
 Run from repo root:
 
 ```bash
 ./scripts/smoke_issue_workflow.sh
+./scripts/smoke_cache.sh
 ```

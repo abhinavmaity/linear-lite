@@ -1,6 +1,6 @@
 # Backend Runtime Quickstart
 
-This folder contains the Linear-lite backend runtime through Milestone 3.
+This folder contains the Linear-lite backend runtime through Milestone 4.
 
 Implemented in backend so far:
 - Milestone 1: runtime foundation (config, server bootstrap, middleware, migration runner)
@@ -12,6 +12,15 @@ Implemented in backend so far:
   - selector endpoints: `GET /api/v1/users`, `GET /api/v1/projects`, `GET /api/v1/sprints`, `GET /api/v1/labels`
   - issue endpoints: `GET /api/v1/issues`, `POST /api/v1/issues`, `GET /api/v1/issues/:id`, `PUT /api/v1/issues/:id`, `DELETE /api/v1/issues/:id`
   - issue identifier generation, filtering/sorting/pagination, activity logging, archive/restore behavior
+- Milestone 4: dashboard and supporting resource APIs
+  - resource detail and CRUD endpoints:
+    - `GET /api/v1/users/:id`
+    - `POST/GET/PUT/DELETE /api/v1/projects`
+    - `POST/GET/PUT/DELETE /api/v1/sprints`
+    - `POST/GET/PUT/DELETE /api/v1/labels`
+  - dashboard endpoint:
+    - `GET /api/v1/dashboard/stats`
+  - Redis cache-backed read paths and write invalidation for users/projects/sprints/labels/dashboard
 
 ## Environment Variables
 
@@ -150,3 +159,17 @@ This validates:
 6. issue archive
 7. issue restore
 8. archive contract checks (`archived=true` rejected, `include_archived` behavior)
+
+## Smoke Validation Checklist (Milestone 4 Cache)
+
+From repo root:
+
+```bash
+./scripts/smoke_cache.sh
+```
+
+This validates:
+1. cache miss + hit behavior for `GET /users`, `GET /projects`, `GET /projects/:id`, `GET /sprints`, `GET /sprints/:id`, `GET /labels`, and `GET /dashboard/stats`
+2. invalidation on `register` for `users:*`
+3. invalidation on project/sprint/label mutations for their cache families
+4. issue-write invalidation for `dashboard:*`, `projects:*`, and `sprints:*`
