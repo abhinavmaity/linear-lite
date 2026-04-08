@@ -473,6 +473,65 @@ func (r *IssueRepositoryDB) ListActivitiesByIssueID(ctx context.Context, issueID
 	return rows, nil
 }
 
+func (r *IssueRepositoryDB) DashboardMetrics(ctx context.Context, userID string, doneSince time.Time) (DashboardMetrics, error) {
+	var metrics DashboardMetrics
+	// Raw SQL is used here to keep dashboard aggregation explicit and efficient.
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT
+			COUNT(*) FILTER (WHERE archived_at IS NULL)::int AS total_issues,
+			COUNT(*) FILTER (WHERE archived_at IS NULL AND assignee_id = @user_id)::int AS my_issues,
+			COUNT(*) FILTER (WHERE archived_at IS NULL AND status = 'in_progress')::int AS in_progress,
+			COUNT(*) FILTER (WHERE archived_at IS NULL AND status = 'done' AND updated_at >= @done_since)::int AS done_this_week
+		FROM issues
+	`, map[string]any{
+		"user_id":    strings.TrimSpace(userID),
+		"done_since": doneSince.UTC(),
+	}).Scan(&metrics).Error
+	if err != nil {
+		return DashboardMetrics{}, err
+	}
+	return metrics, nil
+}
+
+func (r *IssueRepositoryDB) DashboardActiveSprintID(ctx context.Context) (*string, error) {
+	var sprintID string
+	// Raw SQL gives deterministic active-sprint selection with explicit ordering.
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT id
+		FROM sprints
+		WHERE status = 'active'
+		ORDER BY end_date ASC, created_at ASC
+		LIMIT 1
+	`).Scan(&sprintID).Error
+	if err != nil {
+		return nil, err
+	}
+	if strings.TrimSpace(sprintID) == "" {
+		return nil, nil
+	}
+	return &sprintID, nil
+}
+
+func (r *IssueRepositoryDB) ListRecentActivitiesForDashboard(ctx context.Context, limit int) ([]models.IssueActivity, error) {
+	if limit <= 0 {
+		return []models.IssueActivity{}, nil
+	}
+	var rows []models.IssueActivity
+	// Raw SQL keeps the archive filter and ordering clear for dashboard activity.
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT ia.id, ia.issue_id, ia.user_id, ia.action, ia.field_name, ia.old_value, ia.new_value, ia.created_at
+		FROM issue_activities ia
+		INNER JOIN issues i ON i.id = ia.issue_id
+		WHERE i.archived_at IS NULL
+		ORDER BY ia.created_at DESC
+		LIMIT ?
+	`, limit).Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 func (r *IssueRepositoryDB) listLabelIDsByIssueIDTx(tx *gorm.DB, issueID string) ([]string, error) {
 	var ids []string
 	err := tx.Model(&models.IssueLabel{}).

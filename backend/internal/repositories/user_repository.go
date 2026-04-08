@@ -137,6 +137,23 @@ func (r *UserRepository) FindByIDs(ctx context.Context, ids []string) ([]models.
 	return users, nil
 }
 
+func (r *UserRepository) IssueStatsByUserID(ctx context.Context, id string) (UserIssueStats, error) {
+	var stats UserIssueStats
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT
+			COUNT(*) FILTER (WHERE created_by = @user_id)::int AS total_created,
+			COUNT(*) FILTER (WHERE assignee_id = @user_id)::int AS total_assigned,
+			COUNT(*) FILTER (WHERE assignee_id = @user_id AND status = 'in_progress')::int AS in_progress_assigned,
+			COUNT(*) FILTER (WHERE assignee_id = @user_id AND status = 'done')::int AS done_assigned
+		FROM issues
+		WHERE archived_at IS NULL
+	`, map[string]any{"user_id": strings.TrimSpace(id)}).Scan(&stats).Error
+	if err != nil {
+		return UserIssueStats{}, err
+	}
+	return stats, nil
+}
+
 func isUniqueViolation(err error, constraint string) bool {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {

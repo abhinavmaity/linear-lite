@@ -21,6 +21,18 @@ type UserSummary struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type UserStats struct {
+	TotalCreated       int `json:"total_created"`
+	TotalAssigned      int `json:"total_assigned"`
+	InProgressAssigned int `json:"in_progress_assigned"`
+	DoneAssigned       int `json:"done_assigned"`
+}
+
+type UserDetail struct {
+	UserSummary
+	Stats UserStats `json:"stats"`
+}
+
 type SprintSummary struct {
 	ID          string      `json:"id"`
 	Name        string      `json:"name"`
@@ -46,6 +58,17 @@ type ProjectSummary struct {
 	ActiveSprint *SprintSummary `json:"active_sprint"`
 }
 
+type ProjectDetail struct {
+	ProjectSummary
+	Creator UserSummary     `json:"creator"`
+	Sprints []SprintSummary `json:"sprints"`
+}
+
+type SprintDetail struct {
+	SprintSummary
+	Project ProjectSummary `json:"project"`
+}
+
 type LabelSummary struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
@@ -53,6 +76,11 @@ type LabelSummary struct {
 	Description *string   `json:"description"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type LabelDetail struct {
+	LabelSummary
+	UsageCount int `json:"usage_count"`
 }
 
 type IssueActivity struct {
@@ -92,4 +120,13 @@ type IssueSummary struct {
 type IssueDetail struct {
 	IssueSummary
 	Activities []IssueActivity `json:"activities"`
+}
+
+type DashboardStats struct {
+	TotalIssues    int             `json:"total_issues"`
+	MyIssues       int             `json:"my_issues"`
+	InProgress     int             `json:"in_progress"`
+	DoneThisWeek   int             `json:"done_this_week"`
+	ActiveSprint   *SprintSummary  `json:"active_sprint"`
+	RecentActivity []IssueActivity `json:"recent_activity"`
 }

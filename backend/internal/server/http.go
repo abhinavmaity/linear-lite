@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	cachepkg "github.com/abhinavmaity/linear-lite/backend/internal/cache"
 	"github.com/abhinavmaity/linear-lite/backend/internal/config"
 	"github.com/abhinavmaity/linear-lite/backend/internal/handlers"
 	"github.com/abhinavmaity/linear-lite/backend/internal/middleware"
@@ -19,18 +20,21 @@ type Dependencies struct {
 }
 
 func New(cfg config.Config, deps Dependencies) *gin.Engine {
+	cacheStore := cachepkg.NewStore(deps.Redis)
+
 	userRepo := repositories.NewUserRepository(deps.DB)
 	projectRepo := repositories.NewProjectRepository(deps.DB)
 	sprintRepo := repositories.NewSprintRepository(deps.DB)
 	labelRepo := repositories.NewLabelRepository(deps.DB)
 	issueRepo := repositories.NewIssueRepository(deps.DB)
 
-	authService := services.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTTTL, cfg.BcryptCost)
-	userService := services.NewUserService(userRepo)
-	projectService := services.NewProjectService(projectRepo)
-	sprintService := services.NewSprintService(sprintRepo)
-	labelService := services.NewLabelService(labelRepo)
-	issueService := services.NewIssueService(issueRepo, userRepo, projectRepo, sprintRepo, labelRepo)
+	authService := services.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTTTL, cfg.BcryptCost, cacheStore)
+	userService := services.NewUserService(userRepo, cacheStore)
+	projectService := services.NewProjectService(projectRepo, userRepo, cacheStore)
+	sprintService := services.NewSprintService(sprintRepo, projectRepo, cacheStore)
+	labelService := services.NewLabelService(labelRepo, cacheStore)
+	issueService := services.NewIssueService(issueRepo, userRepo, projectRepo, sprintRepo, labelRepo, cacheStore)
+	dashboardService := services.NewDashboardService(issueRepo, sprintRepo, userRepo, cacheStore)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	userHandler := handlers.NewUserHandler(userService)
@@ -38,6 +42,7 @@ func New(cfg config.Config, deps Dependencies) *gin.Engine {
 	sprintHandler := handlers.NewSprintHandler(sprintService)
 	labelHandler := handlers.NewLabelHandler(labelService)
 	issueHandler := handlers.NewIssueHandler(issueService)
+	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
 
 	router := gin.New()
 	router.Use(middleware.RequestID())
@@ -45,7 +50,7 @@ func New(cfg config.Config, deps Dependencies) *gin.Engine {
 	router.Use(middleware.Recovery())
 	router.Use(middleware.CORS(cfg.CORSOrigins))
 
-	registerRoutes(router, cfg, authHandler, userHandler, projectHandler, sprintHandler, labelHandler, issueHandler)
+	registerRoutes(router, cfg, authHandler, userHandler, projectHandler, sprintHandler, labelHandler, issueHandler, dashboardHandler)
 
 	return router
 }
@@ -59,6 +64,7 @@ func registerRoutes(
 	sprintHandler *handlers.SprintHandler,
 	labelHandler *handlers.LabelHandler,
 	issueHandler *handlers.IssueHandler,
+	dashboardHandler *handlers.DashboardHandler,
 ) {
 	router.GET("/healthz", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -76,9 +82,23 @@ func registerRoutes(
 	protected.Use(middleware.RequireAuth(cfg.JWTSecret))
 	protected.GET("/auth/me", authHandler.Me)
 	protected.GET("/users", userHandler.List)
+	protected.GET("/users/:id", userHandler.Get)
 	protected.GET("/projects", projectHandler.List)
+	protected.POST("/projects", projectHandler.Create)
+	protected.GET("/projects/:id", projectHandler.Get)
+	protected.PUT("/projects/:id", projectHandler.Update)
+	protected.DELETE("/projects/:id", projectHandler.Delete)
 	protected.GET("/sprints", sprintHandler.List)
+	protected.POST("/sprints", sprintHandler.Create)
+	protected.GET("/sprints/:id", sprintHandler.Get)
+	protected.PUT("/sprints/:id", sprintHandler.Update)
+	protected.DELETE("/sprints/:id", sprintHandler.Delete)
 	protected.GET("/labels", labelHandler.List)
+	protected.POST("/labels", labelHandler.Create)
+	protected.GET("/labels/:id", labelHandler.Get)
+	protected.PUT("/labels/:id", labelHandler.Update)
+	protected.DELETE("/labels/:id", labelHandler.Delete)
+	protected.GET("/dashboard/stats", dashboardHandler.Stats)
 	protected.GET("/issues", issueHandler.List)
 	protected.POST("/issues", issueHandler.Create)
 	protected.GET("/issues/:id", issueHandler.Get)

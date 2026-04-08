@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/abhinavmaity/linear-lite/backend/internal/models"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -160,6 +162,48 @@ func (r *SprintRepositoryDB) SummariesByIDs(ctx context.Context, ids []string) (
 	return out, nil
 }
 
+func (r *SprintRepositoryDB) Create(ctx context.Context, sprint *models.Sprint) error {
+	if err := r.db.WithContext(ctx).Create(sprint).Error; err != nil {
+		if isSprintUniqueViolation(err, "uq_sprints_one_active_per_project") {
+			return ErrConflict
+		}
+		return err
+	}
+	return nil
+}
+
+func (r *SprintRepositoryDB) Update(ctx context.Context, sprint *models.Sprint) error {
+	if err := r.db.WithContext(ctx).Save(sprint).Error; err != nil {
+		if isSprintUniqueViolation(err, "uq_sprints_one_active_per_project") {
+			return ErrConflict
+		}
+		return err
+	}
+	return nil
+}
+
+func (r *SprintRepositoryDB) Delete(ctx context.Context, id string) error {
+	query := r.db.WithContext(ctx).Delete(&models.Sprint{}, "id = ?", strings.TrimSpace(id))
+	if query.Error != nil {
+		return query.Error
+	}
+	if query.RowsAffected == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+func (r *SprintRepositoryDB) CountIssuesBySprintID(ctx context.Context, id string) (int64, error) {
+	var count int64
+	err := r.db.WithContext(ctx).Model(&models.Issue{}).
+		Where("sprint_id = ?", strings.TrimSpace(id)).
+		Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (r *SprintRepositoryDB) loadIssueCountsBySprint(ctx context.Context, sprintIDs []string) (map[string]IssueCounts, error) {
 	out := make(map[string]IssueCounts, len(sprintIDs))
 	if len(sprintIDs) == 0 {
@@ -198,4 +242,30 @@ func (r *SprintRepositoryDB) loadIssueCountsBySprint(ctx context.Context, sprint
 		}
 	}
 	return out, nil
+}
+
+func isSprintUniqueViolation(err error, constraint string) bool {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		if pgErr.Code != "23505" {
+			return false
+		}
+		if constraint == "" {
+			return true
+		}
+		return pgErr.ConstraintName == constraint
+	}
+
+	var pqErr *pq.Error
+	if errors.As(err, &pqErr) {
+		if string(pqErr.Code) != "23505" {
+			return false
+		}
+		if constraint == "" {
+			return true
+		}
+		return pqErr.Constraint == constraint
+	}
+
+	return false
 }

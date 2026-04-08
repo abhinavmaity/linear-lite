@@ -1,4 +1,4 @@
-name: Backend Smoke Issue Workflow
+name: Backend Smoke Workflows
 
 on:
   workflow_dispatch:
@@ -6,12 +6,14 @@ on:
     paths:
       - "backend/**"
       - "scripts/smoke_issue_workflow.sh"
+      - "scripts/smoke_cache.sh"
       - "docker-compose.backend.yml"
       - ".github/workflows/backend-smoke-issue-workflow.yml"
   pull_request:
     paths:
       - "backend/**"
       - "scripts/smoke_issue_workflow.sh"
+      - "scripts/smoke_cache.sh"
       - "docker-compose.backend.yml"
       - ".github/workflows/backend-smoke-issue-workflow.yml"
 
@@ -25,10 +27,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Ensure script executable
-        run: chmod +x scripts/smoke_issue_workflow.sh
+        run: |
+          chmod +x scripts/smoke_issue_workflow.sh
+          chmod +x scripts/smoke_cache.sh
 
       - name: Run backend issue workflow smoke
         run: ./scripts/smoke_issue_workflow.sh
+
+      - name: Run backend milestone 4 cache smoke
+        run: ./scripts/smoke_cache.sh
 
       - name: Show backend container logs on failure
         if: failure()

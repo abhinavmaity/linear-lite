@@ -12,6 +12,7 @@ import (
 
 type UserService interface {
 	List(ctx context.Context, input services.UserListInput) ([]services.UserSummary, int64, *apperrors.AppError)
+	Get(ctx context.Context, id string) (*services.UserDetail, *apperrors.AppError)
 }
 
 type UserHandler struct {
@@ -53,4 +54,20 @@ func (h *UserHandler) List(c *gin.Context) {
 	}
 
 	WriteCollection(c, http.StatusOK, items, BuildPaginationMeta(pagination.Page, pagination.Limit, total))
+}
+
+func (h *UserHandler) Get(c *gin.Context) {
+	id, appErr := validation.ParseUUIDParam(c, "id")
+	if appErr != nil {
+		apperrors.Write(c, appErr, requestID(c))
+		return
+	}
+
+	user, serviceErr := h.service.Get(c, id.String())
+	if serviceErr != nil {
+		apperrors.Write(c, serviceErr, requestID(c))
+		return
+	}
+
+	WriteResource(c, http.StatusOK, user)
 }
