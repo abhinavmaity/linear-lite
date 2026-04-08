@@ -36,3 +36,17 @@ type ProjectSummaryRow struct {
 	IssueCounts  IssueCounts
 	ActiveSprint *SprintSummaryRow
 }
+
+type UserIssueStats struct {
+	TotalCreated       int
+	TotalAssigned      int
+	InProgressAssigned int
+	DoneAssigned       int
+}
+
+type DashboardMetrics struct {
+	TotalIssues  int
+	MyIssues     int
+	InProgress   int
+	DoneThisWeek int
+}

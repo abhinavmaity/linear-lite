@@ -73,6 +73,8 @@ type UserReadRepository interface {
 	List(ctx context.Context, filter UserListFilter) ([]models.User, int64, error)
 	FindByID(ctx context.Context, id string) (*models.User, error)
 	ExistsByID(ctx context.Context, id string) (bool, error)
+	FindByIDs(ctx context.Context, ids []string) ([]models.User, error)
+	IssueStatsByUserID(ctx context.Context, id string) (UserIssueStats, error)
 }
 
 // ProjectRepository defines project persistence contracts used in Milestone 3+.
@@ -80,6 +82,13 @@ type ProjectRepository interface {
 	List(ctx context.Context, filter ProjectListFilter) ([]ProjectSummaryRow, int64, error)
 	FindByID(ctx context.Context, id string) (*models.Project, error)
 	ExistsByID(ctx context.Context, id string) (bool, error)
+	SummariesByIDs(ctx context.Context, ids []string) (map[string]ProjectSummaryRow, error)
+	ListSprintsByProjectID(ctx context.Context, projectID string) ([]SprintSummaryRow, error)
+	Create(ctx context.Context, project *models.Project) error
+	Update(ctx context.Context, project *models.Project) error
+	Delete(ctx context.Context, id string) error
+	CountIssuesByProjectID(ctx context.Context, id string) (int64, error)
+	CountSprintsByProjectID(ctx context.Context, id string) (int64, error)
 }
 
 // SprintRepository defines sprint persistence contracts used in Milestone 3+.
@@ -87,6 +96,11 @@ type SprintRepository interface {
 	List(ctx context.Context, filter SprintListFilter) ([]SprintSummaryRow, int64, error)
 	FindByID(ctx context.Context, id string) (*models.Sprint, error)
 	ExistsByID(ctx context.Context, id string) (bool, error)
+	SummariesByIDs(ctx context.Context, ids []string) (map[string]SprintSummaryRow, error)
+	Create(ctx context.Context, sprint *models.Sprint) error
+	Update(ctx context.Context, sprint *models.Sprint) error
+	Delete(ctx context.Context, id string) error
+	CountIssuesBySprintID(ctx context.Context, id string) (int64, error)
 }
 
 // LabelRepository defines label persistence contracts used in Milestone 3+.
@@ -94,6 +108,10 @@ type LabelRepository interface {
 	List(ctx context.Context, filter LabelListFilter) ([]models.Label, int64, error)
 	FindByID(ctx context.Context, id string) (*models.Label, error)
 	ExistsByIDs(ctx context.Context, ids []string) (bool, error)
+	Create(ctx context.Context, label *models.Label) error
+	Update(ctx context.Context, label *models.Label) error
+	Delete(ctx context.Context, id string) error
+	UsageCountByID(ctx context.Context, id string) (int64, error)
 }
 
 // IssueRepository defines issue persistence contracts for list/detail/mutations.

@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 
 	apperrors "github.com/abhinavmaity/linear-lite/backend/internal/errors"
 	"github.com/abhinavmaity/linear-lite/backend/internal/repositories"
@@ -52,4 +53,36 @@ func (s *UserService) List(ctx context.Context, input UserListInput) ([]UserSumm
 	}
 
 	return items, total, nil
+}
+
+func (s *UserService) Get(ctx context.Context, id string) (*UserDetail, *apperrors.AppError) {
+	user, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, repositories.ErrNotFound) {
+			return nil, apperrors.NotFound("user not found")
+		}
+		return nil, apperrors.Internal("failed to load user")
+	}
+
+	stats, err := s.repo.IssueStatsByUserID(ctx, id)
+	if err != nil {
+		return nil, apperrors.Internal("failed to load user stats")
+	}
+
+	return &UserDetail{
+		UserSummary: UserSummary{
+			ID:        user.ID,
+			Email:     user.Email,
+			Name:      user.Name,
+			AvatarURL: user.AvatarURL,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+		},
+		Stats: UserStats{
+			TotalCreated:       stats.TotalCreated,
+			TotalAssigned:      stats.TotalAssigned,
+			InProgressAssigned: stats.InProgressAssigned,
+			DoneAssigned:       stats.DoneAssigned,
+		},
+	}, nil
 }

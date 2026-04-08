@@ -2,9 +2,12 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/abhinavmaity/linear-lite/backend/internal/models"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -175,6 +178,99 @@ func (r *ProjectRepositoryDB) SummariesByIDs(ctx context.Context, ids []string) 
 	return out, nil
 }
 
+func (r *ProjectRepositoryDB) ListSprintsByProjectID(ctx context.Context, projectID string) ([]SprintSummaryRow, error) {
+	var sprints []models.Sprint
+	err := r.db.WithContext(ctx).
+		Where("project_id = ?", strings.TrimSpace(projectID)).
+		Order("start_date DESC").
+		Find(&sprints).Error
+	if err != nil {
+		return nil, err
+	}
+	if len(sprints) == 0 {
+		return []SprintSummaryRow{}, nil
+	}
+
+	sprintIDs := make([]string, 0, len(sprints))
+	for _, sprint := range sprints {
+		sprintIDs = append(sprintIDs, sprint.ID)
+	}
+	countsBySprint, err := r.loadIssueCountsBySprintIDs(ctx, sprintIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	rows := make([]SprintSummaryRow, 0, len(sprints))
+	for _, sprint := range sprints {
+		rows = append(rows, SprintSummaryRow{
+			ID:          sprint.ID,
+			Name:        sprint.Name,
+			Description: sprint.Description,
+			ProjectID:   sprint.ProjectID,
+			StartDate:   sprint.StartDate,
+			EndDate:     sprint.EndDate,
+			Status:      sprint.Status,
+			CreatedAt:   sprint.CreatedAt,
+			UpdatedAt:   sprint.UpdatedAt,
+			IssueCounts: countsBySprint[sprint.ID],
+		})
+	}
+	return rows, nil
+}
+
+func (r *ProjectRepositoryDB) Create(ctx context.Context, project *models.Project) error {
+	if err := r.db.WithContext(ctx).Create(project).Error; err != nil {
+		if isProjectUniqueViolation(err, "uq_projects_key") {
+			return ErrConflict
+		}
+		return err
+	}
+	return nil
+}
+
+func (r *ProjectRepositoryDB) Update(ctx context.Context, project *models.Project) error {
+	if err := r.db.WithContext(ctx).Save(project).Error; err != nil {
+		if isProjectUniqueViolation(err, "uq_projects_key") {
+			return ErrConflict
+		}
+		return err
+	}
+	return nil
+}
+
+func (r *ProjectRepositoryDB) Delete(ctx context.Context, id string) error {
+	query := r.db.WithContext(ctx).Delete(&models.Project{}, "id = ?", strings.TrimSpace(id))
+	if query.Error != nil {
+		return query.Error
+	}
+	if query.RowsAffected == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+func (r *ProjectRepositoryDB) CountIssuesByProjectID(ctx context.Context, id string) (int64, error) {
+	var count int64
+	err := r.db.WithContext(ctx).Model(&models.Issue{}).
+		Where("project_id = ?", strings.TrimSpace(id)).
+		Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (r *ProjectRepositoryDB) CountSprintsByProjectID(ctx context.Context, id string) (int64, error) {
+	var count int64
+	err := r.db.WithContext(ctx).Model(&models.Sprint{}).
+		Where("project_id = ?", strings.TrimSpace(id)).
+		Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 type issueCountsRow struct {
 	ResourceID string `gorm:"column:resource_id"`
 	Total      int    `gorm:"column:total"`
@@ -303,4 +399,71 @@ func (r *ProjectRepositoryDB) loadIssueCountsBySprint(ctx context.Context, activ
 	}
 
 	return out, nil
+}
+
+func (r *ProjectRepositoryDB) loadIssueCountsBySprintIDs(ctx context.Context, sprintIDs []string) (map[string]IssueCounts, error) {
+	out := make(map[string]IssueCounts, len(sprintIDs))
+	if len(sprintIDs) == 0 {
+		return out, nil
+	}
+
+	var rows []issueCountsRow
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT
+			sprint_id AS resource_id,
+			COUNT(*)::int AS total,
+			COUNT(*) FILTER (WHERE status = 'backlog')::int AS backlog,
+			COUNT(*) FILTER (WHERE status = 'todo')::int AS todo,
+			COUNT(*) FILTER (WHERE status = 'in_progress')::int AS in_progress,
+			COUNT(*) FILTER (WHERE status = 'in_review')::int AS in_review,
+			COUNT(*) FILTER (WHERE status = 'done')::int AS done,
+			COUNT(*) FILTER (WHERE status = 'cancelled')::int AS cancelled
+		FROM issues
+		WHERE archived_at IS NULL
+		  AND sprint_id IN ?
+		GROUP BY sprint_id
+	`, sprintIDs).Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+
+	for _, row := range rows {
+		out[row.ResourceID] = IssueCounts{
+			Total:      row.Total,
+			Backlog:    row.Backlog,
+			Todo:       row.Todo,
+			InProgress: row.InProgress,
+			InReview:   row.InReview,
+			Done:       row.Done,
+			Cancelled:  row.Cancelled,
+		}
+	}
+
+	return out, nil
+}
+
+func isProjectUniqueViolation(err error, constraint string) bool {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		if pgErr.Code != "23505" {
+			return false
+		}
+		if constraint == "" {
+			return true
+		}
+		return pgErr.ConstraintName == constraint
+	}
+
+	var pqErr *pq.Error
+	if errors.As(err, &pqErr) {
+		if string(pqErr.Code) != "23505" {
+			return false
+		}
+		if constraint == "" {
+			return true
+		}
+		return pqErr.Constraint == constraint
+	}
+
+	return false
 }
