@@ -4,11 +4,13 @@
 This document is the execution-oriented backend implementation checklist for Linear-lite. `docs/Technical_Architecture.md` remains the canonical source of truth for backend behavior, schema, constraints, route contracts, and infrastructure decisions. When this document and the architecture document appear to differ, follow the architecture document and update this checklist to match.
 
 ## Implementation Status Snapshot
-- Milestone 1 and Milestone 2 are complete.
+- Milestones 1 through 4 are complete.
 - Milestone 3 (core issue workflow backend) is complete in code, including selector endpoints, issue endpoints, schema support, and archive/restore behavior.
+- Milestone 4 (dashboard and supporting resource APIs) is complete in code and validated with cache smoke coverage.
 - A reproducible smoke workflow exists at `scripts/smoke_issue_workflow.sh`.
+- A reproducible cache workflow exists at `scripts/smoke_cache.sh`.
 - CI smoke validation is wired via `.github/workflows/backend-smoke-issue-workflow.yml`.
-- Milestone 4+ work remains pending.
+- Remaining major milestone focus is Milestone 6 quality/deployment hardening and expanded QA coverage.
 
 ## Implementation Rules
 - Implement the backend as the layered monolith defined by the architecture: router -> middleware -> handlers -> services -> repositories -> PostgreSQL.

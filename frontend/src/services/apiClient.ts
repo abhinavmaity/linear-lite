@@ -1,25 +1,23 @@
 import { getStoredToken, useAuthStore } from 'store/authStore';
 import { ApiError, CollectionResponse, ErrorEnvelope, SingleResponse } from 'types/api';
 import { cleanParams } from 'utils/query';
-import { shouldUseMockForPath } from './env';
-import { mockRequest } from './mockBackend';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api/v1';
 
 async function request<T>(path: string, init?: RequestInit) {
   const token = getStoredToken();
-
-  if (shouldUseMockForPath(path)) {
-    return mockRequest<T>(path, init, token);
+  const headers = new Headers(init?.headers);
+  headers.set('Accept', 'application/json');
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+  if (init?.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
   }
 
   const response = await fetch(`${API_BASE}${path}`, {
     ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...init?.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -31,7 +29,7 @@ async function request<T>(path: string, init?: RequestInit) {
       response.status,
       body?.error ?? {
         code: 'internal_error',
-        message: 'Request failed.',
+        message: response.statusText || 'Request failed.',
       },
     );
   }

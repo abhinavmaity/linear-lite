@@ -10,6 +10,7 @@ import { useLabelsSelector, useProjectsSelector, useSprintsSelector, useUsersSel
 import { issuesApi } from 'services/issuesApi';
 import { useUIStore } from 'store/uiStore';
 import { ApiError } from 'types/api';
+import { IssuePriority, IssueStatus } from 'types/domain';
 
 export function CreateIssueModal() {
   const open = useUIStore((state) => state.createIssueOpen);
@@ -25,6 +26,7 @@ export function CreateIssueModal() {
   const [assigneeId, setAssigneeId] = useState('');
   const [sprintId, setSprintId] = useState('');
   const [labelIds, setLabelIds] = useState<string[]>([]);
+  const [clientError, setClientError] = useState<string | null>(null);
 
   const users = useUsersSelector();
   const projects = useProjectsSelector();
@@ -34,11 +36,11 @@ export function CreateIssueModal() {
   const mutation = useMutation({
     mutationFn: () =>
       issuesApi.create({
-        title,
+        title: title.trim(),
         description: description || null,
         project_id: projectId,
-        status: status as 'backlog',
-        priority: priority as 'medium',
+        status: status as IssueStatus,
+        priority: priority as IssuePriority,
         assignee_id: assigneeId || null,
         sprint_id: sprintId || null,
         label_ids: labelIds,
@@ -50,6 +52,10 @@ export function CreateIssueModal() {
       close();
       setTitle('');
       setDescription('');
+      setProjectId('');
+      setSprintId('');
+      setLabelIds([]);
+      setClientError(null);
       navigate(`/issues/${response.data.id}`);
     },
     onError: (error) => {
@@ -58,23 +64,35 @@ export function CreateIssueModal() {
   });
 
   const error = mutation.error instanceof ApiError ? mutation.error.message : null;
+  const fieldErrors = mutation.error instanceof ApiError ? mutation.error.fields : undefined;
 
   const selectedProjectSprints = useMemo(() => sprints.data ?? [], [sprints.data]);
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    if (!title.trim()) {
+      setClientError('Title is required.');
+      return;
+    }
+    if (!projectId) {
+      setClientError('Project is required.');
+      return;
+    }
+    setClientError(null);
     mutation.mutate();
   }
 
   return (
     <Modal open={open} title="Create Issue" onClose={close}>
       <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 16 }}>
+        {clientError ? <ErrorBanner message={clientError} /> : null}
         {error ? <ErrorBanner message={error} /> : null}
         <div>
           <div className="label" style={{ marginBottom: 8 }}>
             Title
           </div>
           <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Build authentication flow" />
+          {fieldErrors?.title ? <div style={{ color: 'var(--text-secondary)', marginTop: 6 }}>{fieldErrors.title}</div> : null}
         </div>
         <div>
           <div className="label" style={{ marginBottom: 8 }}>
@@ -99,7 +117,15 @@ export function CreateIssueModal() {
             <div className="label" style={{ marginBottom: 8 }}>
               Project
             </div>
-            <Select value={projectId} onChange={(event) => setProjectId(event.target.value)} required>
+            <Select
+              value={projectId}
+              onChange={(event) => {
+                const nextProject = event.target.value;
+                setProjectId(nextProject);
+                setSprintId('');
+              }}
+              required
+            >
               <option value="">Select project</option>
               {projects.data?.map((project) => (
                 <option key={project.id} value={project.id}>
@@ -107,6 +133,7 @@ export function CreateIssueModal() {
                 </option>
               ))}
             </Select>
+            {fieldErrors?.project_id ? <div style={{ color: 'var(--text-secondary)', marginTop: 6 }}>{fieldErrors.project_id}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
@@ -149,7 +176,7 @@ export function CreateIssueModal() {
             <div className="label" style={{ marginBottom: 8 }}>
               Sprint
             </div>
-            <Select value={sprintId} onChange={(event) => setSprintId(event.target.value)}>
+            <Select value={sprintId} onChange={(event) => setSprintId(event.target.value)} disabled={!projectId}>
               <option value="">No sprint</option>
               {selectedProjectSprints.map((sprint) => (
                 <option key={sprint.id} value={sprint.id}>
@@ -157,6 +184,7 @@ export function CreateIssueModal() {
                 </option>
               ))}
             </Select>
+            {!projectId ? <div style={{ color: 'var(--text-secondary)', marginTop: 6 }}>Select a project first.</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>

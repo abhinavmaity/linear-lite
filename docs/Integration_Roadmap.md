@@ -4,7 +4,7 @@
 This roadmap defines the milestone-based path from the current frontend-heavy prototype state to an MVP-complete, integrated full-stack implementation. Use it as the sequencing guide for execution planning, task assignment, and progress tracking. The milestones are sequential, but each milestone also calls out work that can safely proceed in parallel.
 
 ## Current Baseline
-Linear-lite has clear product scope, frontend planning, design direction, and a detailed backend architecture contract. The frontend already includes the core authenticated shell, auth screens, dashboard, issues list, board, issue detail, create issue modal, and scaffolded supporting pages. Frontend development currently supports mock-backed workflows. The main gap is backend execution and real frontend/backend integration.
+Linear-lite has clear product scope, frontend planning, design direction, and a detailed backend architecture contract. The frontend includes the core authenticated shell, auth screens, dashboard, issues list, board, issue detail, create issue modal, and integrated supporting resource pages. Frontend development is now backend-backed for MVP workflows. The main remaining gap is Milestone 6 quality/deployment hardening and broader QA depth.
 
 ## Execution Status Update
 
@@ -12,10 +12,19 @@ Completed:
 - Milestone 1: Backend Foundation and Runtime Skeleton
 - Milestone 2: Database Schema and Core Auth
 - Milestone 3: Core Issue Workflow Backend
+- Milestone 4: Dashboard and Supporting Resource APIs
+- Milestone 5: Frontend Integration Parity Pass
 
 Current focus:
-- Milestone 4: Dashboard and Supporting Resource APIs
-- Milestone 5 and 6 remain pending until Milestone 4 contract surface is stable
+- Milestone 6: Quality, Deployment, and MVP Readiness
+
+Milestone 5 completion notes (April 10, 2026):
+- Removed active mock fallback routing from frontend runtime API calls.
+- Completed route parity for dashboard, issues list, board, issue detail, and create issue modal against real backend contracts.
+- Completed projects/sprints/labels frontend CRUD parity with backend conflict and validation handling.
+- Preserved team page as read-only while improving filter/sort and state handling.
+- Added skeleton-loading integration (`boneyard-js`) for major loading routes.
+- Added milestone validation artifacts in `docs/Milestone_5_Validation_Report.md` and `docs/Milestone_5_Parity_Completion_Report.md`.
 
 ## Milestones
 

@@ -12,13 +12,15 @@ import { useDebouncedValue } from 'hooks/useDebouncedValue';
 import { useArchiveIssue, useIssueDetail, useUpdateIssue } from 'features/issues/issuesQueries';
 import { useLabelsSelector, useProjectsSelector, useSprintsSelector, useUsersSelector } from 'features/issues/selectorsQueries';
 import { useUIStore } from 'store/uiStore';
+import { ApiError } from 'types/api';
 import { formatDate, relativeTime, titleCase } from 'utils/format';
 
 export function IssueDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const pushToast = useUIStore((state) => state.pushToast);
-  const issue = useIssueDetail(id);
+  const [includeArchived, setIncludeArchived] = useState(false);
+  const issue = useIssueDetail(id, includeArchived);
   const projects = useProjectsSelector();
   const users = useUsersSelector();
   const labels = useLabelsSelector();
@@ -53,18 +55,44 @@ export function IssueDetailPage() {
   useEffect(() => {
     if (!issue.data) return;
     if (debouncedTitle !== issue.data.title) {
-      updateIssue.mutate({ title: debouncedTitle });
+      updateIssue.mutate(
+        { title: debouncedTitle },
+        {
+          onError: (error) => {
+            setTitle(issue.data?.title ?? '');
+            pushToast({ tone: 'error', message: error instanceof Error ? error.message : 'Failed to update title.' });
+          },
+        },
+      );
     }
-  }, [debouncedTitle, issue.data, updateIssue]);
+  }, [debouncedTitle, issue.data, pushToast, updateIssue]);
 
   useEffect(() => {
     if (!issue.data) return;
     if (debouncedDescription !== (issue.data.description ?? '')) {
-      updateIssue.mutate({ description: debouncedDescription || null });
+      updateIssue.mutate(
+        { description: debouncedDescription || null },
+        {
+          onError: (error) => {
+            setDescription(issue.data?.description ?? '');
+            pushToast({ tone: 'error', message: error instanceof Error ? error.message : 'Failed to update description.' });
+          },
+        },
+      );
     }
-  }, [debouncedDescription, issue.data, updateIssue]);
+  }, [debouncedDescription, issue.data, pushToast, updateIssue]);
 
   const saving = updateIssue.isPending;
+  const issueError = issue.error instanceof ApiError ? issue.error : null;
+
+  function updateWithFeedback<T>(payload: T, rollback: () => void, fallbackMessage: string) {
+    updateIssue.mutate(payload as never, {
+      onError: (error) => {
+        rollback();
+        pushToast({ tone: 'error', message: error instanceof Error ? error.message : fallbackMessage });
+      },
+    });
+  }
 
   const sidebar = useMemo(
     () => (
@@ -76,9 +104,10 @@ export function IssueDetailPage() {
           <Select
             value={status}
             onChange={(event) => {
+              const previous = status;
               const next = event.target.value;
               setStatus(next);
-              updateIssue.mutate({ status: next as never });
+              updateWithFeedback({ status: next as never }, () => setStatus(previous), 'Failed to update status.');
             }}
           >
             <option value="backlog">Backlog</option>
@@ -96,9 +125,10 @@ export function IssueDetailPage() {
           <Select
             value={priority}
             onChange={(event) => {
+              const previous = priority;
               const next = event.target.value;
               setPriority(next);
-              updateIssue.mutate({ priority: next as never });
+              updateWithFeedback({ priority: next as never }, () => setPriority(previous), 'Failed to update priority.');
             }}
           >
             <option value="low">Low</option>
@@ -114,9 +144,19 @@ export function IssueDetailPage() {
           <Select
             value={projectId}
             onChange={(event) => {
+              const previousProject = projectId;
+              const previousSprint = sprintId;
               const next = event.target.value;
               setProjectId(next);
-              updateIssue.mutate({ project_id: next, sprint_id: null });
+              setSprintId('');
+              updateWithFeedback(
+                { project_id: next, sprint_id: null },
+                () => {
+                  setProjectId(previousProject);
+                  setSprintId(previousSprint);
+                },
+                'Failed to update project.',
+              );
             }}
           >
             {projects.data?.map((project) => (
@@ -133,9 +173,10 @@ export function IssueDetailPage() {
           <Select
             value={assigneeId}
             onChange={(event) => {
+              const previous = assigneeId;
               const next = event.target.value;
               setAssigneeId(next);
-              updateIssue.mutate({ assignee_id: next || null });
+              updateWithFeedback({ assignee_id: next || null }, () => setAssigneeId(previous), 'Failed to update assignee.');
             }}
           >
             <option value="">Unassigned</option>
@@ -153,9 +194,10 @@ export function IssueDetailPage() {
           <Select
             value={sprintId}
             onChange={(event) => {
+              const previous = sprintId;
               const next = event.target.value;
               setSprintId(next);
-              updateIssue.mutate({ sprint_id: next || null });
+              updateWithFeedback({ sprint_id: next || null }, () => setSprintId(previous), 'Failed to update sprint.');
             }}
           >
             <option value="">No sprint</option>
@@ -174,9 +216,10 @@ export function IssueDetailPage() {
             multiple
             value={labelIds}
             onChange={(event) => {
+              const previous = labelIds;
               const next = Array.from(event.target.selectedOptions).map((option) => option.value);
               setLabelIds(next);
-              updateIssue.mutate({ label_ids: next });
+              updateWithFeedback({ label_ids: next }, () => setLabelIds(previous), 'Failed to update labels.');
             }}
             style={{ minHeight: 120 }}
           >
@@ -190,7 +233,10 @@ export function IssueDetailPage() {
         <Button
           variant="danger"
           disabled={archiveIssue.isPending}
-          onClick={() =>
+          onClick={() => {
+            if (!window.confirm('Archive this issue? You can restore it later from archived views.')) {
+              return;
+            }
             archiveIssue.mutate(undefined, {
               onSuccess: () => {
                 pushToast({ tone: 'success', message: 'Issue archived.' });
@@ -199,14 +245,29 @@ export function IssueDetailPage() {
               onError: (error) => {
                 pushToast({ tone: 'error', message: error instanceof Error ? error.message : 'Failed to archive issue.' });
               },
-            })
-          }
+            });
+          }}
         >
           Archive Issue
         </Button>
       </div>
     ),
-    [archiveIssue, assigneeId, labelIds, labels.data, navigate, priority, projectId, projects.data, pushToast, sprintId, sprints.data, status, updateIssue, users.data],
+    [
+      archiveIssue,
+      assigneeId,
+      labelIds,
+      labels.data,
+      navigate,
+      priority,
+      projectId,
+      projects.data,
+      pushToast,
+      sprintId,
+      sprints.data,
+      status,
+      updateIssue,
+      users.data,
+    ],
   );
 
   return (
@@ -214,6 +275,13 @@ export function IssueDetailPage() {
       <PageHeader title="Issue Detail" subtitle="Comments are intentionally omitted; the activity feed is read-only." />
       {issue.isLoading ? <Spinner label="Loading issue" /> : null}
       {issue.isError ? <ErrorBanner message={(issue.error as Error).message} /> : null}
+      {issueError?.status === 404 && !includeArchived ? (
+        <div style={{ marginBottom: 16 }}>
+          <Button variant="ghost" onClick={() => setIncludeArchived(true)}>
+            Try Loading Archived Issue
+          </Button>
+        </div>
+      ) : null}
       {!issue.isLoading && !issue.data && !issue.isError ? (
         <EmptyState title="Issue not found" description="The requested issue could not be loaded." />
       ) : null}
@@ -253,7 +321,7 @@ export function IssueDetailPage() {
                 ) : (
                   issue.data.activities.map((activity) => (
                     <div key={activity.id} className="panel-soft" style={{ padding: 14 }}>
-                      <div style={{ fontWeight: 700 }}>{activity.user.name}</div>
+                      <div style={{ fontWeight: 700 }}>{activity.user?.name ?? 'Unknown user'}</div>
                       <div style={{ color: 'var(--text-secondary)', marginTop: 4 }}>
                         {titleCase(activity.action)}
                         {activity.field_name ? ` · ${titleCase(activity.field_name)}` : ''} · {relativeTime(activity.created_at)}
