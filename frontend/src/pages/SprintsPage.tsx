@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FormEvent, useMemo, useState } from 'react';
+import { Skeleton } from 'boneyard-js/react';
 import { Button } from 'components/common/Button';
 import { EmptyState } from 'components/common/EmptyState';
 import { ErrorBanner } from 'components/common/ErrorBanner';
@@ -235,80 +236,93 @@ export function SprintsPage() {
         </div>
       </div>
       {actionError ? <ErrorBanner message={actionError} /> : null}
-      {sprints.isLoading ? <Spinner label="Loading sprints" /> : null}
-      {sprints.isFetching && !sprints.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Refreshing sprints...</div> : null}
-      {sprints.isError ? <ErrorBanner message={(sprints.error as Error).message} /> : null}
-      {sprints.data?.length ? (
-        <div style={{ display: 'grid', gap: 16 }}>
-          {sprints.data.map((sprint) => (
-            <article key={sprint.id} className="panel" style={{ padding: 18 }}>
-              {editingId === sprint.id ? (
-                <form onSubmit={(event) => handleUpdate(event, sprint.id)} style={{ display: 'grid', gap: 10 }}>
-                  <Input value={editName} onChange={(event) => setEditName(event.target.value)} required />
-                  <Input value={editDescription} onChange={(event) => setEditDescription(event.target.value)} placeholder="Optional description" />
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-                    <Input type="date" value={editStartDate} onChange={(event) => setEditStartDate(event.target.value)} required />
-                    <Input type="date" value={editEndDate} onChange={(event) => setEditEndDate(event.target.value)} required />
-                    <Select value={editStatus} onChange={(event) => setEditStatus(event.target.value as 'planned' | 'active' | 'completed')}>
-                      <option value="planned">Planned</option>
-                      <option value="active">Active</option>
-                      <option value="completed">Completed</option>
-                    </Select>
-                  </div>
-                  {fieldErrors?.name ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.name}</div> : null}
-                  {fieldErrors?.start_date ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.start_date}</div> : null}
-                  {fieldErrors?.end_date ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.end_date}</div> : null}
-                  {fieldErrors?.status ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.status}</div> : null}
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <Button type="submit" disabled={updateSprint.isPending}>
-                      {updateSprint.isPending ? 'Saving' : 'Save'}
-                    </Button>
-                    <Button type="button" variant="ghost" onClick={() => setEditingId(null)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
-              ) : (
-                <>
-                  <h3 style={{ marginTop: 0 }}>{sprint.name}</h3>
-                  <p style={{ color: 'var(--text-secondary)' }}>
-                    {titleCase(sprint.status)} · {formatDate(sprint.start_date)} to {formatDate(sprint.end_date)}
-                  </p>
-                  <p style={{ color: 'var(--text-secondary)' }}>Project: {projectNameById.get(sprint.project_id) ?? sprint.project_id}</p>
-                  <p style={{ color: 'var(--text-secondary)' }}>
-                    Issues: total {sprint.issue_counts.total}, in progress {sprint.issue_counts.in_progress}, done {sprint.issue_counts.done}
-                  </p>
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => startEdit(sprint.id, sprint.name, sprint.description, sprint.start_date, sprint.end_date, sprint.status)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="danger"
-                      disabled={deleteSprint.isPending}
-                      onClick={() => {
-                        if (!window.confirm(`Delete sprint "${sprint.name}"?`)) return;
-                        setActionError(null);
-                        setFieldErrors(null);
-                        deleteSprint.mutate(sprint.id);
-                      }}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </>
-              )}
+      <Skeleton
+        name="sprints-page"
+        loading={sprints.isLoading}
+        fallback={<Spinner label="Loading sprints" />}
+        fixture={
+          <div style={{ display: 'grid', gap: 16 }}>
+            <article className="panel" style={{ padding: 18 }}>
+              <h3 style={{ marginTop: 0 }}>Sprint Alpha</h3>
+              <p style={{ color: 'var(--text-secondary)' }}>Active · Apr 01 to Apr 14</p>
             </article>
-          ))}
-        </div>
-      ) : null}
-      {sprints.data && sprints.data.length === 0 ? (
-        <EmptyState title="No sprints" description="Sprint data will appear here when available." />
-      ) : null}
+          </div>
+        }
+      >
+        {sprints.isFetching && !sprints.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Refreshing sprints...</div> : null}
+        {sprints.isError ? <ErrorBanner message={(sprints.error as Error).message} /> : null}
+        {sprints.data?.length ? (
+          <div style={{ display: 'grid', gap: 16 }}>
+            {sprints.data.map((sprint) => (
+              <article key={sprint.id} className="panel" style={{ padding: 18 }}>
+                {editingId === sprint.id ? (
+                  <form onSubmit={(event) => handleUpdate(event, sprint.id)} style={{ display: 'grid', gap: 10 }}>
+                    <Input value={editName} onChange={(event) => setEditName(event.target.value)} required />
+                    <Input value={editDescription} onChange={(event) => setEditDescription(event.target.value)} placeholder="Optional description" />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                      <Input type="date" value={editStartDate} onChange={(event) => setEditStartDate(event.target.value)} required />
+                      <Input type="date" value={editEndDate} onChange={(event) => setEditEndDate(event.target.value)} required />
+                      <Select value={editStatus} onChange={(event) => setEditStatus(event.target.value as 'planned' | 'active' | 'completed')}>
+                        <option value="planned">Planned</option>
+                        <option value="active">Active</option>
+                        <option value="completed">Completed</option>
+                      </Select>
+                    </div>
+                    {fieldErrors?.name ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.name}</div> : null}
+                    {fieldErrors?.start_date ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.start_date}</div> : null}
+                    {fieldErrors?.end_date ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.end_date}</div> : null}
+                    {fieldErrors?.status ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.status}</div> : null}
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <Button type="submit" disabled={updateSprint.isPending}>
+                        {updateSprint.isPending ? 'Saving' : 'Save'}
+                      </Button>
+                      <Button type="button" variant="ghost" onClick={() => setEditingId(null)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <h3 style={{ marginTop: 0 }}>{sprint.name}</h3>
+                    <p style={{ color: 'var(--text-secondary)' }}>
+                      {titleCase(sprint.status)} · {formatDate(sprint.start_date)} to {formatDate(sprint.end_date)}
+                    </p>
+                    <p style={{ color: 'var(--text-secondary)' }}>Project: {projectNameById.get(sprint.project_id) ?? sprint.project_id}</p>
+                    <p style={{ color: 'var(--text-secondary)' }}>
+                      Issues: total {sprint.issue_counts.total}, in progress {sprint.issue_counts.in_progress}, done {sprint.issue_counts.done}
+                    </p>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => startEdit(sprint.id, sprint.name, sprint.description, sprint.start_date, sprint.end_date, sprint.status)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="danger"
+                        disabled={deleteSprint.isPending}
+                        onClick={() => {
+                          if (!window.confirm(`Delete sprint "${sprint.name}"?`)) return;
+                          setActionError(null);
+                          setFieldErrors(null);
+                          deleteSprint.mutate(sprint.id);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : null}
+        {sprints.data && sprints.data.length === 0 ? (
+          <EmptyState title="No sprints" description="Sprint data will appear here when available." />
+        ) : null}
+      </Skeleton>
     </div>
   );
 }

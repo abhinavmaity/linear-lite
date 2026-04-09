@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FormEvent, useState } from 'react';
+import { Skeleton } from 'boneyard-js/react';
 import { Button } from 'components/common/Button';
 import { EmptyState } from 'components/common/EmptyState';
 import { ErrorBanner } from 'components/common/ErrorBanner';
@@ -147,72 +148,86 @@ export function LabelsPage() {
         </div>
       </div>
       {actionError ? <ErrorBanner message={actionError} /> : null}
-      {labels.isLoading ? <Spinner label="Loading labels" /> : null}
-      {labels.isFetching && !labels.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Refreshing labels...</div> : null}
-      {labels.isError ? <ErrorBanner message={(labels.error as Error).message} /> : null}
-      {labels.data?.length ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
-          {labels.data.map((label) => (
-            <article key={label.id} className="panel" style={{ padding: 18 }}>
-              {editingId === label.id ? (
-                <form onSubmit={(event) => handleUpdate(event, label.id)} style={{ display: 'grid', gap: 10 }}>
-                  <Input value={editName} onChange={(event) => setEditName(event.target.value)} required />
-                  <Input value={editColor} onChange={(event) => setEditColor(event.target.value)} required />
-                  <Input value={editDescription} onChange={(event) => setEditDescription(event.target.value)} placeholder="Optional description" />
-                  {fieldErrors?.name ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.name}</div> : null}
-                  {fieldErrors?.color ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.color}</div> : null}
-                  {fieldErrors?.description ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.description}</div> : null}
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <Button type="submit" disabled={updateLabel.isPending}>
-                      {updateLabel.isPending ? 'Saving' : 'Save'}
-                    </Button>
-                    <Button type="button" variant="ghost" onClick={() => setEditingId(null)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
-              ) : (
-                <>
-                  <div
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 999,
-                      background: label.color,
-                      border: '2px solid var(--border-strong)',
-                      marginBottom: 12,
-                    }}
-                  />
-                  <h3 style={{ margin: '0 0 6px' }}>{label.name}</h3>
-                  <p style={{ color: 'var(--text-secondary)', margin: 0 }}>{label.description ?? 'No description'}</p>
-                  <p style={{ color: 'var(--text-secondary)', marginTop: 8, fontSize: 13 }}>Updated {formatDate(label.updated_at)}</p>
-                  <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
-                    <Button type="button" variant="ghost" onClick={() => startEdit(label.id, label.name, label.color, label.description)}>
-                      Edit
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="danger"
-                      disabled={deleteLabel.isPending}
-                      onClick={() => {
-                        if (!window.confirm(`Delete label "${label.name}"?`)) return;
-                        setActionError(null);
-                        setFieldErrors(null);
-                        deleteLabel.mutate(label.id);
-                      }}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </>
-              )}
+      <Skeleton
+        name="labels-page"
+        loading={labels.isLoading}
+        fallback={<Spinner label="Loading labels" />}
+        fixture={
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+            <article className="panel" style={{ padding: 18 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 999, background: '#3B82F6', border: '2px solid var(--border-strong)', marginBottom: 12 }} />
+              <h3 style={{ margin: '0 0 6px' }}>bug</h3>
+              <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Something not working</p>
             </article>
-          ))}
-        </div>
-      ) : null}
-      {labels.data && labels.data.length === 0 ? (
-        <EmptyState title="No labels" description="Labels will appear here when available." />
-      ) : null}
+          </div>
+        }
+      >
+        {labels.isFetching && !labels.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Refreshing labels...</div> : null}
+        {labels.isError ? <ErrorBanner message={(labels.error as Error).message} /> : null}
+        {labels.data?.length ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+            {labels.data.map((label) => (
+              <article key={label.id} className="panel" style={{ padding: 18 }}>
+                {editingId === label.id ? (
+                  <form onSubmit={(event) => handleUpdate(event, label.id)} style={{ display: 'grid', gap: 10 }}>
+                    <Input value={editName} onChange={(event) => setEditName(event.target.value)} required />
+                    <Input value={editColor} onChange={(event) => setEditColor(event.target.value)} required />
+                    <Input value={editDescription} onChange={(event) => setEditDescription(event.target.value)} placeholder="Optional description" />
+                    {fieldErrors?.name ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.name}</div> : null}
+                    {fieldErrors?.color ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.color}</div> : null}
+                    {fieldErrors?.description ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.description}</div> : null}
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <Button type="submit" disabled={updateLabel.isPending}>
+                        {updateLabel.isPending ? 'Saving' : 'Save'}
+                      </Button>
+                      <Button type="button" variant="ghost" onClick={() => setEditingId(null)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <div
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 999,
+                        background: label.color,
+                        border: '2px solid var(--border-strong)',
+                        marginBottom: 12,
+                      }}
+                    />
+                    <h3 style={{ margin: '0 0 6px' }}>{label.name}</h3>
+                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>{label.description ?? 'No description'}</p>
+                    <p style={{ color: 'var(--text-secondary)', marginTop: 8, fontSize: 13 }}>Updated {formatDate(label.updated_at)}</p>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+                      <Button type="button" variant="ghost" onClick={() => startEdit(label.id, label.name, label.color, label.description)}>
+                        Edit
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="danger"
+                        disabled={deleteLabel.isPending}
+                        onClick={() => {
+                          if (!window.confirm(`Delete label "${label.name}"?`)) return;
+                          setActionError(null);
+                          setFieldErrors(null);
+                          deleteLabel.mutate(label.id);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : null}
+        {labels.data && labels.data.length === 0 ? (
+          <EmptyState title="No labels" description="Labels will appear here when available." />
+        ) : null}
+      </Skeleton>
     </div>
   );
 }

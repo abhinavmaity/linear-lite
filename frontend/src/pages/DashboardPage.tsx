@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Skeleton } from 'boneyard-js/react';
 import { EmptyState } from 'components/common/EmptyState';
 import { ErrorBanner } from 'components/common/ErrorBanner';
 import { PageHeader } from 'components/common/PageHeader';
@@ -13,10 +14,46 @@ export function DashboardPage() {
   return (
     <div>
       <PageHeader title="Dashboard" subtitle="Only architecture-supported metrics are rendered here." />
-      {stats.isLoading ? <Spinner label="Loading dashboard" /> : null}
       {stats.isError ? <ErrorBanner message={(stats.error as Error).message} /> : null}
-      {stats.data ? (
-        <>
+      <Skeleton
+        name="dashboard-page"
+        loading={stats.isLoading}
+        fallback={<Spinner label="Loading dashboard" />}
+        fixture={
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16, marginBottom: 24 }}>
+              <StatCard label="Total Issues" value={42} />
+              <StatCard label="My Issues" value={12} />
+              <StatCard label="In Progress" value={5} accent />
+              <StatCard label="Done This Week" value={7} />
+            </div>
+            <div className="two-col">
+              <section className="panel" style={{ padding: 20 }}>
+                <div className="label" style={{ fontSize: 24, marginBottom: 14 }}>
+                  Recent Activity
+                </div>
+                <div style={{ display: 'grid', gap: 14 }}>
+                  <div className="panel-soft" style={{ padding: 14 }}>
+                    <div style={{ fontWeight: 700 }}>Alex</div>
+                    <div style={{ color: 'var(--text-secondary)' }}>Updated · Status · 5m ago</div>
+                  </div>
+                </div>
+              </section>
+              <aside className="panel" style={{ padding: 20 }}>
+                <div className="label" style={{ fontSize: 24, marginBottom: 14 }}>
+                  Active Sprint
+                </div>
+                <div className="panel-soft" style={{ padding: 16 }}>
+                  <div style={{ fontWeight: 700, fontSize: 22 }}>Sprint 1</div>
+                  <div style={{ color: 'var(--text-secondary)', marginTop: 8 }}>2026-04-01 to 2026-04-14</div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        }
+      >
+        {stats.data ? (
+          <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16, marginBottom: 24 }}>
             <StatCard label="Total Issues" value={stats.data.total_issues} />
             <StatCard label="My Issues" value={stats.data.my_issues} />
@@ -68,8 +105,9 @@ export function DashboardPage() {
               )}
             </aside>
           </div>
-        </>
-      ) : null}
+          </>
+        ) : null}
+      </Skeleton>
     </div>
   );
 }

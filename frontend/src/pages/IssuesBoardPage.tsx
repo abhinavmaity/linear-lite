@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { Skeleton } from 'boneyard-js/react';
 import { Input } from 'components/common/Input';
 import { Select } from 'components/common/Select';
 import { Button } from 'components/common/Button';
@@ -50,6 +51,7 @@ export function IssuesBoardPage() {
     label_id: labelId ? [labelId] : undefined,
     label_mode: 'any',
   });
+  const loading = issues.isLoading || users.isLoading || projects.isLoading || labels.isLoading || sprints.isLoading;
 
   const grouped = useMemo(() => {
     const base = groupByStatus(issues.data?.items ?? []);
@@ -85,128 +87,161 @@ export function IssuesBoardPage() {
   return (
     <div>
       <PageHeader title="Board" subtitle="Shared issue query layer with optimistic drag-and-drop status updates." />
-      <div className="panel" style={{ padding: 18, marginBottom: 20 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr repeat(6, 1fr)', gap: 12 }}>
-          <Input placeholder="Search issues" value={search} onChange={(event) => setSearch(event.target.value)} />
-          <Select value={status} onChange={(event) => setStatus(event.target.value)}>
-            <option value="">All statuses</option>
-            <option value="backlog">Backlog</option>
-            <option value="todo">Todo</option>
-            <option value="in_progress">In Progress</option>
-            <option value="in_review">In Review</option>
-            <option value="done">Done</option>
-            <option value="cancelled">Cancelled</option>
-          </Select>
-          <Select value={priority} onChange={(event) => setPriority(event.target.value)}>
-            <option value="">All priorities</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-            <option value="urgent">Urgent</option>
-          </Select>
-          <Select value={assigneeId} onChange={(event) => setAssigneeId(event.target.value)}>
-            <option value="">All assignees</option>
-            {users.data?.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.name}
-              </option>
-            ))}
-          </Select>
-          <Select value={projectId} onChange={(event) => setProjectId(event.target.value)}>
-            <option value="">All projects</option>
-            {projects.data?.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </Select>
-          <Select value={sprintId} onChange={(event) => setSprintId(event.target.value)}>
-            <option value="">All sprints</option>
-            {sprints.data?.map((sprint) => (
-              <option key={sprint.id} value={sprint.id}>
-                {sprint.name}
-              </option>
-            ))}
-          </Select>
-          <Select value={labelId} onChange={(event) => setLabelId(event.target.value)}>
-            <option value="">All labels</option>
-            {labels.data?.map((label) => (
-              <option key={label.id} value={label.id}>
-                {label.name}
-              </option>
-            ))}
-          </Select>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              setSearch('');
-              setStatus('');
-              setPriority('');
-              setAssigneeId('');
-              setProjectId('');
-              setSprintId('');
-              setLabelId('');
+      <Skeleton
+        name="issues-board-page"
+        loading={loading}
+        fallback={<Spinner label="Loading board" />}
+        fixture={
+          <div>
+            <div className="panel" style={{ padding: 18, marginBottom: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr repeat(6, 1fr)', gap: 12 }}>
+                <Input placeholder="Search issues" value="loading" readOnly />
+                <Input value="All statuses" readOnly />
+                <Input value="Priority" readOnly />
+                <Input value="Assignee" readOnly />
+                <Input value="Project" readOnly />
+                <Input value="Sprint" readOnly />
+                <Input value="Label" readOnly />
+                <Button variant="ghost">Reset</Button>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(220px, 1fr))', gap: 16, alignItems: 'start' }}>
+              {['Backlog', 'Todo', 'In Progress', 'In Review', 'Done'].map((column) => (
+                <section key={column} className="panel" style={{ padding: 14, minHeight: 280 }}>
+                  <div className="label" style={{ fontSize: 18, marginBottom: 12 }}>
+                    {column} (1)
+                  </div>
+                  <div className="panel-soft" style={{ padding: 12 }}>
+                    Example card
+                  </div>
+                </section>
+              ))}
+            </div>
+          </div>
+        }
+      >
+        <div className="panel" style={{ padding: 18, marginBottom: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr repeat(6, 1fr)', gap: 12 }}>
+            <Input placeholder="Search issues" value={search} onChange={(event) => setSearch(event.target.value)} />
+            <Select value={status} onChange={(event) => setStatus(event.target.value)}>
+              <option value="">All statuses</option>
+              <option value="backlog">Backlog</option>
+              <option value="todo">Todo</option>
+              <option value="in_progress">In Progress</option>
+              <option value="in_review">In Review</option>
+              <option value="done">Done</option>
+              <option value="cancelled">Cancelled</option>
+            </Select>
+            <Select value={priority} onChange={(event) => setPriority(event.target.value)}>
+              <option value="">All priorities</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </Select>
+            <Select value={assigneeId} onChange={(event) => setAssigneeId(event.target.value)}>
+              <option value="">All assignees</option>
+              {users.data?.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name}
+                </option>
+              ))}
+            </Select>
+            <Select value={projectId} onChange={(event) => setProjectId(event.target.value)}>
+              <option value="">All projects</option>
+              {projects.data?.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}
+                </option>
+              ))}
+            </Select>
+            <Select value={sprintId} onChange={(event) => setSprintId(event.target.value)}>
+              <option value="">All sprints</option>
+              {sprints.data?.map((sprint) => (
+                <option key={sprint.id} value={sprint.id}>
+                  {sprint.name}
+                </option>
+              ))}
+            </Select>
+            <Select value={labelId} onChange={(event) => setLabelId(event.target.value)}>
+              <option value="">All labels</option>
+              {labels.data?.map((label) => (
+                <option key={label.id} value={label.id}>
+                  {label.name}
+                </option>
+              ))}
+            </Select>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setSearch('');
+                setStatus('');
+                setPriority('');
+                setAssigneeId('');
+                setProjectId('');
+                setSprintId('');
+                setLabelId('');
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+        {issues.isFetching && !issues.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Updating board...</div> : null}
+        {issues.isError ? <ErrorBanner message={(issues.error as Error).message} /> : null}
+        {issues.data ? (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(5, minmax(220px, 1fr))',
+              gap: 16,
+              alignItems: 'start',
+              overflowX: 'auto',
             }}
           >
-            Reset
-          </Button>
-        </div>
-      </div>
-      {issues.isFetching && !issues.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Updating board...</div> : null}
-      {issues.isLoading ? <Spinner label="Loading board" /> : null}
-      {issues.isError ? <ErrorBanner message={(issues.error as Error).message} /> : null}
-      {issues.data ? (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(5, minmax(220px, 1fr))',
-            gap: 16,
-            alignItems: 'start',
-            overflowX: 'auto',
-          }}
-        >
-          {columns.map((column) => (
-            <section
-              key={column}
-              className="panel"
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={(event) => {
-                if (movingIssueId) return;
-                const issueId = event.dataTransfer.getData('text/plain');
-                if (issueId) {
-                  moveIssue(issueId, column);
-                }
-              }}
-              style={{ padding: 14, minHeight: 420 }}
-            >
-              <div className="label" style={{ fontSize: 18, marginBottom: 12 }}>
-                {column.replace('_', ' ')} ({grouped[column].length})
-              </div>
-              <div style={{ display: 'grid', gap: 12 }}>
-                {grouped[column].map((issue) => (
-                  <div
-                    key={issue.id}
-                    draggable={!movingIssueId}
-                    onDragStart={(event) => {
-                      if (movingIssueId) {
-                        event.preventDefault();
-                        return;
-                      }
-                      event.dataTransfer.setData('text/plain', issue.id);
-                    }}
-                    style={{ opacity: movingIssueId === issue.id ? 0.6 : 1 }}
-                  >
-                    <IssueCard issue={issue} compact />
-                  </div>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      ) : null}
-      {issues.data && issues.data.items.length === 0 ? (
-        <EmptyState title="No issues found" description="No issues match the current board filters." />
-      ) : null}
+            {columns.map((column) => (
+              <section
+                key={column}
+                className="panel"
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => {
+                  if (movingIssueId) return;
+                  const issueId = event.dataTransfer.getData('text/plain');
+                  if (issueId) {
+                    moveIssue(issueId, column);
+                  }
+                }}
+                style={{ padding: 14, minHeight: 420 }}
+              >
+                <div className="label" style={{ fontSize: 18, marginBottom: 12 }}>
+                  {column.replace('_', ' ')} ({grouped[column].length})
+                </div>
+                <div style={{ display: 'grid', gap: 12 }}>
+                  {grouped[column].map((issue) => (
+                    <div
+                      key={issue.id}
+                      draggable={!movingIssueId}
+                      onDragStart={(event) => {
+                        if (movingIssueId) {
+                          event.preventDefault();
+                          return;
+                        }
+                        event.dataTransfer.setData('text/plain', issue.id);
+                      }}
+                      style={{ opacity: movingIssueId === issue.id ? 0.6 : 1 }}
+                    >
+                      <IssueCard issue={issue} compact />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        ) : null}
+        {issues.data && issues.data.items.length === 0 ? (
+          <EmptyState title="No issues found" description="No issues match the current board filters." />
+        ) : null}
+      </Skeleton>
     </div>
   );
 }

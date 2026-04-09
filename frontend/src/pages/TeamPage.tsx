@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
+import { Skeleton } from 'boneyard-js/react';
 import { Avatar } from 'components/common/Avatar';
 import { Badge } from 'components/common/Badge';
 import { EmptyState } from 'components/common/EmptyState';
@@ -47,37 +48,55 @@ export function TeamPage() {
           </Select>
         </div>
       </div>
-      {users.isLoading ? <Spinner label="Loading team" /> : null}
-      {users.isFetching && !users.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Refreshing team...</div> : null}
-      {users.isError ? <ErrorBanner message={(users.error as Error).message} /> : null}
-      {users.data ? (
-        <div style={{ marginBottom: 12, color: 'var(--text-secondary)', display: 'flex', gap: 10, alignItems: 'center' }}>
-          <span>{totalUsers} members</span>
-          <Badge>Read only</Badge>
-        </div>
-      ) : null}
-      {users.data?.length ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
-          {users.data.map((user) => (
-            <article key={user.id} className="panel" style={{ padding: 18, display: 'grid', gap: 10 }}>
+      <Skeleton
+        name="team-page"
+        loading={users.isLoading}
+        fallback={<Spinner label="Loading team" />}
+        fixture={
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+            <article className="panel" style={{ padding: 18, display: 'grid', gap: 10 }}>
               <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-                <Avatar user={user} size={48} />
+                <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--bg-muted)' }} />
                 <div>
-                  <div style={{ fontWeight: 700 }}>{user.name}</div>
-                  <div style={{ color: 'var(--text-secondary)' }}>{user.email}</div>
+                  <div style={{ fontWeight: 700 }}>Alex Doe</div>
+                  <div style={{ color: 'var(--text-secondary)' }}>alex@example.com</div>
                 </div>
               </div>
-              <div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Joined {formatDate(user.created_at)}</div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Last update {formatDate(user.updated_at)}</div>
-              </div>
             </article>
-          ))}
-        </div>
-      ) : null}
-      {users.data && users.data.length === 0 ? (
-        <EmptyState title="No team members" description="No users match the current search and sort options." />
-      ) : null}
+          </div>
+        }
+      >
+        {users.isFetching && !users.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Refreshing team...</div> : null}
+        {users.isError ? <ErrorBanner message={(users.error as Error).message} /> : null}
+        {users.data ? (
+          <div style={{ marginBottom: 12, color: 'var(--text-secondary)', display: 'flex', gap: 10, alignItems: 'center' }}>
+            <span>{totalUsers} members</span>
+            <Badge>Read only</Badge>
+          </div>
+        ) : null}
+        {users.data?.length ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+            {users.data.map((user) => (
+              <article key={user.id} className="panel" style={{ padding: 18, display: 'grid', gap: 10 }}>
+                <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                  <Avatar user={user} size={48} />
+                  <div>
+                    <div style={{ fontWeight: 700 }}>{user.name}</div>
+                    <div style={{ color: 'var(--text-secondary)' }}>{user.email}</div>
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Joined {formatDate(user.created_at)}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Last update {formatDate(user.updated_at)}</div>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : null}
+        {users.data && users.data.length === 0 ? (
+          <EmptyState title="No team members" description="No users match the current search and sort options." />
+        ) : null}
+      </Skeleton>
     </div>
   );
 }

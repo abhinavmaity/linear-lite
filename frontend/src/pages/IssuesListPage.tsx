@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { Skeleton } from 'boneyard-js/react';
 import { Badge } from 'components/common/Badge';
 import { Button } from 'components/common/Button';
 import { EmptyState } from 'components/common/EmptyState';
@@ -43,6 +44,7 @@ export function IssuesListPage() {
   );
 
   const issues = useIssuesList(queryParams);
+  const loading = issues.isLoading || projects.isLoading || users.isLoading || labels.isLoading || sprints.isLoading;
 
   function updateParam(key: string, value: string) {
     const next = new URLSearchParams(params);
@@ -94,126 +96,171 @@ export function IssuesListPage() {
           </Link>
         }
       />
-      <div className="panel" style={{ padding: 18, marginBottom: 20 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr repeat(6, 1fr)', gap: 12 }}>
-          <Input
-            placeholder="Search issues"
-            value={params.get('search') ?? ''}
-            onChange={(event) => updateParam('search', event.target.value)}
-          />
-          <Select value={params.get('status') ?? ''} onChange={(event) => updateParam('status', event.target.value)}>
-            <option value="">All statuses</option>
-            <option value="backlog">Backlog</option>
-            <option value="todo">Todo</option>
-            <option value="in_progress">In Progress</option>
-            <option value="in_review">In Review</option>
-            <option value="done">Done</option>
-            <option value="cancelled">Cancelled</option>
-          </Select>
-          <Select value={params.get('priority') ?? ''} onChange={(event) => updateParam('priority', event.target.value)}>
-            <option value="">All priorities</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-            <option value="urgent">Urgent</option>
-          </Select>
-          <Select value={params.get('assignee_id') ?? ''} onChange={(event) => updateParam('assignee_id', event.target.value)}>
-            <option value="">All assignees</option>
-            {users.data?.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.name}
-              </option>
-            ))}
-          </Select>
-          <Select value={params.get('project_id') ?? ''} onChange={(event) => updateParam('project_id', event.target.value)}>
-            <option value="">All projects</option>
-            {projects.data?.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </Select>
-          <Select value={params.get('sprint_id') ?? ''} onChange={(event) => updateParam('sprint_id', event.target.value)}>
-            <option value="">All sprints</option>
-            {sprints.data?.map((sprint) => (
-              <option key={sprint.id} value={sprint.id}>
-                {sprint.name}
-              </option>
-            ))}
-          </Select>
-          <Select value={params.get('label_id') ?? ''} onChange={(event) => updateParam('label_id', event.target.value)}>
-            <option value="">All labels</option>
-            {labels.data?.map((label) => (
-              <option key={label.id} value={label.id}>
-                {label.name}
-              </option>
-            ))}
-          </Select>
-          <Button variant="ghost" onClick={clearFilters}>
-            Reset
-          </Button>
-        </div>
-      </div>
-
-      {issues.isFetching && !issues.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Updating issues...</div> : null}
-      {issues.isLoading ? <Spinner label="Loading issues" /> : null}
-      {issues.isError ? <ErrorBanner message={(issues.error as Error).message} /> : null}
-      {issues.data && issues.data.items.length === 0 ? (
-        <EmptyState title="No issues found" description="No issues match the current filters. Try changing or resetting filters." />
-      ) : null}
-      {issues.data && issues.data.items.length > 0 ? (
-        <div className="panel" style={{ overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ textAlign: 'left', background: 'var(--bg-muted)' }}>
-                <SortableHeader label={`Identifier${sortIndicator('identifier')}`} onClick={() => toggleSort('identifier')} />
-                <SortableHeader label={`Title${sortIndicator('title')}`} onClick={() => toggleSort('title')} />
-                <SortableHeader label={`Status${sortIndicator('status')}`} onClick={() => toggleSort('status')} />
-                <SortableHeader label={`Priority${sortIndicator('priority')}`} onClick={() => toggleSort('priority')} />
-                <th className="label" style={{ padding: 14 }}>
-                  Assignee
-                </th>
-                <th className="label" style={{ padding: 14 }}>
-                  Labels
-                </th>
-                <th className="label" style={{ padding: 14 }}>
-                  Sprint
-                </th>
-                <th className="label" style={{ padding: 14 }}>
-                  Project
-                </th>
-                <SortableHeader label={`Updated${sortIndicator('updated_at')}`} onClick={() => toggleSort('updated_at')} />
-              </tr>
-            </thead>
-            <tbody>
-              {issues.data.items.map((issue) => (
-                <IssueRow issue={issue} key={issue.id} />
-              ))}
-            </tbody>
-          </table>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: 14, borderTop: '1px solid var(--border-soft)' }}>
-            <span style={{ color: 'var(--text-secondary)' }}>
-              Page {issues.data.pagination.page} of {issues.data.pagination.total_pages || 1}
-            </span>
-            <div style={{ display: 'flex', gap: 12 }}>
-              <Button
-                variant="ghost"
-                disabled={issues.data.pagination.page <= 1}
-                onClick={() => updateParam('page', String(issues.data!.pagination.page - 1))}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="ghost"
-                disabled={issues.data.pagination.page >= issues.data.pagination.total_pages}
-                onClick={() => updateParam('page', String(issues.data!.pagination.page + 1))}
-              >
-                Next
-              </Button>
+      <Skeleton
+        name="issues-list-page"
+        loading={loading}
+        fallback={<Spinner label="Loading issues" />}
+        fixture={
+          <div>
+            <div className="panel" style={{ padding: 18, marginBottom: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr repeat(6, 1fr)', gap: 12 }}>
+                <Input placeholder="Search issues" value="auth" readOnly />
+                <Select value="todo" disabled><option value="todo">Todo</option></Select>
+                <Select value="high" disabled><option value="high">High</option></Select>
+                <Input value="Alex" readOnly />
+                <Input value="Platform" readOnly />
+                <Input value="Sprint 3" readOnly />
+                <Input value="bug" readOnly />
+                <Button variant="ghost">Reset</Button>
+              </div>
+            </div>
+            <div className="panel" style={{ overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ textAlign: 'left', background: 'var(--bg-muted)' }}>
+                    {['Identifier', 'Title', 'Status', 'Priority', 'Assignee', 'Labels', 'Sprint', 'Project', 'Updated'].map((h) => (
+                      <th key={h} className="label" style={{ padding: 14 }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ borderTop: '1px solid var(--border-soft)' }}>
+                    <td style={{ padding: 14 }}>PLAT-101</td>
+                    <td style={{ padding: 14 }}>Implement loading skeletons</td>
+                    <td style={{ padding: 14 }}>In Progress</td>
+                    <td style={{ padding: 14 }}>High</td>
+                    <td style={{ padding: 14 }}>Alex</td>
+                    <td style={{ padding: 14 }}>ui, infra</td>
+                    <td style={{ padding: 14 }}>Sprint 3</td>
+                    <td style={{ padding: 14 }}>Platform</td>
+                    <td style={{ padding: 14 }}>Apr 10</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
+        }
+      >
+        <div className="panel" style={{ padding: 18, marginBottom: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr repeat(6, 1fr)', gap: 12 }}>
+            <Input
+              placeholder="Search issues"
+              value={params.get('search') ?? ''}
+              onChange={(event) => updateParam('search', event.target.value)}
+            />
+            <Select value={params.get('status') ?? ''} onChange={(event) => updateParam('status', event.target.value)}>
+              <option value="">All statuses</option>
+              <option value="backlog">Backlog</option>
+              <option value="todo">Todo</option>
+              <option value="in_progress">In Progress</option>
+              <option value="in_review">In Review</option>
+              <option value="done">Done</option>
+              <option value="cancelled">Cancelled</option>
+            </Select>
+            <Select value={params.get('priority') ?? ''} onChange={(event) => updateParam('priority', event.target.value)}>
+              <option value="">All priorities</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </Select>
+            <Select value={params.get('assignee_id') ?? ''} onChange={(event) => updateParam('assignee_id', event.target.value)}>
+              <option value="">All assignees</option>
+              {users.data?.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name}
+                </option>
+              ))}
+            </Select>
+            <Select value={params.get('project_id') ?? ''} onChange={(event) => updateParam('project_id', event.target.value)}>
+              <option value="">All projects</option>
+              {projects.data?.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}
+                </option>
+              ))}
+            </Select>
+            <Select value={params.get('sprint_id') ?? ''} onChange={(event) => updateParam('sprint_id', event.target.value)}>
+              <option value="">All sprints</option>
+              {sprints.data?.map((sprint) => (
+                <option key={sprint.id} value={sprint.id}>
+                  {sprint.name}
+                </option>
+              ))}
+            </Select>
+            <Select value={params.get('label_id') ?? ''} onChange={(event) => updateParam('label_id', event.target.value)}>
+              <option value="">All labels</option>
+              {labels.data?.map((label) => (
+                <option key={label.id} value={label.id}>
+                  {label.name}
+                </option>
+              ))}
+            </Select>
+            <Button variant="ghost" onClick={clearFilters}>
+              Reset
+            </Button>
+          </div>
         </div>
-      ) : null}
+
+        {issues.isFetching && !issues.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Updating issues...</div> : null}
+        {issues.isError ? <ErrorBanner message={(issues.error as Error).message} /> : null}
+        {issues.data && issues.data.items.length === 0 ? (
+          <EmptyState title="No issues found" description="No issues match the current filters. Try changing or resetting filters." />
+        ) : null}
+        {issues.data && issues.data.items.length > 0 ? (
+          <div className="panel" style={{ overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ textAlign: 'left', background: 'var(--bg-muted)' }}>
+                  <SortableHeader label={`Identifier${sortIndicator('identifier')}`} onClick={() => toggleSort('identifier')} />
+                  <SortableHeader label={`Title${sortIndicator('title')}`} onClick={() => toggleSort('title')} />
+                  <SortableHeader label={`Status${sortIndicator('status')}`} onClick={() => toggleSort('status')} />
+                  <SortableHeader label={`Priority${sortIndicator('priority')}`} onClick={() => toggleSort('priority')} />
+                  <th className="label" style={{ padding: 14 }}>
+                    Assignee
+                  </th>
+                  <th className="label" style={{ padding: 14 }}>
+                    Labels
+                  </th>
+                  <th className="label" style={{ padding: 14 }}>
+                    Sprint
+                  </th>
+                  <th className="label" style={{ padding: 14 }}>
+                    Project
+                  </th>
+                  <SortableHeader label={`Updated${sortIndicator('updated_at')}`} onClick={() => toggleSort('updated_at')} />
+                </tr>
+              </thead>
+              <tbody>
+                {issues.data.items.map((issue) => (
+                  <IssueRow issue={issue} key={issue.id} />
+                ))}
+              </tbody>
+            </table>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: 14, borderTop: '1px solid var(--border-soft)' }}>
+              <span style={{ color: 'var(--text-secondary)' }}>
+                Page {issues.data.pagination.page} of {issues.data.pagination.total_pages || 1}
+              </span>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <Button
+                  variant="ghost"
+                  disabled={issues.data.pagination.page <= 1}
+                  onClick={() => updateParam('page', String(issues.data!.pagination.page - 1))}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="ghost"
+                  disabled={issues.data.pagination.page >= issues.data.pagination.total_pages}
+                  onClick={() => updateParam('page', String(issues.data!.pagination.page + 1))}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </Skeleton>
     </div>
   );
 }

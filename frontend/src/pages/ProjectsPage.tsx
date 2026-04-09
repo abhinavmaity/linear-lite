@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FormEvent, useMemo, useState } from 'react';
+import { Skeleton } from 'boneyard-js/react';
 import { Button } from 'components/common/Button';
 import { EmptyState } from 'components/common/EmptyState';
 import { ErrorBanner } from 'components/common/ErrorBanner';
@@ -177,78 +178,92 @@ export function ProjectsPage() {
         </div>
       </div>
       {actionError ? <ErrorBanner message={actionError} /> : null}
-      {projects.isLoading ? <Spinner label="Loading projects" /> : null}
-      {projects.isFetching && !projects.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Refreshing projects...</div> : null}
-      {projects.isError ? <ErrorBanner message={(projects.error as Error).message} /> : null}
-      {projects.data?.length ? (
-        <div style={{ display: 'grid', gap: 12 }}>
-          <div style={{ color: 'var(--text-secondary)' }}>{sortedCount} projects</div>
-        </div>
-      ) : null}
-      {projects.data?.length ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
-          {projects.data.map((project) => (
-            <article key={project.id} className="panel" style={{ padding: 18 }}>
-              {editingId === project.id ? (
-                <form onSubmit={(event) => handleUpdate(event, project.id)} style={{ display: 'grid', gap: 10 }}>
-                  <Input value={editName} onChange={(event) => setEditName(event.target.value)} required />
-                  <Input value={editKey} onChange={(event) => setEditKey(event.target.value.toUpperCase())} required />
-                  <Input value={editDescription} onChange={(event) => setEditDescription(event.target.value)} placeholder="Optional description" />
-                  {fieldErrors?.name ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.name}</div> : null}
-                  {fieldErrors?.key ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.key}</div> : null}
-                  {fieldErrors?.description ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.description}</div> : null}
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <Button type="submit" disabled={updateProject.isPending}>
-                      {updateProject.isPending ? 'Saving' : 'Save'}
-                    </Button>
-                    <Button type="button" variant="ghost" onClick={() => setEditingId(null)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
-              ) : (
-                <>
-                  <div className="label" style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>
-                    {project.key}
-                  </div>
-                  <h3 style={{ margin: 0 }}>{project.name}</h3>
-                  <p style={{ color: 'var(--text-secondary)' }}>{project.description ?? 'No description'}</p>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-                    Updated {formatDate(project.updated_at)} · Total {project.issue_counts.total} issues
-                  </div>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 6 }}>
-                    Status mix: {project.issue_counts.backlog} backlog, {project.issue_counts.in_progress} in progress, {project.issue_counts.done} done
-                  </div>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 6 }}>
-                    Active sprint: {project.active_sprint?.name ?? 'None'}
-                  </div>
-                  <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-                    <Button type="button" variant="ghost" onClick={() => startEdit(project.id, project.name, project.key, project.description)}>
-                      Edit
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="danger"
-                      disabled={deleteProject.isPending}
-                      onClick={() => {
-                        if (!window.confirm(`Delete project "${project.name}"?`)) return;
-                        setActionError(null);
-                        setFieldErrors(null);
-                        deleteProject.mutate(project.id);
-                      }}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </>
-              )}
+      <Skeleton
+        name="projects-page"
+        loading={projects.isLoading}
+        fallback={<Spinner label="Loading projects" />}
+        fixture={
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+            <article className="panel" style={{ padding: 18 }}>
+              <div className="label" style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>PLAT</div>
+              <h3 style={{ margin: 0 }}>Platform</h3>
+              <p style={{ color: 'var(--text-secondary)' }}>Core infrastructure work</p>
             </article>
-          ))}
-        </div>
-      ) : null}
-      {projects.data && projects.data.length === 0 ? (
-        <EmptyState title="No projects" description="Projects will appear here once the backend contains project data." />
-      ) : null}
+          </div>
+        }
+      >
+        {projects.isFetching && !projects.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Refreshing projects...</div> : null}
+        {projects.isError ? <ErrorBanner message={(projects.error as Error).message} /> : null}
+        {projects.data?.length ? (
+          <div style={{ display: 'grid', gap: 12 }}>
+            <div style={{ color: 'var(--text-secondary)' }}>{sortedCount} projects</div>
+          </div>
+        ) : null}
+        {projects.data?.length ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+            {projects.data.map((project) => (
+              <article key={project.id} className="panel" style={{ padding: 18 }}>
+                {editingId === project.id ? (
+                  <form onSubmit={(event) => handleUpdate(event, project.id)} style={{ display: 'grid', gap: 10 }}>
+                    <Input value={editName} onChange={(event) => setEditName(event.target.value)} required />
+                    <Input value={editKey} onChange={(event) => setEditKey(event.target.value.toUpperCase())} required />
+                    <Input value={editDescription} onChange={(event) => setEditDescription(event.target.value)} placeholder="Optional description" />
+                    {fieldErrors?.name ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.name}</div> : null}
+                    {fieldErrors?.key ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.key}</div> : null}
+                    {fieldErrors?.description ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.description}</div> : null}
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <Button type="submit" disabled={updateProject.isPending}>
+                        {updateProject.isPending ? 'Saving' : 'Save'}
+                      </Button>
+                      <Button type="button" variant="ghost" onClick={() => setEditingId(null)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <div className="label" style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>
+                      {project.key}
+                    </div>
+                    <h3 style={{ margin: 0 }}>{project.name}</h3>
+                    <p style={{ color: 'var(--text-secondary)' }}>{project.description ?? 'No description'}</p>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+                      Updated {formatDate(project.updated_at)} · Total {project.issue_counts.total} issues
+                    </div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 6 }}>
+                      Status mix: {project.issue_counts.backlog} backlog, {project.issue_counts.in_progress} in progress, {project.issue_counts.done} done
+                    </div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 6 }}>
+                      Active sprint: {project.active_sprint?.name ?? 'None'}
+                    </div>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+                      <Button type="button" variant="ghost" onClick={() => startEdit(project.id, project.name, project.key, project.description)}>
+                        Edit
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="danger"
+                        disabled={deleteProject.isPending}
+                        onClick={() => {
+                          if (!window.confirm(`Delete project "${project.name}"?`)) return;
+                          setActionError(null);
+                          setFieldErrors(null);
+                          deleteProject.mutate(project.id);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : null}
+        {projects.data && projects.data.length === 0 ? (
+          <EmptyState title="No projects" description="Projects will appear here once the backend contains project data." />
+        ) : null}
+      </Skeleton>
     </div>
   );
 }
