@@ -13,7 +13,7 @@ export function ProjectsPage() {
 
   return (
     <div>
-      <PageHeader title="Projects" subtitle="Scaffolded route with live list data from the project summary endpoint." />
+      <PageHeader title="Projects" subtitle="Track project ownership, keys, and progress at a glance." />
       {projects.isLoading ? <Spinner label="Loading projects" /> : null}
       {projects.isError ? <ErrorBanner message={(projects.error as Error).message} /> : null}
       {projects.data?.length ? (

@@ -13,7 +13,7 @@ export function SprintsPage() {
 
   return (
     <div>
-      <PageHeader title="Sprints" subtitle="Scaffolded MVP route with live sprint list data." />
+      <PageHeader title="Sprints" subtitle="Plan and track sprint windows across active projects." />
       {sprints.isLoading ? <Spinner label="Loading sprints" /> : null}
       {sprints.isError ? <ErrorBanner message={(sprints.error as Error).message} /> : null}
       {sprints.data?.length ? (

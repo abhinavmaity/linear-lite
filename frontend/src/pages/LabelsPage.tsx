@@ -13,7 +13,7 @@ export function LabelsPage() {
 
   return (
     <div>
-      <PageHeader title="Labels" subtitle="Scaffolded route with label management data source." />
+      <PageHeader title="Labels" subtitle="Organize issue categories with consistent label definitions." />
       {labels.isLoading ? <Spinner label="Loading labels" /> : null}
       {labels.isError ? <ErrorBanner message={(labels.error as Error).message} /> : null}
       {labels.data?.length ? (
