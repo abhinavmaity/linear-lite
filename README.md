@@ -98,16 +98,25 @@ The main planning and architecture references for this repository are:
 - [Technical_Architecture.md](/Users/abhinavmaity/code/linear-lite/docs/Technical_Architecture.md)
 - [Integration_Roadmap.md](/Users/abhinavmaity/code/linear-lite/docs/Integration_Roadmap.md)
 - [Backend_Task_Breakdown.md](/Users/abhinavmaity/code/linear-lite/docs/Backend_Task_Breakdown.md)
+- [Milestone_5_Parity_Completion_Report.md](/Users/abhinavmaity/code/linear-lite/docs/Milestone_5_Parity_Completion_Report.md)
+- [Milestone_5_Validation_Report.md](/Users/abhinavmaity/code/linear-lite/docs/Milestone_5_Validation_Report.md)
 
 ## Current Status
 
-The repository has moved beyond pure planning. The frontend core MVP flows are already implemented, including auth screens, dashboard, issues list, board, issue detail, a create issue modal, and scaffolded supporting pages for projects, sprints, labels, and team views.
+The repository has moved beyond pure planning. The frontend core MVP flows are implemented, including auth screens, dashboard, issues list, board, issue detail, a create issue modal, and integrated supporting pages for projects, sprints, labels, and team views.
 
 Backend Milestones 1 through 4 are now implemented:
 - Milestone 1: runtime foundation
 - Milestone 2: database auth foundation + core auth flow
 - Milestone 3: core issue workflow backend
 - Milestone 4: dashboard and supporting resource APIs
+
+Milestone 5 (Frontend Integration Parity Pass) is now implemented:
+- mock fallback routing removed for active frontend flows
+- dashboard, issues list, board, issue detail, and create issue modal parity completed against real API contracts
+- projects, sprints, and labels pages moved to real CRUD UI flows with backend conflict/validation handling
+- team page kept read-only with improved filtering/sorting and loading/error states
+- skeleton-loading integration added with `boneyard-js` for major loading routes
 
 The backend now includes:
 - canonical SQL schema support for `users`, `projects`, `sprints`, `labels`, `issues`, `issue_labels`, and `issue_activities`
@@ -124,18 +133,26 @@ Frontend auth flows are wired to the real backend contract (not mock auth): regi
 
 Dashboard and supporting resource CRUD backend domains are no longer in-progress and now match the Milestone 4 contract surface.
 
+Frontend loading UIs now support auto-generated skeleton flows via `boneyard-js`:
+- dependency installed in `frontend/`
+- skeleton wrappers added to key routes
+- capture scripts added: `npm run boneyard:build` and `npm run boneyard:watch`
+- baseline config: `frontend/boneyard.config.json`
+
 ## Implementation Snapshot
 
 - Product definition and architecture: complete
-- Frontend core shell and issue workflows: largely complete
+- Frontend core shell and issue workflows: complete and backend-backed
 - Frontend auth integration with real backend: complete
 - Backend Milestone 1 runtime foundation: complete
 - Backend Milestone 2 auth foundation and core auth endpoints: complete
 - Backend Milestone 3 core issue workflow backend: complete
 - Backend Milestone 4 dashboard and supporting resource APIs: complete
-- Supporting resource screens: scaffolded
-- Remaining frontend integration parity for supporting screens: in progress
-- Full integration parity and deployment hardening: pending (Milestones 5 and 6)
+- Frontend Milestone 5 integration parity pass: complete
+- Supporting resource screens (projects/sprints/labels): CRUD parity integrated
+- Team page: read-only parity integrated
+- Skeleton-loading integration: complete for major loading routes
+- Deployment hardening and broader QA: pending (Milestone 6)
 
 ## Backend Smoke Validation
 
@@ -149,3 +166,21 @@ Run from repo root:
 ./scripts/smoke_issue_workflow.sh
 ./scripts/smoke_cache.sh
 ```
+
+## Frontend Skeleton Capture (Milestone 5)
+
+Run from `frontend/`:
+
+```bash
+npm run dev
+```
+
+In a second terminal:
+
+```bash
+npm run boneyard:build
+# or
+npm run boneyard:watch
+```
+
+This generates responsive bones in `frontend/src/bones/` for routes wrapped with `Skeleton`.
