@@ -82,7 +82,7 @@ export interface IssueActivity {
   old_value: string | null;
   new_value: string | null;
   created_at: string;
-  user: UserSummary;
+  user: UserSummary | null;
 }
 
 export type IssueStatus = 'backlog' | 'todo' | 'in_progress' | 'in_review' | 'done' | 'cancelled';

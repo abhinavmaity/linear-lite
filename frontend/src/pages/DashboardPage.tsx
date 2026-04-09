@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { EmptyState } from 'components/common/EmptyState';
 import { ErrorBanner } from 'components/common/ErrorBanner';
 import { PageHeader } from 'components/common/PageHeader';
@@ -33,10 +34,19 @@ export function DashboardPage() {
                 <div style={{ display: 'grid', gap: 14 }}>
                   {stats.data.recent_activity.map((activity) => (
                     <div key={activity.id} className="panel-soft" style={{ padding: 14 }}>
-                      <div style={{ fontWeight: 700 }}>{activity.user.name}</div>
+                      <div style={{ fontWeight: 700 }}>{activity.user?.name ?? 'Unknown user'}</div>
                       <div style={{ color: 'var(--text-secondary)' }}>
-                        {titleCase(activity.action)} on issue {activity.issue_id.slice(0, 8)} · {relativeTime(activity.created_at)}
+                        {titleCase(activity.action)}
+                        {activity.field_name ? ` · ${titleCase(activity.field_name)}` : ''} · {relativeTime(activity.created_at)}
                       </div>
+                      <div style={{ marginTop: 8, fontSize: 14 }}>
+                        {activity.old_value || activity.new_value
+                          ? `${activity.old_value ?? 'empty'} → ${activity.new_value ?? 'empty'}`
+                          : 'No field change payload'}
+                      </div>
+                      <Link to={`/issues/${activity.issue_id}`} style={{ display: 'inline-block', marginTop: 8, fontWeight: 700 }}>
+                        Open issue
+                      </Link>
                     </div>
                   ))}
                 </div>

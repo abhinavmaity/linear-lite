@@ -8,11 +8,11 @@ export function useIssuesList(params: IssueListParams) {
   });
 }
 
-export function useIssueDetail(id?: string) {
+export function useIssueDetail(id?: string, includeArchived = false) {
   return useQuery({
-    queryKey: ['issue', id],
+    queryKey: ['issue', id, includeArchived],
     enabled: Boolean(id),
-    queryFn: () => issuesApi.getById(id!).then((response) => response.data),
+    queryFn: () => issuesApi.getById(id!, includeArchived).then((response) => response.data),
   });
 }
 
@@ -22,7 +22,8 @@ export function useUpdateIssue(id: string) {
   return useMutation({
     mutationFn: (payload: IssueUpsertInput) => issuesApi.update(id, payload).then((response) => response.data),
     onSuccess: (issue) => {
-      queryClient.setQueryData(['issue', id], issue);
+      queryClient.setQueryData(['issue', id, false], issue);
+      queryClient.setQueryData(['issue', id, true], issue);
       queryClient.invalidateQueries({ queryKey: ['issues'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
