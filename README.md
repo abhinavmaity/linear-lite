@@ -100,6 +100,10 @@ The main planning and architecture references for this repository are:
 - [Backend_Task_Breakdown.md](/Users/abhinavmaity/code/linear-lite/docs/Backend_Task_Breakdown.md)
 - [Milestone_5_Parity_Completion_Report.md](/Users/abhinavmaity/code/linear-lite/docs/Milestone_5_Parity_Completion_Report.md)
 - [Milestone_5_Validation_Report.md](/Users/abhinavmaity/code/linear-lite/docs/Milestone_5_Validation_Report.md)
+- [Milestone_6_Checklist.md](/Users/abhinavmaity/code/linear-lite/docs/Milestone_6_Checklist.md)
+- [Milestone_6_Validation_Report.md](/Users/abhinavmaity/code/linear-lite/docs/Milestone_6_Validation_Report.md)
+- [Milestone_6_Manual_UX_Acceptance.md](/Users/abhinavmaity/code/linear-lite/docs/Milestone_6_Manual_UX_Acceptance.md)
+- [Milestone_6_MVP_Readiness_Signoff.md](/Users/abhinavmaity/code/linear-lite/docs/Milestone_6_MVP_Readiness_Signoff.md)
 
 ## Current Status
 
@@ -152,7 +156,7 @@ Frontend loading UIs now support auto-generated skeleton flows via `boneyard-js`
 - Supporting resource screens (projects/sprints/labels): CRUD parity integrated
 - Team page: read-only parity integrated
 - Skeleton-loading integration: complete for major loading routes
-- Deployment hardening and broader QA: pending (Milestone 6)
+- Milestone 6 quality/deployment hardening and MVP readiness: complete
 
 ## Backend Smoke Validation
 

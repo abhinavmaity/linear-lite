@@ -10,7 +10,7 @@ This document is the execution-oriented backend implementation checklist for Lin
 - A reproducible smoke workflow exists at `scripts/smoke_issue_workflow.sh`.
 - A reproducible cache workflow exists at `scripts/smoke_cache.sh`.
 - CI quality gates are wired via `.github/workflows/ci-validation.yml`.
-- Remaining major milestone focus is Milestone 6 quality/deployment hardening and expanded QA coverage.
+- Milestone 6 quality/deployment hardening is complete; current backend focus is stability and MVP release quality.
 
 ## Implementation Rules
 - Implement the backend as the layered monolith defined by the architecture: router -> middleware -> handlers -> services -> repositories -> PostgreSQL.
