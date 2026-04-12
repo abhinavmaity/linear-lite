@@ -139,7 +139,7 @@ TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 echo "==> Starting backend stack"
-compose up -d --build
+compose up -d --build postgres redis backend
 
 echo "==> Running migrations"
 compose exec -T backend migrate

@@ -23,7 +23,7 @@ This checklist tracks Milestone 6 execution. Milestone 6 is hardening-only and m
 | M6-12 | Add Root Full-Stack Compose Baseline | Platform + Full-stack | M6-03 | One root command starts frontend, backend, postgres, redis with documented ports and health expectations. | Complete |
 | M6-13 | Finalize Migration Path in Full Stack | Backend + Platform | M6-12 | Migration execution path is explicit and reproducible in local full-stack flow; no undocumented schema bootstrap. | Complete |
 | M6-14 | Environment Contract Alignment | Backend + Frontend + Platform | M6-12, M6-13 | Required env vars for all services are documented and verified in a fresh setup run. | Complete |
-| M6-15 | CI Hardening for Milestone 6 Gates | Platform + QA | M6-04, M6-05, M6-07, M6-12 | CI runs build + smoke + critical E2E gate for milestone target branch and reports clear pass/fail. | Not Started |
+| M6-15 | CI Hardening for Milestone 6 Gates | Platform + QA | M6-04, M6-05, M6-07, M6-12 | CI runs build + smoke + critical E2E gate for milestone target branch and reports clear pass/fail. | Complete |
 | M6-16 | Manual UX Acceptance Walkthrough | QA + Frontend | M6-08, M6-09, M6-10, M6-11 | Manual checklist for `/dashboard`, `/issues`, `/board`, `/issues/:id`, `/projects`, `/sprints`, `/labels`, `/team` completed and signed off. | Not Started |
 | M6-17 | Documentation Consistency Pass | Docs + Full-stack | M6-12, M6-14, M6-16 | `README`, roadmap, backend breakdown, and runbooks reflect actual integrated state and commands. | Not Started |
 | M6-18 | Milestone 6 Validation Report + Sign-off | Tech Lead + QA + Eng | M6-15, M6-17 | Single report captures commands run, evidence, remaining known limitations, and explicit MVP readiness decision. | Not Started |
@@ -78,3 +78,9 @@ Out-of-scope for Milestone 6:
 - M6-14 completed:
   - added `frontend/.env.example` and full-stack env contract documentation updates in `README.md` and `backend/README.md`.
   - verified fresh startup and endpoint behavior on overridden host ports (`5180`/`18080`).
+- M6-15 completed:
+  - replaced legacy backend-only smoke workflow with unified CI validation workflow:
+    - `.github/workflows/ci-validation.yml`
+  - CI gate now runs backend build, frontend build, backend smoke workflow, backend cache smoke workflow, and Playwright E2E suite.
+  - aligned CI trigger paths to unified compose file (`docker-compose.yml`) and current scripts.
+  - updated smoke scripts to start backend-only compose services (`postgres`, `redis`, `backend`) for deterministic CI sequencing before E2E.

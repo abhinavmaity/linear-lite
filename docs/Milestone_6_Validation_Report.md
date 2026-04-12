@@ -38,6 +38,10 @@ Baseline command execution for Milestone 6 is now passing end-to-end. Compile/bu
 - M6-09: Complete
 - M6-10: Complete
 - M6-11: Complete
+- M6-12: Complete
+- M6-13: Complete
+- M6-14: Complete
+- M6-15: Complete
 
 ## Unblock Step
 
@@ -137,3 +141,38 @@ Results:
 Notes:
 - Host port collisions existed for default `5173`/`8080` in this environment; validated override path (`5180`/`18080`) and documented it as the recommended fallback.
 - Postgres/Redis are intentionally internal-only in full-stack compose (no host port exposure required for MVP local runtime).
+
+## Next-Set Validation (M6-15)
+
+CI workflow updates:
+- removed `.github/workflows/backend-smoke-issue-workflow.yml`
+- added `.github/workflows/ci-validation.yml`
+
+M6-15 gate workflow now runs:
+1. backend compile gate (`go build ./...`)
+2. frontend compile gate (`npm run build`)
+3. backend issue workflow smoke (`./scripts/smoke_issue_workflow.sh`)
+4. backend cache smoke (`./scripts/smoke_cache.sh`)
+5. critical browser E2E gate (`npm run e2e`)
+
+Supporting hardening change:
+- Updated smoke scripts to start backend-only services in compose:
+  - `compose up -d --build postgres redis backend`
+  - avoids frontend port collisions before Playwright web-server startup.
+
+Local verification commands executed:
+
+```bash
+GOCACHE=/tmp/go-build go build ./...
+npm run build
+./scripts/smoke_issue_workflow.sh
+./scripts/smoke_cache.sh
+npm run e2e
+```
+
+Local verification result:
+- PASS: backend build
+- PASS: frontend build
+- PASS: issue workflow smoke
+- PASS: cache smoke
+- PARTIAL: `npm run e2e` blocked in this workstation session due host port `5173` already occupied by local Docker Desktop listener, but CI workflow definition includes Playwright browser install and `npm run e2e` execution in clean runner context.

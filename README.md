@@ -175,6 +175,19 @@ Run from repo root:
 docker compose up --build -d
 ```
 
+First-time setup (fresh clone / fresh database):
+
+```bash
+docker compose up --build -d
+docker compose --profile tools run --rm migrate
+```
+
+After the first migration run, normal day-to-day startup is just:
+
+```bash
+docker compose up --build -d
+```
+
 If host ports `5173` or `8080` are busy, override them:
 
 ```bash
