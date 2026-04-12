@@ -30,6 +30,9 @@ Baseline command execution for Milestone 6 is now passing end-to-end. Compile/bu
 - M6-01: Complete
 - M6-02: Complete
 - M6-03: Complete
+- M6-04: Complete
+- M6-05: Complete
+- M6-06: Complete
 
 ## Unblock Step
 
@@ -51,3 +54,19 @@ Post-fix rerun:
 ```
 
 Both pass after the fix.
+
+## Next-Set Validation (M6-04 to M6-06)
+
+Added tests:
+- `backend/internal/handlers/handlers_test.go`
+- `backend/internal/services/services_rules_test.go`
+- `backend/internal/repositories/issue_repository_test.go`
+
+Command executed:
+
+```bash
+GOCACHE=/tmp/go-build go test ./...
+```
+
+Result:
+- PASS (handlers/services/repositories packages with new tests)

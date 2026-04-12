@@ -12,9 +12,9 @@ This checklist tracks Milestone 6 execution. Milestone 6 is hardening-only and m
 | M6-01 | Freeze Milestone 6 Scope | Product + Tech Lead | None | Milestone doc states hardening-only scope; all post-MVP items explicitly marked out of scope. | Complete |
 | M6-02 | Build Milestone 6 Validation Matrix | QA + Full-stack | M6-01 | Matrix maps each MVP journey to automated/manual checks and includes expected pass criteria. | Complete |
 | M6-03 | Baseline Stability Run (Current Checks) | Backend + Frontend | M6-02 | `frontend npm run build`, `backend go build ./...`, `smoke_issue_workflow.sh`, and `smoke_cache.sh` all pass on clean run. | Complete |
-| M6-04 | Add Backend Handler Contract Tests | Backend | M6-03 | Tests cover status/envelope/error mapping for auth + key validation/conflict paths; passing in CI. | Not Started |
-| M6-05 | Add Backend Service Rule Tests | Backend | M6-03 | Tests cover sprint-project alignment, active sprint uniqueness, and delete-blocking rules; passing in CI. | Not Started |
-| M6-06 | Add Backend Repository Edge Tests | Backend | M6-03 | Tests cover search behavior, archive/restore behavior, and issue ID generation safety path; passing. | Not Started |
+| M6-04 | Add Backend Handler Contract Tests | Backend | M6-03 | Tests cover status/envelope/error mapping for auth + key validation/conflict paths; passing in CI. | Complete |
+| M6-05 | Add Backend Service Rule Tests | Backend | M6-03 | Tests cover sprint-project alignment, active sprint uniqueness, and delete-blocking rules; passing in CI. | Complete |
+| M6-06 | Add Backend Repository Edge Tests | Backend | M6-03 | Tests cover search behavior, archive/restore behavior, and issue ID generation safety path; passing. | Complete |
 | M6-07 | Stand Up Critical Path E2E Harness | QA Automation + Frontend | M6-02, M6-03 | Browser test framework runs in repo with deterministic setup/teardown and CI-ready command. | Not Started |
 | M6-08 | E2E: Auth + Session Journey | QA Automation + Frontend | M6-07 | Register/login/session restore/protected-route guard pass end-to-end against real backend. | Not Started |
 | M6-09 | E2E: Core Issue Workflow Journey | QA Automation + Frontend + Backend | M6-07 | Create issue, list visibility, detail update, board status change, archive/restore all pass in one flow. | Not Started |
@@ -52,3 +52,9 @@ Out-of-scope for Milestone 6:
   - `./scripts/smoke_issue_workflow.sh`: pass
   - `./scripts/smoke_cache.sh`: pass
   - Investigation outcome: fixed smoke-data collision by making label update name unique per run in `scripts/smoke_cache.sh`.
+- M6-04 completed:
+  - added handler tests for auth invalid JSON, auth conflict mapping, and project validation envelope/request ID behavior.
+- M6-05 completed:
+  - added service rule tests for project delete blocking and key-change blocking, plus sprint active/dependency delete blocking and active sprint uniqueness conflict mapping.
+- M6-06 completed:
+  - added repository edge tests for issue repository helper behavior (`strPtrEqual`, unique-constraint detection/matching).
