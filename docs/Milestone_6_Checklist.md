@@ -20,9 +20,9 @@ This checklist tracks Milestone 6 execution. Milestone 6 is hardening-only and m
 | M6-09 | E2E: Core Issue Workflow Journey | QA Automation + Frontend + Backend | M6-07 | Create issue, list visibility, detail update, board status change, archive/restore all pass in one flow. | Complete |
 | M6-10 | E2E: Supporting Resources Journey | QA Automation + Frontend + Backend | M6-07 | Project/sprint/label CRUD happy paths plus one conflict case each pass with expected UX error handling. | Complete |
 | M6-11 | E2E: Dashboard Consistency Checks | QA Automation + Backend | M6-08, M6-09 | Dashboard stats reflect issue mutations and load correctly after key workflow steps. | Complete |
-| M6-12 | Add Root Full-Stack Compose Baseline | Platform + Full-stack | M6-03 | One root command starts frontend, backend, postgres, redis with documented ports and health expectations. | Not Started |
-| M6-13 | Finalize Migration Path in Full Stack | Backend + Platform | M6-12 | Migration execution path is explicit and reproducible in local full-stack flow; no undocumented schema bootstrap. | Not Started |
-| M6-14 | Environment Contract Alignment | Backend + Frontend + Platform | M6-12, M6-13 | Required env vars for all services are documented and verified in a fresh setup run. | Not Started |
+| M6-12 | Add Root Full-Stack Compose Baseline | Platform + Full-stack | M6-03 | One root command starts frontend, backend, postgres, redis with documented ports and health expectations. | Complete |
+| M6-13 | Finalize Migration Path in Full Stack | Backend + Platform | M6-12 | Migration execution path is explicit and reproducible in local full-stack flow; no undocumented schema bootstrap. | Complete |
+| M6-14 | Environment Contract Alignment | Backend + Frontend + Platform | M6-12, M6-13 | Required env vars for all services are documented and verified in a fresh setup run. | Complete |
 | M6-15 | CI Hardening for Milestone 6 Gates | Platform + QA | M6-04, M6-05, M6-07, M6-12 | CI runs build + smoke + critical E2E gate for milestone target branch and reports clear pass/fail. | Not Started |
 | M6-16 | Manual UX Acceptance Walkthrough | QA + Frontend | M6-08, M6-09, M6-10, M6-11 | Manual checklist for `/dashboard`, `/issues`, `/board`, `/issues/:id`, `/projects`, `/sprints`, `/labels`, `/team` completed and signed off. | Not Started |
 | M6-17 | Documentation Consistency Pass | Docs + Full-stack | M6-12, M6-14, M6-16 | `README`, roadmap, backend breakdown, and runbooks reflect actual integrated state and commands. | Not Started |
@@ -69,3 +69,12 @@ Out-of-scope for Milestone 6:
   - added supporting resources E2E coverage in `frontend/tests/e2e/supporting-resources.spec.ts` (happy-path + conflict cases).
 - M6-11 completed:
   - added dashboard consistency E2E coverage in `frontend/tests/e2e/dashboard-consistency.spec.ts`.
+- M6-12 completed:
+  - added root full-stack compose file `docker-compose.fullstack.yml` with frontend/backend/postgres/redis services.
+  - frontend/backend host ports are overrideable via `FULLSTACK_FRONTEND_PORT` and `FULLSTACK_BACKEND_PORT`.
+- M6-13 completed:
+  - added explicit migration one-off service (`migrate`) via compose tools profile:
+    - `docker compose -f docker-compose.fullstack.yml --profile tools run --rm migrate`
+- M6-14 completed:
+  - added `frontend/.env.example` and full-stack env contract documentation updates in `README.md` and `backend/README.md`.
+  - verified fresh startup and endpoint behavior on overridden host ports (`5180`/`18080`).

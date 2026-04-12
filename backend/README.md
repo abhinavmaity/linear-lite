@@ -132,6 +132,22 @@ Then run migrations in a one-off backend container:
 docker compose -f docker-compose.backend.yml run --rm backend migrate
 ```
 
+Full-stack compose path (frontend + backend + postgres + redis) is available at:
+
+```bash
+docker compose -f docker-compose.fullstack.yml up --build -d
+docker compose -f docker-compose.fullstack.yml --profile tools run --rm migrate
+```
+
+If host ports are occupied, override frontend/backend host ports:
+
+```bash
+FULLSTACK_FRONTEND_PORT=5180 FULLSTACK_BACKEND_PORT=18080 docker compose -f docker-compose.fullstack.yml up --build -d
+FULLSTACK_FRONTEND_PORT=5180 FULLSTACK_BACKEND_PORT=18080 docker compose -f docker-compose.fullstack.yml --profile tools run --rm migrate
+```
+
+Note: postgres and redis are internal-only in `docker-compose.fullstack.yml` (no host port bind by default).
+
 ## Manual Auth Validation Checklist
 
 After startup and migrations, verify this sequence:

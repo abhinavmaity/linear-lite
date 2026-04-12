@@ -167,6 +167,56 @@ Run from repo root:
 ./scripts/smoke_cache.sh
 ```
 
+## Full-Stack Local Runtime (Milestone 6)
+
+Run from repo root:
+
+```bash
+docker compose -f docker-compose.fullstack.yml up --build -d
+```
+
+If host ports `5173` or `8080` are busy, override them:
+
+```bash
+FULLSTACK_FRONTEND_PORT=5180 FULLSTACK_BACKEND_PORT=18080 docker compose -f docker-compose.fullstack.yml up --build -d
+```
+
+Apply migrations (explicit one-off path):
+
+```bash
+docker compose -f docker-compose.fullstack.yml --profile tools run --rm migrate
+```
+
+If you started compose with overridden ports, reuse the same env vars for migration:
+
+```bash
+FULLSTACK_FRONTEND_PORT=5180 FULLSTACK_BACKEND_PORT=18080 docker compose -f docker-compose.fullstack.yml --profile tools run --rm migrate
+```
+
+Service URLs after startup:
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:8080/api/v1`
+- Postgres: internal-only (`postgres:5432` in compose network)
+- Redis: internal-only (`redis:6379` in compose network)
+
+When using port overrides, frontend/backend URLs use the overridden host ports.
+
+Stop full-stack runtime:
+
+```bash
+docker compose -f docker-compose.fullstack.yml down -v
+```
+
+### Environment Contract
+
+- Backend env baseline: `backend/.env.example`
+- Frontend env baseline: `frontend/.env.example`
+- Full-stack compose injects:
+  - `VITE_API_BASE_URL=http://localhost:${FULLSTACK_BACKEND_PORT:-8080}/api/v1`
+  - `DATABASE_URL=postgres://postgres:postgres@postgres:5432/linear_lite?sslmode=disable`
+  - `REDIS_URL=redis://redis:6379/0`
+  - `CORS_ORIGINS=http://localhost:${FULLSTACK_FRONTEND_PORT:-5173},http://localhost:3000`
+
 ## Frontend Skeleton Capture (Milestone 5)
 
 Run from `frontend/`:

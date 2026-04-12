@@ -33,6 +33,11 @@ Baseline command execution for Milestone 6 is now passing end-to-end. Compile/bu
 - M6-04: Complete
 - M6-05: Complete
 - M6-06: Complete
+- M6-07: Complete
+- M6-08: Complete
+- M6-09: Complete
+- M6-10: Complete
+- M6-11: Complete
 
 ## Unblock Step
 
@@ -102,3 +107,33 @@ Notes:
 - E2E server is configured with explicit API base override:
   - `VITE_API_BASE_URL=http://127.0.0.1:8080/api/v1`
 - E2E base URL uses `http://localhost:5173` to align with backend CORS settings.
+
+## Next-Set Validation (M6-12 to M6-14)
+
+Infrastructure/docs added:
+- `docker-compose.fullstack.yml`
+- `frontend/Dockerfile`
+- `frontend/.dockerignore`
+- `frontend/.env.example`
+- README updates for full-stack run + env contract
+- backend README updates for full-stack run + migration path
+
+Commands executed:
+
+```bash
+FULLSTACK_BACKEND_PORT=18080 FULLSTACK_FRONTEND_PORT=5180 docker compose -f docker-compose.fullstack.yml up -d --build
+FULLSTACK_BACKEND_PORT=18080 FULLSTACK_FRONTEND_PORT=5180 docker compose -f docker-compose.fullstack.yml --profile tools run --rm migrate
+FULLSTACK_BACKEND_PORT=18080 FULLSTACK_FRONTEND_PORT=5180 docker compose -f docker-compose.fullstack.yml up -d backend frontend
+curl http://localhost:5180
+curl http://localhost:18080/api/v1/auth/me
+```
+
+Results:
+- PASS: full stack starts with postgres/redis/backend/frontend containers healthy.
+- PASS: migration runner completes via explicit one-off `migrate` service.
+- PASS: frontend endpoint returns `200`.
+- PASS: backend auth-me endpoint returns `401 unauthorized` envelope when unauthenticated.
+
+Notes:
+- Host port collisions existed for default `5173`/`8080` in this environment; validated override path (`5180`/`18080`) and documented it as the recommended fallback.
+- Postgres/Redis are intentionally internal-only in full-stack compose (no host port exposure required for MVP local runtime).

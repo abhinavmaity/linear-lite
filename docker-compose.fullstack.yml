@@ -1,0 +1,83 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: linear-lite-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: linear_lite
+    volumes:
+      - linear_lite_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d linear_lite"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: linear-lite-redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: linear-lite-backend
+    env_file:
+      - ./backend/.env.example
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/linear_lite?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      CORS_ORIGINS: http://localhost:${FULLSTACK_FRONTEND_PORT:-5173},http://localhost:3000
+    ports:
+      - "${FULLSTACK_BACKEND_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: linear-lite-frontend
+    env_file:
+      - ./frontend/.env.example
+    environment:
+      VITE_API_BASE_URL: http://localhost:${FULLSTACK_BACKEND_PORT:-8080}/api/v1
+    ports:
+      - "${FULLSTACK_FRONTEND_PORT:-5173}:5173"
+    depends_on:
+      backend:
+        condition: service_started
+
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: linear-lite-migrate
+    env_file:
+      - ./backend/.env.example
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/linear_lite?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      MIGRATION_DIRECTION: up
+      MIGRATION_STEPS: "0"
+      MIGRATIONS_PATH: /app/migrations
+    command: ["migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    profiles:
+      - tools
+
+volumes:
+  linear_lite_pg_data:
