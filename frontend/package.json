@@ -7,6 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "e2e": "playwright test",
+    "e2e:headed": "playwright test --headed",
+    "e2e:install": "playwright install chromium",
     "boneyard:build": "boneyard-js build",
     "boneyard:watch": "boneyard-js build --watch"
   },
@@ -19,6 +22,7 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.53.2",
     "@types/node": "^22.13.8",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",

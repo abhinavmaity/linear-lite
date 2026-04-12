@@ -70,3 +70,35 @@ GOCACHE=/tmp/go-build go test ./...
 
 Result:
 - PASS (handlers/services/repositories packages with new tests)
+
+## Next-Set Validation (M6-07 to M6-11)
+
+Harness and tests added:
+- `frontend/playwright.config.ts`
+- `frontend/tests/e2e/helpers.ts`
+- `frontend/tests/e2e/auth-session.spec.ts`
+- `frontend/tests/e2e/issue-workflow.spec.ts`
+- `frontend/tests/e2e/supporting-resources.spec.ts`
+- `frontend/tests/e2e/dashboard-consistency.spec.ts`
+
+Frontend package updates:
+- `frontend/package.json` scripts for E2E execution
+- `@playwright/test` added to dev dependencies
+
+Command executed:
+
+```bash
+npm run e2e
+```
+
+Result:
+- PASS (5/5 Playwright specs)
+  - `M6-08` auth/session journey: pass
+  - `M6-09` core issue workflow journey: pass
+  - `M6-10` supporting resources journey: pass
+  - `M6-11` dashboard consistency journey: pass
+
+Notes:
+- E2E server is configured with explicit API base override:
+  - `VITE_API_BASE_URL=http://127.0.0.1:8080/api/v1`
+- E2E base URL uses `http://localhost:5173` to align with backend CORS settings.

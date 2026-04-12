@@ -15,11 +15,11 @@ This checklist tracks Milestone 6 execution. Milestone 6 is hardening-only and m
 | M6-04 | Add Backend Handler Contract Tests | Backend | M6-03 | Tests cover status/envelope/error mapping for auth + key validation/conflict paths; passing in CI. | Complete |
 | M6-05 | Add Backend Service Rule Tests | Backend | M6-03 | Tests cover sprint-project alignment, active sprint uniqueness, and delete-blocking rules; passing in CI. | Complete |
 | M6-06 | Add Backend Repository Edge Tests | Backend | M6-03 | Tests cover search behavior, archive/restore behavior, and issue ID generation safety path; passing. | Complete |
-| M6-07 | Stand Up Critical Path E2E Harness | QA Automation + Frontend | M6-02, M6-03 | Browser test framework runs in repo with deterministic setup/teardown and CI-ready command. | Not Started |
-| M6-08 | E2E: Auth + Session Journey | QA Automation + Frontend | M6-07 | Register/login/session restore/protected-route guard pass end-to-end against real backend. | Not Started |
-| M6-09 | E2E: Core Issue Workflow Journey | QA Automation + Frontend + Backend | M6-07 | Create issue, list visibility, detail update, board status change, archive/restore all pass in one flow. | Not Started |
-| M6-10 | E2E: Supporting Resources Journey | QA Automation + Frontend + Backend | M6-07 | Project/sprint/label CRUD happy paths plus one conflict case each pass with expected UX error handling. | Not Started |
-| M6-11 | E2E: Dashboard Consistency Checks | QA Automation + Backend | M6-08, M6-09 | Dashboard stats reflect issue mutations and load correctly after key workflow steps. | Not Started |
+| M6-07 | Stand Up Critical Path E2E Harness | QA Automation + Frontend | M6-02, M6-03 | Browser test framework runs in repo with deterministic setup/teardown and CI-ready command. | Complete |
+| M6-08 | E2E: Auth + Session Journey | QA Automation + Frontend | M6-07 | Register/login/session restore/protected-route guard pass end-to-end against real backend. | Complete |
+| M6-09 | E2E: Core Issue Workflow Journey | QA Automation + Frontend + Backend | M6-07 | Create issue, list visibility, detail update, board status change, archive/restore all pass in one flow. | Complete |
+| M6-10 | E2E: Supporting Resources Journey | QA Automation + Frontend + Backend | M6-07 | Project/sprint/label CRUD happy paths plus one conflict case each pass with expected UX error handling. | Complete |
+| M6-11 | E2E: Dashboard Consistency Checks | QA Automation + Backend | M6-08, M6-09 | Dashboard stats reflect issue mutations and load correctly after key workflow steps. | Complete |
 | M6-12 | Add Root Full-Stack Compose Baseline | Platform + Full-stack | M6-03 | One root command starts frontend, backend, postgres, redis with documented ports and health expectations. | Not Started |
 | M6-13 | Finalize Migration Path in Full Stack | Backend + Platform | M6-12 | Migration execution path is explicit and reproducible in local full-stack flow; no undocumented schema bootstrap. | Not Started |
 | M6-14 | Environment Contract Alignment | Backend + Frontend + Platform | M6-12, M6-13 | Required env vars for all services are documented and verified in a fresh setup run. | Not Started |
@@ -58,3 +58,14 @@ Out-of-scope for Milestone 6:
   - added service rule tests for project delete blocking and key-change blocking, plus sprint active/dependency delete blocking and active sprint uniqueness conflict mapping.
 - M6-06 completed:
   - added repository edge tests for issue repository helper behavior (`strPtrEqual`, unique-constraint detection/matching).
+- M6-07 completed:
+  - added Playwright harness (`frontend/playwright.config.ts`) and npm scripts (`e2e`, `e2e:headed`, `e2e:install`).
+  - added deterministic API-backed E2E helpers in `frontend/tests/e2e/helpers.ts`.
+- M6-08 completed:
+  - added auth/session E2E coverage in `frontend/tests/e2e/auth-session.spec.ts`.
+- M6-09 completed:
+  - added core issue workflow E2E coverage in `frontend/tests/e2e/issue-workflow.spec.ts` (detail update, board reflection, archive, restore).
+- M6-10 completed:
+  - added supporting resources E2E coverage in `frontend/tests/e2e/supporting-resources.spec.ts` (happy-path + conflict cases).
+- M6-11 completed:
+  - added dashboard consistency E2E coverage in `frontend/tests/e2e/dashboard-consistency.spec.ts`.
