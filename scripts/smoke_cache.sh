@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-COMPOSE_FILE="$ROOT_DIR/docker-compose.backend.yml"
+COMPOSE_FILE="$ROOT_DIR/docker-compose.yml"
 
 if [[ -x "/usr/local/bin/docker" ]]; then
   DOCKER_BIN="${DOCKER_BIN:-/usr/local/bin/docker}"
@@ -139,7 +139,7 @@ TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 echo "==> Starting backend stack"
-compose up -d --build
+compose up -d --build postgres redis backend
 
 echo "==> Running migrations"
 compose exec -T backend migrate
@@ -256,7 +256,10 @@ LABELS_2_STATUS="$(http_json GET "http://localhost:8080/api/v1/labels?page=1&lim
 assert_status "labels second fetch (cache hit)" "200" "$LABELS_2_STATUS"
 assert_not_contains "labels cached response" "$HIDDEN_LABEL_NAME" "$TMP_DIR/labels_2.json"
 
-LABEL_UPDATE_PAYLOAD='{"name":"cache-label-updated","color":"#EF4444"}'
+# Keep updated label names unique per run so reruns on reused DB state
+# do not fail with expected 409 conflicts unrelated to cache behavior.
+LABEL_UPDATE_NAME="cache-label-updated-$(date +%s)"
+LABEL_UPDATE_PAYLOAD="{\"name\":\"$LABEL_UPDATE_NAME\",\"color\":\"#EF4444\"}"
 LABEL_UPDATE_STATUS="$(http_json PUT "http://localhost:8080/api/v1/labels/$LABEL_ID" "$TMP_DIR/label_update.json" "$TOKEN" "$LABEL_UPDATE_PAYLOAD")"
 assert_status "label update" "200" "$LABEL_UPDATE_STATUS"
 assert_eq "labels keys invalidated after label update" "0" "$(redis_count 'labels:*')"

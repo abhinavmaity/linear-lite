@@ -1,0 +1,83 @@
+name: CI Validation
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "scripts/smoke_issue_workflow.sh"
+      - "scripts/smoke_cache.sh"
+      - "docker-compose.yml"
+      - ".github/workflows/ci-validation.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "scripts/smoke_issue_workflow.sh"
+      - "scripts/smoke_cache.sh"
+      - "docker-compose.yml"
+      - ".github/workflows/ci-validation.yml"
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Backend build
+        run: go build ./...
+        working-directory: backend
+
+      - name: Frontend build
+        run: npm run build
+        working-directory: frontend
+
+      - name: Ensure smoke scripts executable
+        run: |
+          chmod +x scripts/smoke_issue_workflow.sh
+          chmod +x scripts/smoke_cache.sh
+
+      - name: Run backend issue workflow smoke
+        run: ./scripts/smoke_issue_workflow.sh
+
+      - name: Run backend cache smoke
+        run: ./scripts/smoke_cache.sh
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+        working-directory: frontend
+
+      - name: Run critical E2E suite
+        run: npm run e2e
+        working-directory: frontend
+
+      - name: Show container logs on failure
+        if: failure()
+        run: |
+          docker compose logs backend || true
+          docker compose logs postgres || true
+          docker compose logs redis || true
+
+      - name: Tear down stack
+        if: always()
+        run: docker compose down -v

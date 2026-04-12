@@ -4,7 +4,7 @@
 This roadmap defines the milestone-based path from the current frontend-heavy prototype state to an MVP-complete, integrated full-stack implementation. Use it as the sequencing guide for execution planning, task assignment, and progress tracking. The milestones are sequential, but each milestone also calls out work that can safely proceed in parallel.
 
 ## Current Baseline
-Linear-lite has clear product scope, frontend planning, design direction, and a detailed backend architecture contract. The frontend includes the core authenticated shell, auth screens, dashboard, issues list, board, issue detail, create issue modal, and integrated supporting resource pages. Frontend development is now backend-backed for MVP workflows. The main remaining gap is Milestone 6 quality/deployment hardening and broader QA depth.
+Linear-lite has clear product scope, frontend planning, design direction, and a detailed backend architecture contract. The frontend includes the core authenticated shell, auth screens, dashboard, issues list, board, issue detail, create issue modal, and integrated supporting resource pages. Frontend development is backend-backed for MVP workflows, and Milestone 6 hardening/readiness tasks are complete.
 
 ## Execution Status Update
 
@@ -14,9 +14,10 @@ Completed:
 - Milestone 3: Core Issue Workflow Backend
 - Milestone 4: Dashboard and Supporting Resource APIs
 - Milestone 5: Frontend Integration Parity Pass
+- Milestone 6: Quality, Deployment, and MVP Readiness
 
 Current focus:
-- Milestone 6: Quality, Deployment, and MVP Readiness
+- Focused MVP QA and release progression within documented scope
 
 Milestone 5 completion notes (April 10, 2026):
 - Removed active mock fallback routing from frontend runtime API calls.

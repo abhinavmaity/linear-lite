@@ -123,14 +123,30 @@ Shared helpers:
 From repo root:
 
 ```bash
-docker compose -f docker-compose.backend.yml up --build
+docker compose up --build -d
 ```
 
-Then run migrations in a one-off backend container:
+Then run migrations in a one-off migration container:
 
 ```bash
-docker compose -f docker-compose.backend.yml run --rm backend migrate
+docker compose --profile tools run --rm migrate
 ```
+
+By default, `docker compose up` now brings up frontend + backend + postgres + redis together.
+
+```bash
+docker compose up --build -d
+docker compose --profile tools run --rm migrate
+```
+
+If host ports are occupied, override frontend/backend host ports:
+
+```bash
+FULLSTACK_FRONTEND_PORT=5180 FULLSTACK_BACKEND_PORT=18080 docker compose up --build -d
+FULLSTACK_FRONTEND_PORT=5180 FULLSTACK_BACKEND_PORT=18080 docker compose --profile tools run --rm migrate
+```
+
+Note: postgres and redis are internal-only in `docker-compose.yml` (no host port bind by default).
 
 ## Manual Auth Validation Checklist
 

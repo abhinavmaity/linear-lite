@@ -67,7 +67,7 @@ Run from `backend/`:
 
 Run from repo root (backend local stack):
 
-- Docker baseline: `docker compose -f docker-compose.backend.yml up --build`
+- Docker baseline: `docker compose up --build`
 
 ## Change Validation
 

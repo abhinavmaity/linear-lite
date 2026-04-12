@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-COMPOSE_FILE="$ROOT_DIR/docker-compose.backend.yml"
+COMPOSE_FILE="$ROOT_DIR/docker-compose.yml"
 
 if [[ -x "/usr/local/bin/docker" ]]; then
   DOCKER_BIN="${DOCKER_BIN:-/usr/local/bin/docker}"
@@ -74,7 +74,7 @@ TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 echo "==> Starting backend stack"
-compose up -d --build
+compose up -d --build postgres redis backend
 
 echo "==> Running migrations"
 compose exec -T backend migrate
