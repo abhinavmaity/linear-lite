@@ -70,11 +70,11 @@ Out-of-scope for Milestone 6:
 - M6-11 completed:
   - added dashboard consistency E2E coverage in `frontend/tests/e2e/dashboard-consistency.spec.ts`.
 - M6-12 completed:
-  - added root full-stack compose file `docker-compose.fullstack.yml` with frontend/backend/postgres/redis services.
+  - added root unified compose file `docker-compose.yml` with frontend/backend/postgres/redis services.
   - frontend/backend host ports are overrideable via `FULLSTACK_FRONTEND_PORT` and `FULLSTACK_BACKEND_PORT`.
 - M6-13 completed:
   - added explicit migration one-off service (`migrate`) via compose tools profile:
-    - `docker compose -f docker-compose.fullstack.yml --profile tools run --rm migrate`
+    - `docker compose --profile tools run --rm migrate`
 - M6-14 completed:
   - added `frontend/.env.example` and full-stack env contract documentation updates in `README.md` and `backend/README.md`.
   - verified fresh startup and endpoint behavior on overridden host ports (`5180`/`18080`).

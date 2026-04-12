@@ -111,7 +111,7 @@ Notes:
 ## Next-Set Validation (M6-12 to M6-14)
 
 Infrastructure/docs added:
-- `docker-compose.fullstack.yml`
+- `docker-compose.yml`
 - `frontend/Dockerfile`
 - `frontend/.dockerignore`
 - `frontend/.env.example`
@@ -121,9 +121,9 @@ Infrastructure/docs added:
 Commands executed:
 
 ```bash
-FULLSTACK_BACKEND_PORT=18080 FULLSTACK_FRONTEND_PORT=5180 docker compose -f docker-compose.fullstack.yml up -d --build
-FULLSTACK_BACKEND_PORT=18080 FULLSTACK_FRONTEND_PORT=5180 docker compose -f docker-compose.fullstack.yml --profile tools run --rm migrate
-FULLSTACK_BACKEND_PORT=18080 FULLSTACK_FRONTEND_PORT=5180 docker compose -f docker-compose.fullstack.yml up -d backend frontend
+FULLSTACK_BACKEND_PORT=18080 FULLSTACK_FRONTEND_PORT=5180 docker compose up -d --build
+FULLSTACK_BACKEND_PORT=18080 FULLSTACK_FRONTEND_PORT=5180 docker compose --profile tools run --rm migrate
+FULLSTACK_BACKEND_PORT=18080 FULLSTACK_FRONTEND_PORT=5180 docker compose up -d backend frontend
 curl http://localhost:5180
 curl http://localhost:18080/api/v1/auth/me
 ```

@@ -172,25 +172,25 @@ Run from repo root:
 Run from repo root:
 
 ```bash
-docker compose -f docker-compose.fullstack.yml up --build -d
+docker compose up --build -d
 ```
 
 If host ports `5173` or `8080` are busy, override them:
 
 ```bash
-FULLSTACK_FRONTEND_PORT=5180 FULLSTACK_BACKEND_PORT=18080 docker compose -f docker-compose.fullstack.yml up --build -d
+FULLSTACK_FRONTEND_PORT=5180 FULLSTACK_BACKEND_PORT=18080 docker compose up --build -d
 ```
 
 Apply migrations (explicit one-off path):
 
 ```bash
-docker compose -f docker-compose.fullstack.yml --profile tools run --rm migrate
+docker compose --profile tools run --rm migrate
 ```
 
 If you started compose with overridden ports, reuse the same env vars for migration:
 
 ```bash
-FULLSTACK_FRONTEND_PORT=5180 FULLSTACK_BACKEND_PORT=18080 docker compose -f docker-compose.fullstack.yml --profile tools run --rm migrate
+FULLSTACK_FRONTEND_PORT=5180 FULLSTACK_BACKEND_PORT=18080 docker compose --profile tools run --rm migrate
 ```
 
 Service URLs after startup:
@@ -204,7 +204,7 @@ When using port overrides, frontend/backend URLs use the overridden host ports.
 Stop full-stack runtime:
 
 ```bash
-docker compose -f docker-compose.fullstack.yml down -v
+docker compose down -v
 ```
 
 ### Environment Contract
