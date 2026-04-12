@@ -7,25 +7,23 @@ This file defines how AI coding agents should operate in the `linear-lite` repos
 ## Project Snapshot
 
 - Product: Linear-lite (lightweight issue/project tracker MVP).
-- Current implementation status: frontend exists and backend Milestone 1 runtime skeleton is in place.
-- Primary stack in code today: React + TypeScript + Vite + Zustand + TanStack Query, plus Go + Gin + PostgreSQL + Redis for backend runtime.
+- Current implementation status: MVP scope is implemented and integrated across frontend and backend.
+- Primary stack in code today: React + TypeScript + Vite + Zustand + TanStack Query, plus Go + Gin + PostgreSQL + Redis.
 
 ## Source of Truth (Read First)
 
 1. `README.md`
-2. `docs/Objective.md`
-3. `docs/Frontend_Planning.md`
-4. `frontend/design.md` (UI design direction and patterns)
-5. `docs/Technical_Architecture.md`
-6. `docs/Frontend_Validation_Report.md` (if present and relevant)
+2. `docs/Product_and_Delivery.md`
+3. `frontend/design.md` (UI design direction and patterns)
+4. `docs/Technical_Architecture.md`
 
-When implementation details conflict with assumptions, trust documented architecture and planning docs.
+When implementation details conflict with assumptions, trust documented architecture and product documentation.
 
 ## Repository Layout
 
 - `frontend/`: React app (active implementation area)
-- `backend/`: Go API runtime skeleton, middleware, config, and migrations baseline
-- `docs/`: product, UX flow, and architecture references
+- `backend/`: Go API runtime, middleware, config, and migrations
+- `docs/`: product/delivery and architecture references
 
 ## Working Rules for Agents
 
@@ -65,9 +63,10 @@ Run from `backend/`:
 - Run API: `go run ./cmd/api`
 - Run migrations: `go run ./cmd/migrate`
 
-Run from repo root (backend local stack):
+Run from repo root (full local stack):
 
-- Docker baseline: `docker compose up --build`
+- `docker compose up --build -d`
+- `docker compose --profile tools run --rm migrate`
 
 ## Change Validation
 
