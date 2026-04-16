@@ -3,6 +3,7 @@ import { AppShell } from 'components/common/AppShell';
 import { CreateIssueModal } from 'components/issues/CreateIssueModal';
 import { AuthGate } from 'features/auth/AuthGate';
 import { DashboardPage } from 'pages/DashboardPage';
+import { BuildStoryPage } from 'pages/BuildStoryPage';
 import { IssueDetailPage } from 'pages/IssueDetailPage';
 import { IssuesBoardPage } from 'pages/IssuesBoardPage';
 import { IssuesListPage } from 'pages/IssuesListPage';
@@ -35,6 +36,7 @@ function PublicLayout() {
 export function AppRouter() {
   return (
     <Routes>
+      <Route path="/build-story" element={<BuildStoryPage />} />
       <Route element={<PublicLayout />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
