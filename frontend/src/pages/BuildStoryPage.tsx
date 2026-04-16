@@ -30,7 +30,7 @@ const proofPoints = [
   'React + TypeScript + Vite on the frontend',
   'Go + Gin + PostgreSQL + Redis on the backend',
   'Real frontend/backend contract parity across core workflows',
-  'Build, smoke, E2E, manual UX, and MVP readiness sign-off',
+  // 'Build, smoke, E2E, manual UX, and MVP readiness sign-off',
 ];
 
 const productSnapshot: InsightCard[] = [
