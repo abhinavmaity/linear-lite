@@ -127,4 +127,13 @@ button {
   .page {
     padding: 16px;
   }
+
+  .build-story-hero,
+  .build-story-duo {
+    grid-template-columns: 1fr !important;
+  }
+
+  .build-story-bento {
+    grid-template-columns: 1fr !important;
+  }
 }
