@@ -41,6 +41,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   frontend:
     build:
@@ -74,10 +76,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
-    profiles:
-      - tools
 
 volumes:
   linear_lite_pg_data:
