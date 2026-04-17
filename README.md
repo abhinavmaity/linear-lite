@@ -25,7 +25,6 @@ From repository root:
 
 ```bash
 docker compose up --build -d
-docker compose --profile tools run --rm migrate
 ```
 
 Application endpoints:
@@ -37,8 +36,9 @@ If ports are busy, override host ports:
 
 ```bash
 FULLSTACK_FRONTEND_PORT=5180 FULLSTACK_BACKEND_PORT=18080 docker compose up --build -d
-FULLSTACK_FRONTEND_PORT=5180 FULLSTACK_BACKEND_PORT=18080 docker compose --profile tools run --rm migrate
 ```
+
+`docker compose up` now runs schema migrations automatically before backend startup.
 
 Stop local stack:
 

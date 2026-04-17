@@ -1,5 +1,9 @@
 node_modules
 dist
-test-results
 playwright-report
+test-results
 npm-debug.log*
+.DS_Store
+.env
+.env.local
+.env.*.local

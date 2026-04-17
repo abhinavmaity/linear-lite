@@ -1,9 +1,12 @@
 .git
 .gitignore
 .idea
-tmp
 dist
 node_modules
 *.log
+.DS_Store
 .env
-
+.env.local
+.env.*.local
+tmp
+bin
