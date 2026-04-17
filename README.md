@@ -46,40 +46,6 @@ Stop local stack:
 docker compose down -v
 ```
 
-## Deploy on Railway
-
-Create one Railway project with four services:
-
-- `backend` (root directory: `/backend`)
-- `frontend` (root directory: `/frontend`)
-- `Postgres` (Railway template)
-- `Redis` (Railway template)
-
-Set each app service to use its config-as-code file:
-
-- backend config path: `/backend/railway.json`
-- frontend config path: `/frontend/railway.json`
-
-Backend service variables:
-
-- `APP_ENV=production`
-- `JWT_SECRET=<at least 32 characters>`
-- `DATABASE_URL=${{Postgres.DATABASE_URL}}`
-- `REDIS_URL=${{Redis.REDIS_URL}}`
-- `MIGRATIONS_PATH=/app/migrations`
-- `MIGRATION_DIRECTION=up`
-- `MIGRATION_STEPS=0`
-- `CORS_ORIGINS=https://<frontend-public-domain>`
-
-Frontend service variable:
-
-- `VITE_API_BASE_URL=https://<backend-public-domain>/api/v1`
-
-Notes:
-
-- Backend migrations are configured in `/backend/railway.json` via pre-deploy command `migrate`.
-- Frontend now builds static assets and serves them with `serve` (production runtime, no Vite dev server).
-
 ## Local Development
 
 Frontend (`frontend/`):
