@@ -4,6 +4,8 @@ Linear-lite is a focused issue tracking and project planning application for sma
 
 It provides the core workflows teams need every day without the complexity of heavyweight enterprise tools.
 
+Live build story case study: [https://linear-lite.up.railway.app/build-story](https://linear-lite.up.railway.app/build-story)
+
 ## Core Capabilities
 
 - Authentication (register, login, session restore)
