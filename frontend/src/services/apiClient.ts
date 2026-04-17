@@ -1,8 +1,9 @@
 import { getStoredToken, useAuthStore } from 'store/authStore';
+import { getApiBaseUrl } from './env';
 import { ApiError, CollectionResponse, ErrorEnvelope, SingleResponse } from 'types/api';
 import { cleanParams } from 'utils/query';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api/v1';
+const API_BASE = getApiBaseUrl();
 
 async function request<T>(path: string, init?: RequestInit) {
   const token = getStoredToken();
