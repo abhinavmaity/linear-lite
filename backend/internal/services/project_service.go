@@ -345,9 +345,7 @@ func (s *ProjectService) Delete(ctx context.Context, id string) *apperrors.AppEr
 		return apperrors.Internal("failed to validate project deletion")
 	}
 	if issueCount > 0 {
-		return apperrors.Conflict("project cannot be deleted while issues exist", apperrors.FieldErrors{
-			"id": "project has dependent issues",
-		})
+		return apperrors.Conflict("Project cannot be deleted because it still has issues.", nil)
 	}
 
 	sprintCount, err := s.repo.CountSprintsByProjectID(ctx, id)
@@ -355,9 +353,7 @@ func (s *ProjectService) Delete(ctx context.Context, id string) *apperrors.AppEr
 		return apperrors.Internal("failed to validate project deletion")
 	}
 	if sprintCount > 0 {
-		return apperrors.Conflict("project cannot be deleted while sprints exist", apperrors.FieldErrors{
-			"id": "project has dependent sprints",
-		})
+		return apperrors.Conflict("Project cannot be deleted because it still has sprints.", nil)
 	}
 
 	if err := s.repo.Delete(ctx, id); err != nil {

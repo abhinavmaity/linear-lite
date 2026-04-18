@@ -500,6 +500,11 @@ func (s *IssueService) hydrateIssues(ctx context.Context, rows []models.Issue) (
 		}
 
 		creator := userMap[issue.CreatedBy]
+		labels := labelsMap[issue.ID]
+		if labels == nil {
+			labels = []LabelSummary{}
+		}
+
 		items = append(items, IssueSummary{
 			ID:          issue.ID,
 			Identifier:  issue.Identifier,
@@ -519,7 +524,7 @@ func (s *IssueService) hydrateIssues(ctx context.Context, rows []models.Issue) (
 			Sprint:      sprint,
 			Assignee:    assignee,
 			Creator:     creator,
-			Labels:      labelsMap[issue.ID],
+			Labels:      labels,
 		})
 	}
 

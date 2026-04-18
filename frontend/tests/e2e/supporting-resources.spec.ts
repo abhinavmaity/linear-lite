@@ -21,7 +21,7 @@ test.describe('M6-10 Supporting Resources Journey', () => {
     await projectCreateForm.getByPlaceholder('Platform').fill(`Project Duplicate ${seed}`);
     await projectCreateForm.getByPlaceholder('PLAT', { exact: true }).fill(projectKey);
     await projectCreateForm.getByRole('button', { name: 'Create' }).click();
-    await expect(page.getByText(/already exists|already in use/i)).toBeVisible();
+    await expect(projectCreateForm.getByText(/already exists|already in use/i).first()).toBeVisible();
 
     const createdProject = await createProject(request, session.token, `${seed}-sprint-parent`);
 
@@ -56,6 +56,6 @@ test.describe('M6-10 Supporting Resources Journey', () => {
     await labelsCreateForm.getByPlaceholder('bug').fill(labelName);
     await labelsCreateForm.getByPlaceholder('#3B82F6').fill('#EF4444');
     await labelsCreateForm.getByRole('button', { name: 'Create' }).click();
-    await expect(page.getByText(/already exists|already in use/i)).toBeVisible();
+    await expect(labelsCreateForm.getByText(/already exists|already in use/i).first()).toBeVisible();
   });
 });
