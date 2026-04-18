@@ -156,25 +156,25 @@ func (s *ProjectService) Create(ctx context.Context, actorID string, input Proje
 
 	name := strings.TrimSpace(input.Name)
 	if name == "" {
-		fields["name"] = "is required"
+		fields["name"] = "Project name is required."
 	} else if utf8.RuneCountInString(name) > maxProjectNameLength {
-		fields["name"] = "must be less than or equal to 255 characters"
+		fields["name"] = "Project name must be 255 characters or fewer."
 	}
 
 	description := normalizeProjectOptional(input.Description)
 	if description != nil && utf8.RuneCountInString(*description) > maxProjectDescriptionLength {
-		fields["description"] = "must be less than or equal to 10000 characters"
+		fields["description"] = "Description must be 10000 characters or fewer."
 	}
 
 	key := strings.TrimSpace(input.Key)
 	if key == "" {
-		fields["key"] = "is required"
+		fields["key"] = "Project key is required."
 	} else if !projectKeyPattern.MatchString(key) {
-		fields["key"] = "must match ^[A-Z0-9]{2,10}$"
+		fields["key"] = "Project key must be 2-10 uppercase letters or numbers."
 	}
 
 	if len(fields) > 0 {
-		return nil, apperrors.Validation("one or more fields are invalid", fields)
+		return nil, apperrors.Validation("Please correct the highlighted fields and try again.", fields)
 	}
 
 	project := &models.Project{
@@ -186,7 +186,7 @@ func (s *ProjectService) Create(ctx context.Context, actorID string, input Proje
 	if err := s.repo.Create(ctx, project); err != nil {
 		if errors.Is(err, repositories.ErrConflict) {
 			return nil, apperrors.Conflict("project key already exists", apperrors.FieldErrors{
-				"key": "already in use",
+				"key": "This project key is already in use.",
 			})
 		}
 		return nil, apperrors.Internal("failed to create project")
@@ -279,9 +279,9 @@ func (s *ProjectService) Update(ctx context.Context, id string, input ProjectUpd
 	if input.Name != nil {
 		name := strings.TrimSpace(*input.Name)
 		if name == "" {
-			fields["name"] = "is required"
+			fields["name"] = "Project name is required."
 		} else if utf8.RuneCountInString(name) > maxProjectNameLength {
-			fields["name"] = "must be less than or equal to 255 characters"
+			fields["name"] = "Project name must be 255 characters or fewer."
 		} else {
 			project.Name = name
 		}
@@ -289,7 +289,7 @@ func (s *ProjectService) Update(ctx context.Context, id string, input ProjectUpd
 	if input.Description != nil {
 		description := normalizeProjectOptional(*input.Description)
 		if description != nil && utf8.RuneCountInString(*description) > maxProjectDescriptionLength {
-			fields["description"] = "must be less than or equal to 10000 characters"
+			fields["description"] = "Description must be 10000 characters or fewer."
 		} else {
 			project.Description = description
 		}
@@ -297,9 +297,9 @@ func (s *ProjectService) Update(ctx context.Context, id string, input ProjectUpd
 	if input.Key != nil {
 		key := strings.TrimSpace(*input.Key)
 		if key == "" {
-			fields["key"] = "is required"
+			fields["key"] = "Project key is required."
 		} else if !projectKeyPattern.MatchString(key) {
-			fields["key"] = "must match ^[A-Z0-9]{2,10}$"
+			fields["key"] = "Project key must be 2-10 uppercase letters or numbers."
 		} else if key != project.Key {
 			issueCount, countErr := s.repo.CountIssuesByProjectID(ctx, id)
 			if countErr != nil {
@@ -307,7 +307,7 @@ func (s *ProjectService) Update(ctx context.Context, id string, input ProjectUpd
 			}
 			if issueCount > 0 {
 				return nil, apperrors.Conflict("project key cannot change once issues exist", apperrors.FieldErrors{
-					"key": "cannot be changed when project has issues",
+					"key": "Project key cannot be changed while the project has issues.",
 				})
 			}
 			project.Key = key
@@ -315,13 +315,13 @@ func (s *ProjectService) Update(ctx context.Context, id string, input ProjectUpd
 	}
 
 	if len(fields) > 0 {
-		return nil, apperrors.Validation("one or more fields are invalid", fields)
+		return nil, apperrors.Validation("Please correct the highlighted fields and try again.", fields)
 	}
 
 	if err := s.repo.Update(ctx, project); err != nil {
 		if errors.Is(err, repositories.ErrConflict) {
 			return nil, apperrors.Conflict("project key already exists", apperrors.FieldErrors{
-				"key": "already in use",
+				"key": "This project key is already in use.",
 			})
 		}
 		return nil, apperrors.Internal("failed to update project")

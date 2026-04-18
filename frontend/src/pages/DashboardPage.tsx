@@ -6,6 +6,7 @@ import { PageHeader } from 'components/common/PageHeader';
 import { Spinner } from 'components/common/Spinner';
 import { StatCard } from 'components/dashboard/StatCard';
 import { useDashboardStats } from 'features/dashboard/dashboardQueries';
+import { getBannerErrorMessage } from 'utils/errorPresentation';
 import { relativeTime, titleCase } from 'utils/format';
 
 export function DashboardPage() {
@@ -14,7 +15,7 @@ export function DashboardPage() {
   return (
     <div>
       <PageHeader title="Dashboard" subtitle="Only architecture-supported metrics are rendered here." />
-      {stats.isError ? <ErrorBanner message={(stats.error as Error).message} /> : null}
+      {stats.isError ? <ErrorBanner message={getBannerErrorMessage(stats.error, 'Unable to load dashboard right now.')} /> : null}
       <Skeleton
         name="dashboard-page"
         loading={stats.isLoading}

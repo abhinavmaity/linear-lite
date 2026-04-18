@@ -15,6 +15,7 @@ import { useLabelsSelector, useProjectsSelector, useSprintsSelector, useUsersSel
 import { issuesApi } from 'services/issuesApi';
 import { useUIStore } from 'store/uiStore';
 import { IssueSummary } from 'types/domain';
+import { getBannerErrorMessage, parseUiError } from 'utils/errorPresentation';
 
 type BoardColumn = 'backlog' | 'todo' | 'in_progress' | 'in_review' | 'done' | 'cancelled';
 
@@ -78,7 +79,7 @@ export function IssuesBoardPage() {
       setItems(null);
     } catch (error) {
       setItems(previous);
-      pushToast({ tone: 'error', message: error instanceof Error ? error.message : 'Failed to update issue.' });
+      pushToast({ tone: 'error', message: parseUiError(error, 'Failed to update issue.').message });
     } finally {
       setMovingIssueId(null);
     }
@@ -188,7 +189,7 @@ export function IssuesBoardPage() {
           </div>
         </div>
         {issues.isFetching && !issues.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Updating board...</div> : null}
-        {issues.isError ? <ErrorBanner message={(issues.error as Error).message} /> : null}
+        {issues.isError ? <ErrorBanner message={getBannerErrorMessage(issues.error, 'Unable to load board issues right now.')} /> : null}
         {issues.data ? (
           <div
             style={{

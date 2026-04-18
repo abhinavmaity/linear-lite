@@ -13,6 +13,7 @@ import { useArchiveIssue, useIssueDetail, useUpdateIssue } from 'features/issues
 import { useLabelsSelector, useProjectsSelector, useSprintsSelector, useUsersSelector } from 'features/issues/selectorsQueries';
 import { useUIStore } from 'store/uiStore';
 import { ApiError } from 'types/api';
+import { getBannerErrorMessage, parseUiError } from 'utils/errorPresentation';
 import { formatDate, relativeTime, titleCase } from 'utils/format';
 
 export function IssueDetailPage() {
@@ -60,7 +61,7 @@ export function IssueDetailPage() {
         {
           onError: (error) => {
             setTitle(issue.data?.title ?? '');
-            pushToast({ tone: 'error', message: error instanceof Error ? error.message : 'Failed to update title.' });
+            pushToast({ tone: 'error', message: parseUiError(error, 'Failed to update title.').message });
           },
         },
       );
@@ -75,7 +76,7 @@ export function IssueDetailPage() {
         {
           onError: (error) => {
             setDescription(issue.data?.description ?? '');
-            pushToast({ tone: 'error', message: error instanceof Error ? error.message : 'Failed to update description.' });
+            pushToast({ tone: 'error', message: parseUiError(error, 'Failed to update description.').message });
           },
         },
       );
@@ -89,7 +90,7 @@ export function IssueDetailPage() {
     updateIssue.mutate(payload as never, {
       onError: (error) => {
         rollback();
-        pushToast({ tone: 'error', message: error instanceof Error ? error.message : fallbackMessage });
+        pushToast({ tone: 'error', message: parseUiError(error, fallbackMessage).message });
       },
     });
   }
@@ -243,7 +244,7 @@ export function IssueDetailPage() {
                 navigate('/issues');
               },
               onError: (error) => {
-                pushToast({ tone: 'error', message: error instanceof Error ? error.message : 'Failed to archive issue.' });
+                pushToast({ tone: 'error', message: parseUiError(error, 'Failed to archive issue.').message });
               },
             });
           }}
@@ -274,7 +275,7 @@ export function IssueDetailPage() {
     <div>
       <PageHeader title="Issue Detail" subtitle="Comments are intentionally omitted; the activity feed is read-only." />
       {issue.isLoading ? <Spinner label="Loading issue" /> : null}
-      {issue.isError ? <ErrorBanner message={(issue.error as Error).message} /> : null}
+      {issue.isError ? <ErrorBanner message={getBannerErrorMessage(issue.error, 'Unable to load issue details right now.')} /> : null}
       {issueError?.status === 404 && !includeArchived ? (
         <div style={{ marginBottom: 16 }}>
           <Button variant="ghost" onClick={() => setIncludeArchived(true)}>

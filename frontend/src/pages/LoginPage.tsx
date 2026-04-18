@@ -6,7 +6,7 @@ import { ErrorBanner } from 'components/common/ErrorBanner';
 import { Input } from 'components/common/Input';
 import { authApi } from 'services/authApi';
 import { useAuthStore } from 'store/authStore';
-import { ApiError } from 'types/api';
+import { parseUiError } from 'utils/errorPresentation';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -23,7 +23,9 @@ export function LoginPage() {
     },
   });
 
-  const error = mutation.error instanceof ApiError ? mutation.error.message : null;
+  const parsedError = mutation.error ? parseUiError(mutation.error, 'Unable to sign in right now. Please try again.') : null;
+  const error = parsedError?.summary ?? null;
+  const fieldErrors = parsedError?.fields ?? null;
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -49,12 +51,14 @@ export function LoginPage() {
               Email
             </div>
             <Input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="alex@example.com" />
+            {fieldErrors?.email ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.email}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
               Password
             </div>
             <Input type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+            {fieldErrors?.password ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.password}</div> : null}
           </div>
           <Button type="submit" disabled={mutation.isPending}>
             {mutation.isPending ? 'Signing In' : 'Enter Dashboard'}

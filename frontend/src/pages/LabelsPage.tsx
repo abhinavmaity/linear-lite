@@ -9,7 +9,7 @@ import { PageHeader } from 'components/common/PageHeader';
 import { Spinner } from 'components/common/Spinner';
 import { labelsApi, LabelCreateInput, LabelUpdateInput } from 'services/labelsApi';
 import { useUIStore } from 'store/uiStore';
-import { ApiError } from 'types/api';
+import { getBannerErrorMessage, parseUiError } from 'utils/errorPresentation';
 import { formatDate } from 'utils/format';
 
 export function LabelsPage() {
@@ -44,7 +44,7 @@ export function LabelsPage() {
     },
     onError: (error) => {
       const parsed = parseApiError(error, 'Failed to create label.');
-      setActionError(parsed.message);
+      setActionError(parsed.summary);
       setFieldErrors(parsed.fields);
     },
   });
@@ -61,7 +61,7 @@ export function LabelsPage() {
     },
     onError: (error) => {
       const parsed = parseApiError(error, 'Failed to update label.');
-      setActionError(parsed.message);
+      setActionError(parsed.summary);
       setFieldErrors(parsed.fields);
     },
   });
@@ -77,7 +77,7 @@ export function LabelsPage() {
     },
     onError: (error) => {
       const parsed = parseApiError(error, 'Failed to delete label.');
-      setActionError(parsed.message);
+      setActionError(parsed.summary);
       setFieldErrors(parsed.fields);
     },
   });
@@ -126,18 +126,21 @@ export function LabelsPage() {
               Name
             </div>
             <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="bug" required />
+            {fieldErrors?.name ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.name}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
               Color
             </div>
             <Input value={color} onChange={(event) => setColor(event.target.value)} placeholder="#3B82F6" required />
+            {fieldErrors?.color ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.color}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
               Description
             </div>
             <Input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Optional description" />
+            {fieldErrors?.description ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.description}</div> : null}
           </div>
           <Button type="submit" disabled={createLabel.isPending}>
             {createLabel.isPending ? 'Creating' : 'Create'}
@@ -163,7 +166,7 @@ export function LabelsPage() {
         }
       >
         {labels.isFetching && !labels.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Refreshing labels...</div> : null}
-        {labels.isError ? <ErrorBanner message={(labels.error as Error).message} /> : null}
+        {labels.isError ? <ErrorBanner message={getBannerErrorMessage(labels.error, 'Unable to load labels right now.')} /> : null}
         {labels.data?.length ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
             {labels.data.map((label) => (
@@ -233,8 +236,5 @@ export function LabelsPage() {
 }
 
 function parseApiError(error: unknown, fallback: string) {
-  if (error instanceof ApiError) {
-    return { message: error.message || fallback, fields: error.fields ?? null };
-  }
-  return { message: fallback, fields: null };
+  return parseUiError(error, fallback);
 }

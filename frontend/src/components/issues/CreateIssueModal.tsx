@@ -9,7 +9,7 @@ import { Select } from 'components/common/Select';
 import { useLabelsSelector, useProjectsSelector, useSprintsSelector, useUsersSelector } from 'features/issues/selectorsQueries';
 import { issuesApi } from 'services/issuesApi';
 import { useUIStore } from 'store/uiStore';
-import { ApiError } from 'types/api';
+import { parseUiError } from 'utils/errorPresentation';
 import { IssuePriority, IssueStatus } from 'types/domain';
 
 export function CreateIssueModal() {
@@ -59,12 +59,14 @@ export function CreateIssueModal() {
       navigate(`/issues/${response.data.id}`);
     },
     onError: (error) => {
-      pushToast({ tone: 'error', message: error instanceof Error ? error.message : 'Failed to create issue.' });
+      const parsed = parseUiError(error, 'Failed to create issue.');
+      pushToast({ tone: 'error', message: parsed.message });
     },
   });
 
-  const error = mutation.error instanceof ApiError ? mutation.error.message : null;
-  const fieldErrors = mutation.error instanceof ApiError ? mutation.error.fields : undefined;
+  const parsedError = mutation.error ? parseUiError(mutation.error, 'Failed to create issue.') : null;
+  const error = parsedError?.summary ?? null;
+  const fieldErrors = parsedError?.fields ?? undefined;
 
   const selectedProjectSprints = useMemo(() => sprints.data ?? [], [sprints.data]);
 
@@ -94,10 +96,10 @@ export function CreateIssueModal() {
           <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Build authentication flow" />
           {fieldErrors?.title ? <div style={{ color: 'var(--text-secondary)', marginTop: 6 }}>{fieldErrors.title}</div> : null}
         </div>
-        <div>
-          <div className="label" style={{ marginBottom: 8 }}>
-            Description
-          </div>
+          <div>
+            <div className="label" style={{ marginBottom: 8 }}>
+              Description
+            </div>
           <textarea
             value={description}
             onChange={(event) => setDescription(event.target.value)}
@@ -111,6 +113,7 @@ export function CreateIssueModal() {
               color: 'var(--text-primary)',
             }}
           />
+          {fieldErrors?.description ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.description}</div> : null}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16 }}>
           <div>
@@ -147,6 +150,7 @@ export function CreateIssueModal() {
                 </option>
               ))}
             </Select>
+            {fieldErrors?.assignee_id ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.assignee_id}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
@@ -160,6 +164,7 @@ export function CreateIssueModal() {
               <option value="done">Done</option>
               <option value="cancelled">Cancelled</option>
             </Select>
+            {fieldErrors?.status ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.status}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
@@ -171,6 +176,7 @@ export function CreateIssueModal() {
               <option value="high">High</option>
               <option value="urgent">Urgent</option>
             </Select>
+            {fieldErrors?.priority ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.priority}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
@@ -185,6 +191,7 @@ export function CreateIssueModal() {
               ))}
             </Select>
             {!projectId ? <div style={{ color: 'var(--text-secondary)', marginTop: 6 }}>Select a project first.</div> : null}
+            {fieldErrors?.sprint_id ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.sprint_id}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
@@ -204,6 +211,7 @@ export function CreateIssueModal() {
                 </option>
               ))}
             </Select>
+            {fieldErrors?.label_ids ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.label_ids}</div> : null}
           </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>

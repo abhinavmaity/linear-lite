@@ -144,19 +144,19 @@ func (s *SprintService) Create(ctx context.Context, input SprintCreateInput) (*S
 
 	name := strings.TrimSpace(input.Name)
 	if name == "" {
-		fields["name"] = "is required"
+		fields["name"] = "Sprint name is required."
 	} else if utf8.RuneCountInString(name) > maxSprintNameLength {
-		fields["name"] = "must be less than or equal to 255 characters"
+		fields["name"] = "Sprint name must be 255 characters or fewer."
 	}
 
 	description := normalizeSprintOptional(input.Description)
 	if description != nil && utf8.RuneCountInString(*description) > maxSprintDescriptionLength {
-		fields["description"] = "must be less than or equal to 10000 characters"
+		fields["description"] = "Description must be 10000 characters or fewer."
 	}
 
 	projectID := strings.TrimSpace(input.ProjectID)
 	if _, err := uuid.Parse(projectID); err != nil {
-		fields["project_id"] = "must be a valid UUID"
+		fields["project_id"] = "Select a valid project."
 	}
 
 	startDate, appErr := parseDateField("start_date", input.StartDate)
@@ -177,11 +177,11 @@ func (s *SprintService) Create(ctx context.Context, input SprintCreateInput) (*S
 	}
 
 	if !startDate.IsZero() && !endDate.IsZero() && endDate.Before(startDate) {
-		fields["end_date"] = "must be greater than or equal to start_date"
+		fields["end_date"] = "End date must be on or after the start date."
 	}
 
 	if len(fields) > 0 {
-		return nil, apperrors.Validation("one or more fields are invalid", fields)
+		return nil, apperrors.Validation("Please correct the highlighted fields and try again.", fields)
 	}
 
 	projectExists, err := s.projects.ExistsByID(ctx, projectID)
@@ -203,7 +203,7 @@ func (s *SprintService) Create(ctx context.Context, input SprintCreateInput) (*S
 	if err := s.repo.Create(ctx, sprint); err != nil {
 		if errors.Is(err, repositories.ErrConflict) {
 			return nil, apperrors.Conflict("only one active sprint is allowed per project", apperrors.FieldErrors{
-				"status": "an active sprint already exists for this project",
+				"status": "An active sprint already exists for this project.",
 			})
 		}
 		return nil, apperrors.Internal("failed to create sprint")
@@ -277,9 +277,9 @@ func (s *SprintService) Update(ctx context.Context, id string, input SprintUpdat
 	if input.Name != nil {
 		name := strings.TrimSpace(*input.Name)
 		if name == "" {
-			fields["name"] = "is required"
+			fields["name"] = "Sprint name is required."
 		} else if utf8.RuneCountInString(name) > maxSprintNameLength {
-			fields["name"] = "must be less than or equal to 255 characters"
+			fields["name"] = "Sprint name must be 255 characters or fewer."
 		} else {
 			sprint.Name = name
 		}
@@ -287,7 +287,7 @@ func (s *SprintService) Update(ctx context.Context, id string, input SprintUpdat
 	if input.Description != nil {
 		description := normalizeSprintOptional(*input.Description)
 		if description != nil && utf8.RuneCountInString(*description) > maxSprintDescriptionLength {
-			fields["description"] = "must be less than or equal to 10000 characters"
+			fields["description"] = "Description must be 10000 characters or fewer."
 		} else {
 			sprint.Description = description
 		}
@@ -320,19 +320,19 @@ func (s *SprintService) Update(ctx context.Context, id string, input SprintUpdat
 		}
 	}
 	if endDate.Before(startDate) {
-		fields["end_date"] = "must be greater than or equal to start_date"
+		fields["end_date"] = "End date must be on or after the start date."
 	}
 	sprint.StartDate = startDate
 	sprint.EndDate = endDate
 
 	if len(fields) > 0 {
-		return nil, apperrors.Validation("one or more fields are invalid", fields)
+		return nil, apperrors.Validation("Please correct the highlighted fields and try again.", fields)
 	}
 
 	if err := s.repo.Update(ctx, sprint); err != nil {
 		if errors.Is(err, repositories.ErrConflict) {
 			return nil, apperrors.Conflict("only one active sprint is allowed per project", apperrors.FieldErrors{
-				"status": "an active sprint already exists for this project",
+				"status": "An active sprint already exists for this project.",
 			})
 		}
 		return nil, apperrors.Internal("failed to update sprint")
@@ -396,16 +396,16 @@ func validateSprintStatus(status string) *apperrors.AppError {
 			return nil
 		}
 	}
-	return apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
-		"status": "must be one of: planned, active, completed",
+	return apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+		"status": "Status must be one of: planned, active, completed.",
 	})
 }
 
 func parseDateField(field, raw string) (time.Time, *apperrors.AppError) {
 	parsed, err := time.Parse(time.DateOnly, strings.TrimSpace(raw))
 	if err != nil {
-		return time.Time{}, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
-			field: "must use YYYY-MM-DD format",
+		return time.Time{}, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+			field: "Date must use YYYY-MM-DD format.",
 		})
 	}
 	return parsed, nil

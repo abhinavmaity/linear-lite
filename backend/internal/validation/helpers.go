@@ -22,8 +22,8 @@ func ParseUUIDParam(c *gin.Context, key string) (uuid.UUID, *apperrors.AppError)
 	value := strings.TrimSpace(c.Param(key))
 	parsed, err := uuid.Parse(value)
 	if err != nil {
-		return uuid.Nil, apperrors.Validation("invalid path parameter", apperrors.FieldErrors{
-			key: "must be a valid UUID",
+		return uuid.Nil, apperrors.Validation("Path parameter is invalid.", apperrors.FieldErrors{
+			key: "Must be a valid ID.",
 		})
 	}
 	return parsed, nil
@@ -32,20 +32,20 @@ func ParseUUIDParam(c *gin.Context, key string) (uuid.UUID, *apperrors.AppError)
 func ParsePagination(c *gin.Context, defaultLimit, maxLimit int) (Pagination, *apperrors.AppError) {
 	page, err := parsePositiveInt(c.DefaultQuery("page", "1"))
 	if err != nil {
-		return Pagination{}, apperrors.Validation("invalid pagination parameters", apperrors.FieldErrors{
-			"page": "must be a positive integer",
+		return Pagination{}, apperrors.Validation("Pagination parameters are invalid.", apperrors.FieldErrors{
+			"page": "Page must be a positive whole number.",
 		})
 	}
 
 	limit, err := parsePositiveInt(c.DefaultQuery("limit", strconv.Itoa(defaultLimit)))
 	if err != nil {
-		return Pagination{}, apperrors.Validation("invalid pagination parameters", apperrors.FieldErrors{
-			"limit": "must be a positive integer",
+		return Pagination{}, apperrors.Validation("Pagination parameters are invalid.", apperrors.FieldErrors{
+			"limit": "Limit must be a positive whole number.",
 		})
 	}
 	if limit > maxLimit {
-		return Pagination{}, apperrors.Validation("invalid pagination parameters", apperrors.FieldErrors{
-			"limit": "must be less than or equal to " + strconv.Itoa(maxLimit),
+		return Pagination{}, apperrors.Validation("Pagination parameters are invalid.", apperrors.FieldErrors{
+			"limit": "Limit must be " + strconv.Itoa(maxLimit) + " or less.",
 		})
 	}
 
@@ -62,8 +62,8 @@ func ParseSortOrder(raw string) (string, *apperrors.AppError) {
 		return "desc", nil
 	}
 	if value != "asc" && value != "desc" {
-		return "", apperrors.Validation("invalid sort order", apperrors.FieldErrors{
-			"order": "must be asc or desc",
+		return "", apperrors.Validation("Sort order is invalid.", apperrors.FieldErrors{
+			"order": "Sort order must be either asc or desc.",
 		})
 	}
 	return value, nil
@@ -81,8 +81,8 @@ func ParseSortField(raw, defaultValue string, allowed []string) (string, *apperr
 		}
 	}
 
-	return "", apperrors.Validation("invalid sort field", apperrors.FieldErrors{
-		"sort_by": "must be one of: " + strings.Join(allowed, ", "),
+	return "", apperrors.Validation("Sort field is invalid.", apperrors.FieldErrors{
+		"sort_by": "Sort field must be one of: " + strings.Join(allowed, ", ") + ".",
 	})
 }
 
@@ -98,8 +98,8 @@ func ValidateEnum(field string, raw string, allowed []string) *apperrors.AppErro
 		}
 	}
 
-	return apperrors.Validation("invalid enum value", apperrors.FieldErrors{
-		field: "must be one of: " + strings.Join(allowed, ", "),
+	return apperrors.Validation("Field value is invalid.", apperrors.FieldErrors{
+		field: "Must be one of: " + strings.Join(allowed, ", ") + ".",
 	})
 }
 
@@ -107,8 +107,8 @@ func ParseDate(field, raw string) (time.Time, *apperrors.AppError) {
 	value := strings.TrimSpace(raw)
 	parsed, err := time.Parse("2006-01-02", value)
 	if err != nil {
-		return time.Time{}, apperrors.Validation("invalid date", apperrors.FieldErrors{
-			field: "must use YYYY-MM-DD format",
+		return time.Time{}, apperrors.Validation("Date is invalid.", apperrors.FieldErrors{
+			field: "Date must use YYYY-MM-DD format.",
 		})
 	}
 	return parsed, nil
@@ -142,8 +142,8 @@ func ParseOptionalUUIDQuery(c *gin.Context, key string) (*uuid.UUID, *apperrors.
 
 	parsed, err := uuid.Parse(value)
 	if err != nil {
-		return nil, apperrors.Validation("invalid query parameter", apperrors.FieldErrors{
-			key: "must be a valid UUID",
+		return nil, apperrors.Validation("One or more query parameters are invalid.", apperrors.FieldErrors{
+			key: "Must be a valid ID.",
 		})
 	}
 
@@ -164,8 +164,8 @@ func ParseOptionalBoolQuery(c *gin.Context, key string, defaultValue bool) (bool
 		return false, nil
 	}
 
-	return false, apperrors.Validation("invalid query parameter", apperrors.FieldErrors{
-		key: "must be a boolean",
+	return false, apperrors.Validation("One or more query parameters are invalid.", apperrors.FieldErrors{
+		key: "Must be true or false.",
 	})
 }
 
@@ -180,13 +180,13 @@ func ParseDistinctUUIDArray(field string, raw []string) ([]uuid.UUID, *apperrors
 		clean := strings.TrimSpace(value)
 		parsed, err := uuid.Parse(clean)
 		if err != nil {
-			return nil, apperrors.Validation("invalid query parameter", apperrors.FieldErrors{
-				field: fmt.Sprintf("item %d must be a valid UUID", idx+1),
+			return nil, apperrors.Validation("One or more query parameters are invalid.", apperrors.FieldErrors{
+				field: fmt.Sprintf("Item %d must be a valid ID.", idx+1),
 			})
 		}
 		if _, ok := seen[parsed]; ok {
-			return nil, apperrors.Validation("invalid query parameter", apperrors.FieldErrors{
-				field: "must not contain duplicates",
+			return nil, apperrors.Validation("One or more query parameters are invalid.", apperrors.FieldErrors{
+				field: "Duplicate values are not allowed.",
 			})
 		}
 		seen[parsed] = struct{}{}

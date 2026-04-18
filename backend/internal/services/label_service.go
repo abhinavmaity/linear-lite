@@ -114,25 +114,25 @@ func (s *LabelService) Create(ctx context.Context, input LabelCreateInput) (*Lab
 
 	name := strings.TrimSpace(input.Name)
 	if name == "" {
-		fields["name"] = "is required"
+		fields["name"] = "Label name is required."
 	} else if utf8.RuneCountInString(name) > maxLabelNameLength {
-		fields["name"] = "must be less than or equal to 50 characters"
+		fields["name"] = "Label name must be 50 characters or fewer."
 	}
 
 	color := strings.TrimSpace(input.Color)
 	if color == "" {
-		fields["color"] = "is required"
+		fields["color"] = "Label color is required."
 	} else if !labelColorPattern.MatchString(color) {
-		fields["color"] = "must match #RRGGBB"
+		fields["color"] = "Color must be a 6-digit hex code like #3B82F6."
 	}
 
 	description := normalizeLabelOptional(input.Description)
 	if description != nil && utf8.RuneCountInString(*description) > maxLabelDescriptionLength {
-		fields["description"] = "must be less than or equal to 1000 characters"
+		fields["description"] = "Description must be 1000 characters or fewer."
 	}
 
 	if len(fields) > 0 {
-		return nil, apperrors.Validation("one or more fields are invalid", fields)
+		return nil, apperrors.Validation("Please correct the highlighted fields and try again.", fields)
 	}
 
 	label := &models.Label{
@@ -143,7 +143,7 @@ func (s *LabelService) Create(ctx context.Context, input LabelCreateInput) (*Lab
 	if err := s.repo.Create(ctx, label); err != nil {
 		if errors.Is(err, repositories.ErrConflict) {
 			return nil, apperrors.Conflict("label name already exists", apperrors.FieldErrors{
-				"name": "already in use",
+				"name": "This label name is already in use.",
 			})
 		}
 		return nil, apperrors.Internal("failed to create label")
@@ -201,9 +201,9 @@ func (s *LabelService) Update(ctx context.Context, id string, input LabelUpdateI
 	if input.Name != nil {
 		name := strings.TrimSpace(*input.Name)
 		if name == "" {
-			fields["name"] = "is required"
+			fields["name"] = "Label name is required."
 		} else if utf8.RuneCountInString(name) > maxLabelNameLength {
-			fields["name"] = "must be less than or equal to 50 characters"
+			fields["name"] = "Label name must be 50 characters or fewer."
 		} else {
 			label.Name = name
 		}
@@ -211,9 +211,9 @@ func (s *LabelService) Update(ctx context.Context, id string, input LabelUpdateI
 	if input.Color != nil {
 		color := strings.TrimSpace(*input.Color)
 		if color == "" {
-			fields["color"] = "is required"
+			fields["color"] = "Label color is required."
 		} else if !labelColorPattern.MatchString(color) {
-			fields["color"] = "must match #RRGGBB"
+			fields["color"] = "Color must be a 6-digit hex code like #3B82F6."
 		} else {
 			label.Color = color
 		}
@@ -221,20 +221,20 @@ func (s *LabelService) Update(ctx context.Context, id string, input LabelUpdateI
 	if input.Description != nil {
 		description := normalizeLabelOptional(*input.Description)
 		if description != nil && utf8.RuneCountInString(*description) > maxLabelDescriptionLength {
-			fields["description"] = "must be less than or equal to 1000 characters"
+			fields["description"] = "Description must be 1000 characters or fewer."
 		} else {
 			label.Description = description
 		}
 	}
 
 	if len(fields) > 0 {
-		return nil, apperrors.Validation("one or more fields are invalid", fields)
+		return nil, apperrors.Validation("Please correct the highlighted fields and try again.", fields)
 	}
 
 	if err := s.repo.Update(ctx, label); err != nil {
 		if errors.Is(err, repositories.ErrConflict) {
 			return nil, apperrors.Conflict("label name already exists", apperrors.FieldErrors{
-				"name": "already in use",
+				"name": "This label name is already in use.",
 			})
 		}
 		return nil, apperrors.Internal("failed to update label")
