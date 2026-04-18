@@ -119,7 +119,9 @@ export function parseUiError(error: unknown, fallback: string): ParsedUiError {
 
   const hasFieldErrors = Boolean(normalizedFields && Object.keys(normalizedFields).length > 0);
   const normalizedMessage = normalizeGeneralMessage(error.message, fallback);
-  const summary = hasFieldErrors ? 'Please correct the highlighted fields and try again.' : normalizedMessage;
+  const summary = hasFieldErrors && error.code === 'validation_error'
+    ? 'Please correct the highlighted fields and try again.'
+    : normalizedMessage;
 
   return {
     message: normalizedMessage,

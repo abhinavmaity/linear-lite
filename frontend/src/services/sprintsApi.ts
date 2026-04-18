@@ -1,6 +1,7 @@
 import { apiClient } from './apiClient';
 import { SprintDetail, SprintSummary } from 'types/domain';
 import { CollectionResponse, SingleResponse } from 'types/api';
+import { safeArray } from 'utils/safeArray';
 
 export interface SprintListParams {
   page?: number;
@@ -29,18 +30,43 @@ export interface SprintUpdateInput {
   status?: 'planned' | 'active' | 'completed';
 }
 
+function normalizeSprintSummary(sprint: SprintSummary): SprintSummary {
+  return sprint;
+}
+
+function normalizeSprintDetail(sprint: SprintDetail): SprintDetail {
+  return {
+    ...normalizeSprintSummary(sprint),
+    project: sprint.project,
+  };
+}
+
 export const sprintsApi = {
   list(params?: SprintListParams) {
-    return apiClient.get<CollectionResponse<SprintSummary>>('/sprints', params as Record<string, unknown> | undefined);
+    return apiClient
+      .get<CollectionResponse<SprintSummary>>('/sprints', params as Record<string, unknown> | undefined)
+      .then((response) => ({
+        ...response,
+        items: safeArray(response.items).map(normalizeSprintSummary),
+      }));
   },
   getById(id: string) {
-    return apiClient.get<SingleResponse<SprintDetail>>(`/sprints/${id}`);
+    return apiClient.get<SingleResponse<SprintDetail>>(`/sprints/${id}`).then((response) => ({
+      ...response,
+      data: normalizeSprintDetail(response.data),
+    }));
   },
   create(payload: SprintCreateInput) {
-    return apiClient.post<SingleResponse<SprintDetail>>('/sprints', payload);
+    return apiClient.post<SingleResponse<SprintDetail>>('/sprints', payload).then((response) => ({
+      ...response,
+      data: normalizeSprintDetail(response.data),
+    }));
   },
   update(id: string, payload: SprintUpdateInput) {
-    return apiClient.put<SingleResponse<SprintDetail>>(`/sprints/${id}`, payload);
+    return apiClient.put<SingleResponse<SprintDetail>>(`/sprints/${id}`, payload).then((response) => ({
+      ...response,
+      data: normalizeSprintDetail(response.data),
+    }));
   },
   delete(id: string) {
     return apiClient.delete<void>(`/sprints/${id}`);

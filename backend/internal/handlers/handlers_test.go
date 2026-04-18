@@ -56,6 +56,70 @@ func (f *fakeProjectService) Delete(ctx context.Context, id string) *apperrors.A
 	return nil
 }
 
+type fakeUserService struct {
+	listFn func(ctx context.Context, input services.UserListInput) ([]services.UserSummary, int64, *apperrors.AppError)
+	getFn  func(ctx context.Context, id string) (*services.UserDetail, *apperrors.AppError)
+}
+
+func (f *fakeUserService) List(ctx context.Context, input services.UserListInput) ([]services.UserSummary, int64, *apperrors.AppError) {
+	return f.listFn(ctx, input)
+}
+
+func (f *fakeUserService) Get(ctx context.Context, id string) (*services.UserDetail, *apperrors.AppError) {
+	if f.getFn == nil {
+		return nil, nil
+	}
+	return f.getFn(ctx, id)
+}
+
+type fakeDashboardService struct {
+	getStatsFn func(ctx context.Context, userID string) (*services.DashboardStats, *apperrors.AppError)
+}
+
+func (f *fakeDashboardService) GetStats(ctx context.Context, userID string) (*services.DashboardStats, *apperrors.AppError) {
+	return f.getStatsFn(ctx, userID)
+}
+
+type fakeIssueService struct {
+	listFn    func(ctx context.Context, input services.IssueListInput) ([]services.IssueSummary, int64, *apperrors.AppError)
+	getFn     func(ctx context.Context, id string, includeArchived bool) (*services.IssueDetail, *apperrors.AppError)
+	createFn  func(ctx context.Context, actorID string, input services.CreateIssueInput) (*services.IssueDetail, *apperrors.AppError)
+	updateFn  func(ctx context.Context, actorID string, input services.UpdateIssueInput) (*services.IssueDetail, *apperrors.AppError)
+	archiveFn func(ctx context.Context, actorID string, id string) *apperrors.AppError
+}
+
+func (f *fakeIssueService) List(ctx context.Context, input services.IssueListInput) ([]services.IssueSummary, int64, *apperrors.AppError) {
+	if f.listFn == nil {
+		return nil, 0, nil
+	}
+	return f.listFn(ctx, input)
+}
+
+func (f *fakeIssueService) Get(ctx context.Context, id string, includeArchived bool) (*services.IssueDetail, *apperrors.AppError) {
+	return f.getFn(ctx, id, includeArchived)
+}
+
+func (f *fakeIssueService) Create(ctx context.Context, actorID string, input services.CreateIssueInput) (*services.IssueDetail, *apperrors.AppError) {
+	if f.createFn == nil {
+		return nil, nil
+	}
+	return f.createFn(ctx, actorID, input)
+}
+
+func (f *fakeIssueService) Update(ctx context.Context, actorID string, input services.UpdateIssueInput) (*services.IssueDetail, *apperrors.AppError) {
+	if f.updateFn == nil {
+		return nil, nil
+	}
+	return f.updateFn(ctx, actorID, input)
+}
+
+func (f *fakeIssueService) Archive(ctx context.Context, actorID string, id string) *apperrors.AppError {
+	if f.archiveFn == nil {
+		return nil
+	}
+	return f.archiveFn(ctx, actorID, id)
+}
+
 func TestAuthRegister_InvalidJSON_ReturnsValidationEnvelope(t *testing.T) {
 	t.Parallel()
 
@@ -171,5 +235,136 @@ func TestProjectCreate_ValidationErrorContainsRequestID(t *testing.T) {
 	}
 	if got := errObj["request_id"]; got != "req-test-1" {
 		t.Fatalf("expected request_id req-test-1, got %v", got)
+	}
+}
+
+func TestUserList_EmptyItemsSerializesAsJSONList(t *testing.T) {
+	t.Parallel()
+
+	gin.SetMode(gin.TestMode)
+	handler := NewUserHandler(&fakeUserService{
+		listFn: func(ctx context.Context, input services.UserListInput) ([]services.UserSummary, int64, *apperrors.AppError) {
+			return []services.UserSummary{}, 0, nil
+		},
+	})
+
+	router := gin.New()
+	router.GET("/users", handler.List)
+
+	req := httptest.NewRequest(http.MethodGet, "/users", nil)
+	resp := httptest.NewRecorder()
+	router.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, resp.Code)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(resp.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("failed to decode response json: %v", err)
+	}
+
+	items, ok := payload["items"].([]any)
+	if !ok {
+		t.Fatalf("expected items to be a json array, got %T", payload["items"])
+	}
+	if len(items) != 0 {
+		t.Fatalf("expected empty items array, got %d entries", len(items))
+	}
+}
+
+func TestDashboardStats_EmptyRecentActivitySerializesAsJSONList(t *testing.T) {
+	t.Parallel()
+
+	gin.SetMode(gin.TestMode)
+	handler := NewDashboardHandler(&fakeDashboardService{
+		getStatsFn: func(ctx context.Context, userID string) (*services.DashboardStats, *apperrors.AppError) {
+			return &services.DashboardStats{
+				RecentActivity: []services.IssueActivity{},
+			}, nil
+		},
+	})
+
+	router := gin.New()
+	router.GET("/dashboard/stats", handler.Stats)
+
+	req := httptest.NewRequest(http.MethodGet, "/dashboard/stats", nil)
+	resp := httptest.NewRecorder()
+	router.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, resp.Code)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(resp.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("failed to decode response json: %v", err)
+	}
+
+	data, ok := payload["data"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected data object, got %T", payload["data"])
+	}
+	activity, ok := data["recent_activity"].([]any)
+	if !ok {
+		t.Fatalf("expected recent_activity to be a json array, got %T", data["recent_activity"])
+	}
+	if len(activity) != 0 {
+		t.Fatalf("expected empty recent_activity array, got %d entries", len(activity))
+	}
+}
+
+func TestIssueGet_EmptyLabelsAndActivitiesSerializeAsJSONLists(t *testing.T) {
+	t.Parallel()
+
+	gin.SetMode(gin.TestMode)
+	handler := NewIssueHandler(&fakeIssueService{
+		getFn: func(ctx context.Context, id string, includeArchived bool) (*services.IssueDetail, *apperrors.AppError) {
+			return &services.IssueDetail{
+				IssueSummary: services.IssueSummary{
+					ID:         id,
+					Identifier: "PRJ-1",
+					Labels:     []services.LabelSummary{},
+				},
+				Activities: []services.IssueActivity{},
+			}, nil
+		},
+	})
+
+	router := gin.New()
+	router.GET("/issues/:id", handler.Get)
+
+	req := httptest.NewRequest(http.MethodGet, "/issues/00000000-0000-0000-0000-000000000001", nil)
+	resp := httptest.NewRecorder()
+	router.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, resp.Code)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(resp.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("failed to decode response json: %v", err)
+	}
+
+	data, ok := payload["data"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected data object, got %T", payload["data"])
+	}
+
+	labels, ok := data["labels"].([]any)
+	if !ok {
+		t.Fatalf("expected labels to be a json array, got %T", data["labels"])
+	}
+	if len(labels) != 0 {
+		t.Fatalf("expected empty labels array, got %d entries", len(labels))
+	}
+
+	activities, ok := data["activities"].([]any)
+	if !ok {
+		t.Fatalf("expected activities to be a json array, got %T", data["activities"])
+	}
+	if len(activities) != 0 {
+		t.Fatalf("expected empty activities array, got %d entries", len(activities))
 	}
 }
