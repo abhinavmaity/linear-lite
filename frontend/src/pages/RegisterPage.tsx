@@ -6,7 +6,7 @@ import { ErrorBanner } from 'components/common/ErrorBanner';
 import { Input } from 'components/common/Input';
 import { authApi } from 'services/authApi';
 import { useAuthStore } from 'store/authStore';
-import { ApiError } from 'types/api';
+import { parseUiError } from 'utils/errorPresentation';
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -25,7 +25,9 @@ export function RegisterPage() {
     },
   });
 
-  const error = localError || (mutation.error instanceof ApiError ? mutation.error.message : null);
+  const parsedError = mutation.error ? parseUiError(mutation.error, 'Unable to create account right now. Please try again.') : null;
+  const error = localError || parsedError?.summary || null;
+  const fieldErrors = parsedError?.fields ?? null;
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -56,12 +58,14 @@ export function RegisterPage() {
               Name
             </div>
             <Input value={name} onChange={(event) => setName(event.target.value)} />
+            {fieldErrors?.name ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.name}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
               Email
             </div>
             <Input type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+            {fieldErrors?.email ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.email}</div> : null}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div>
@@ -69,6 +73,7 @@ export function RegisterPage() {
                 Password
               </div>
               <Input type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+              {fieldErrors?.password ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.password}</div> : null}
             </div>
             <div>
               <div className="label" style={{ marginBottom: 8 }}>

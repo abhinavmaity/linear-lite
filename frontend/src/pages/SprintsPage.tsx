@@ -11,7 +11,7 @@ import { Spinner } from 'components/common/Spinner';
 import { projectsApi } from 'services/projectsApi';
 import { sprintsApi, SprintCreateInput, SprintUpdateInput } from 'services/sprintsApi';
 import { useUIStore } from 'store/uiStore';
-import { ApiError } from 'types/api';
+import { getBannerErrorMessage, parseUiError } from 'utils/errorPresentation';
 import { formatDate, titleCase } from 'utils/format';
 
 export function SprintsPage() {
@@ -72,7 +72,7 @@ export function SprintsPage() {
     },
     onError: (error) => {
       const parsed = parseApiError(error, 'Failed to create sprint.');
-      setActionError(parsed.message);
+      setActionError(parsed.summary);
       setFieldErrors(parsed.fields);
     },
   });
@@ -90,7 +90,7 @@ export function SprintsPage() {
     },
     onError: (error) => {
       const parsed = parseApiError(error, 'Failed to update sprint.');
-      setActionError(parsed.message);
+      setActionError(parsed.summary);
       setFieldErrors(parsed.fields);
     },
   });
@@ -107,7 +107,7 @@ export function SprintsPage() {
     },
     onError: (error) => {
       const parsed = parseApiError(error, 'Failed to delete sprint.');
-      setActionError(parsed.message);
+      setActionError(parsed.summary);
       setFieldErrors(parsed.fields);
     },
   });
@@ -165,6 +165,7 @@ export function SprintsPage() {
               Sprint name
             </div>
             <Input value={name} onChange={(event) => setName(event.target.value)} required />
+            {fieldErrors?.name ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.name}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
@@ -178,18 +179,21 @@ export function SprintsPage() {
                 </option>
               ))}
             </Select>
+            {fieldErrors?.project_id ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.project_id}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
               Start
             </div>
             <Input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} required />
+            {fieldErrors?.start_date ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.start_date}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
               End
             </div>
             <Input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} required />
+            {fieldErrors?.end_date ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.end_date}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
@@ -200,6 +204,7 @@ export function SprintsPage() {
               <option value="active">Active</option>
               <option value="completed">Completed</option>
             </Select>
+            {fieldErrors?.status ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.status}</div> : null}
           </div>
           <Button type="submit" disabled={createSprint.isPending}>
             {createSprint.isPending ? 'Creating' : 'Create'}
@@ -250,7 +255,7 @@ export function SprintsPage() {
         }
       >
         {sprints.isFetching && !sprints.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Refreshing sprints...</div> : null}
-        {sprints.isError ? <ErrorBanner message={(sprints.error as Error).message} /> : null}
+        {sprints.isError ? <ErrorBanner message={getBannerErrorMessage(sprints.error, 'Unable to load sprints right now.')} /> : null}
         {sprints.data?.length ? (
           <div style={{ display: 'grid', gap: 16 }}>
             {sprints.data.map((sprint) => (
@@ -328,8 +333,5 @@ export function SprintsPage() {
 }
 
 function parseApiError(error: unknown, fallback: string) {
-  if (error instanceof ApiError) {
-    return { message: error.message || fallback, fields: error.fields ?? null };
-  }
-  return { message: fallback, fields: null };
+  return parseUiError(error, fallback);
 }

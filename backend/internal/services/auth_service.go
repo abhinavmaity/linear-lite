@@ -92,9 +92,9 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (*AuthS
 
 	name := strings.TrimSpace(input.Name)
 	if name == "" {
-		fields["name"] = "is required"
+		fields["name"] = "Name is required."
 	} else if utf8.RuneCountInString(name) > maxNameLength {
-		fields["name"] = "must be less than or equal to 255 characters"
+		fields["name"] = "Name must be 255 characters or fewer."
 	}
 
 	emailInput := strings.TrimSpace(input.Email)
@@ -107,7 +107,7 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (*AuthS
 	}
 
 	if len(fields) > 0 {
-		return nil, apperrors.Validation("one or more fields are invalid", fields)
+		return nil, apperrors.Validation("Please correct the highlighted fields and try again.", fields)
 	}
 
 	email := strings.ToLower(emailInput)
@@ -125,7 +125,7 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (*AuthS
 	if err := s.users.Create(ctx, user); err != nil {
 		if errors.Is(err, repositories.ErrEmailConflict) {
 			return nil, apperrors.Conflict("email is already registered", apperrors.FieldErrors{
-				"email": "already in use",
+				"email": "This email address is already in use.",
 			})
 		}
 		return nil, apperrors.Internal("failed to create user")
@@ -160,7 +160,7 @@ func (s *AuthService) Login(ctx context.Context, input LoginInput) (*AuthSession
 	}
 
 	if len(fields) > 0 {
-		return nil, apperrors.Validation("one or more fields are invalid", fields)
+		return nil, apperrors.Validation("Please correct the highlighted fields and try again.", fields)
 	}
 
 	email := strings.ToLower(emailInput)
@@ -244,15 +244,15 @@ func mapAuthUser(user *models.User) AuthUser {
 
 func validateEmail(email string) error {
 	if email == "" {
-		return errors.New("is required")
+		return errors.New("Email is required.")
 	}
 	if len(email) > maxEmailLength {
-		return errors.New("must be less than or equal to 255 characters")
+		return errors.New("Email must be 255 characters or fewer.")
 	}
 
 	addr, err := mail.ParseAddress(email)
 	if err != nil || addr.Address != email {
-		return errors.New("must be a valid email address")
+		return errors.New("Enter a valid email address.")
 	}
 
 	return nil
@@ -261,17 +261,17 @@ func validateEmail(email string) error {
 func validatePassword(password string) error {
 	length := utf8.RuneCountInString(password)
 	if length < minPasswordLength || length > maxPasswordLength {
-		return errors.New("must be between 8 and 72 characters")
+		return errors.New("Password must be 8-72 characters long.")
 	}
 
 	// bcrypt has a hard 72-byte input limit, so enforce it explicitly.
 	if len([]byte(password)) > maxPasswordLength {
-		return errors.New("must be between 8 and 72 characters")
+		return errors.New("Password must be 8-72 characters long.")
 	}
 
 	return nil
 }
 
 func invalidCredentialsError() *apperrors.AppError {
-	return apperrors.Unauthorized("invalid email or password")
+	return apperrors.Unauthorized("Email or password is incorrect.")
 }

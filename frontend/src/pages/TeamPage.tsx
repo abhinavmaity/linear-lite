@@ -10,6 +10,7 @@ import { PageHeader } from 'components/common/PageHeader';
 import { Select } from 'components/common/Select';
 import { Spinner } from 'components/common/Spinner';
 import { usersApi } from 'services/usersApi';
+import { getBannerErrorMessage } from 'utils/errorPresentation';
 import { formatDate } from 'utils/format';
 
 export function TeamPage() {
@@ -67,7 +68,7 @@ export function TeamPage() {
         }
       >
         {users.isFetching && !users.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Refreshing team...</div> : null}
-        {users.isError ? <ErrorBanner message={(users.error as Error).message} /> : null}
+        {users.isError ? <ErrorBanner message={getBannerErrorMessage(users.error, 'Unable to load team members right now.')} /> : null}
         {users.data ? (
           <div style={{ marginBottom: 12, color: 'var(--text-secondary)', display: 'flex', gap: 10, alignItems: 'center' }}>
             <span>{totalUsers} members</span>

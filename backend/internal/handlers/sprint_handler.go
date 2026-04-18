@@ -104,8 +104,8 @@ type updateSprintRequest struct {
 func (h *SprintHandler) Create(c *gin.Context) {
 	var req createSprintRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		apperrors.Write(c, apperrors.Validation("invalid request body", apperrors.FieldErrors{
-			"body": "must be valid JSON",
+		apperrors.Write(c, apperrors.Validation("Request body is invalid.", apperrors.FieldErrors{
+			"body": "Body must be valid JSON.",
 		}), requestID(c))
 		return
 	}
@@ -151,8 +151,8 @@ func (h *SprintHandler) Update(c *gin.Context) {
 
 	var raw map[string]json.RawMessage
 	if err := c.ShouldBindJSON(&raw); err != nil {
-		apperrors.Write(c, apperrors.Validation("invalid request body", apperrors.FieldErrors{
-			"body": "must be valid JSON",
+		apperrors.Write(c, apperrors.Validation("Request body is invalid.", apperrors.FieldErrors{
+			"body": "Body must be valid JSON.",
 		}), requestID(c))
 		return
 	}

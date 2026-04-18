@@ -139,7 +139,7 @@ func TestProjectCreate_ValidationErrorContainsRequestID(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	handler := NewProjectHandler(&fakeProjectService{
 		createFn: func(ctx context.Context, actorID string, input services.ProjectCreateInput) (*services.ProjectDetail, *apperrors.AppError) {
-			return nil, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
+			return nil, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
 				"key": "must match ^[A-Z0-9]{2,10}$",
 			})
 		},

@@ -98,7 +98,7 @@ func (h *IssueHandler) List(c *gin.Context) {
 	}
 	labelMode := strings.TrimSpace(c.DefaultQuery("label_mode", "any"))
 	if labelMode != "any" && labelMode != "all" {
-		apperrors.Write(c, apperrors.Validation("invalid query parameter", apperrors.FieldErrors{
+		apperrors.Write(c, apperrors.Validation("One or more query parameters are invalid.", apperrors.FieldErrors{
 			"label_mode": "must be any or all",
 		}), requestID(c))
 		return
@@ -135,30 +135,30 @@ func (h *IssueHandler) List(c *gin.Context) {
 func (h *IssueHandler) Create(c *gin.Context) {
 	var req createIssueRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		apperrors.Write(c, apperrors.Validation("invalid request body", apperrors.FieldErrors{
-			"body": "must be valid JSON",
+		apperrors.Write(c, apperrors.Validation("Request body is invalid.", apperrors.FieldErrors{
+			"body": "Body must be valid JSON.",
 		}), requestID(c))
 		return
 	}
 
 	if _, err := uuid.Parse(req.ProjectID); err != nil {
-		apperrors.Write(c, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
-			"project_id": "must be a valid UUID",
+		apperrors.Write(c, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+			"project_id": "Select a valid project.",
 		}), requestID(c))
 		return
 	}
 	if req.SprintID != nil {
 		if _, err := uuid.Parse(*req.SprintID); err != nil {
-			apperrors.Write(c, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
-				"sprint_id": "must be a valid UUID",
+			apperrors.Write(c, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+				"sprint_id": "Select a valid sprint.",
 			}), requestID(c))
 			return
 		}
 	}
 	if req.AssigneeID != nil {
 		if _, err := uuid.Parse(*req.AssigneeID); err != nil {
-			apperrors.Write(c, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
-				"assignee_id": "must be a valid UUID",
+			apperrors.Write(c, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+				"assignee_id": "Select a valid assignee.",
 			}), requestID(c))
 			return
 		}
@@ -231,8 +231,8 @@ func (h *IssueHandler) Update(c *gin.Context) {
 
 	var raw map[string]json.RawMessage
 	if err := c.ShouldBindJSON(&raw); err != nil {
-		apperrors.Write(c, apperrors.Validation("invalid request body", apperrors.FieldErrors{
-			"body": "must be valid JSON",
+		apperrors.Write(c, apperrors.Validation("Request body is invalid.", apperrors.FieldErrors{
+			"body": "Body must be valid JSON.",
 		}), requestID(c))
 		return
 	}
@@ -353,8 +353,8 @@ func parseStringPointer(raw map[string]json.RawMessage, key string) (*string, bo
 	}
 	var value string
 	if err := json.Unmarshal(v, &value); err != nil {
-		return nil, false, apperrors.Validation("invalid request body", apperrors.FieldErrors{
-			key: "must be a string",
+		return nil, false, apperrors.Validation("Request body is invalid.", apperrors.FieldErrors{
+			key: "Value must be a string.",
 		})
 	}
 	value = strings.TrimSpace(value)
@@ -370,8 +370,8 @@ func parseRequiredStringPointer(raw map[string]json.RawMessage, key string) (*st
 		return nil, false, nil
 	}
 	if value == nil || *value == "" {
-		return nil, false, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
-			key: "is required",
+		return nil, false, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+			key: "This field is required.",
 		})
 	}
 	return value, true, nil
@@ -387,8 +387,8 @@ func parseNullableStringPointer(raw map[string]json.RawMessage, key string) (*st
 	}
 	var value string
 	if err := json.Unmarshal(v, &value); err != nil {
-		return nil, false, apperrors.Validation("invalid request body", apperrors.FieldErrors{
-			key: "must be a string or null",
+		return nil, false, apperrors.Validation("Request body is invalid.", apperrors.FieldErrors{
+			key: "Value must be a string or null.",
 		})
 	}
 	value = strings.TrimSpace(value)
@@ -408,21 +408,21 @@ func parseUUIDStringPointer(raw map[string]json.RawMessage, key string, nullable
 	}
 	var value string
 	if err := json.Unmarshal(v, &value); err != nil {
-		msg := "must be a UUID string"
+		msg := "Value must be an ID string."
 		if nullable {
-			msg = "must be a UUID string or null"
+			msg = "Value must be an ID string or null."
 		}
-		return nil, false, apperrors.Validation("invalid request body", apperrors.FieldErrors{key: msg})
+		return nil, false, apperrors.Validation("Request body is invalid.", apperrors.FieldErrors{key: msg})
 	}
 	value = strings.TrimSpace(value)
 	if value == "" {
-		return nil, false, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
-			key: "must be a valid UUID",
+		return nil, false, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+			key: "Select a valid value.",
 		})
 	}
 	if _, err := uuid.Parse(value); err != nil {
-		return nil, false, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
-			key: "must be a valid UUID",
+		return nil, false, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+			key: "Select a valid value.",
 		})
 	}
 	return &value, true, nil
@@ -435,8 +435,8 @@ func parseUUIDStringSlice(raw map[string]json.RawMessage, key string) ([]string,
 	}
 	var value []string
 	if err := json.Unmarshal(v, &value); err != nil {
-		return nil, false, apperrors.Validation("invalid request body", apperrors.FieldErrors{
-			key: "must be an array of UUID strings",
+		return nil, false, apperrors.Validation("Request body is invalid.", apperrors.FieldErrors{
+			key: "Value must be an array of ID strings.",
 		})
 	}
 	parsed, err := validation.ParseDistinctUUIDArray(key, value)
@@ -453,8 +453,8 @@ func parseBoolPointer(raw map[string]json.RawMessage, key string) (*bool, bool, 
 	}
 	var value bool
 	if err := json.Unmarshal(v, &value); err != nil {
-		return nil, false, apperrors.Validation("invalid request body", apperrors.FieldErrors{
-			key: "must be a boolean",
+		return nil, false, apperrors.Validation("Request body is invalid.", apperrors.FieldErrors{
+			key: "Value must be true or false.",
 		})
 	}
 	return &value, true, nil

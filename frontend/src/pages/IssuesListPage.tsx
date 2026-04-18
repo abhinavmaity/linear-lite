@@ -12,6 +12,7 @@ import { Spinner } from 'components/common/Spinner';
 import { useDebouncedValue } from 'hooks/useDebouncedValue';
 import { useIssuesList } from 'features/issues/issuesQueries';
 import { useLabelsSelector, useProjectsSelector, useSprintsSelector, useUsersSelector } from 'features/issues/selectorsQueries';
+import { getBannerErrorMessage } from 'utils/errorPresentation';
 import { titleCase } from 'utils/format';
 import { IssueSummary } from 'types/domain';
 
@@ -203,7 +204,7 @@ export function IssuesListPage() {
         </div>
 
         {issues.isFetching && !issues.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Updating issues...</div> : null}
-        {issues.isError ? <ErrorBanner message={(issues.error as Error).message} /> : null}
+        {issues.isError ? <ErrorBanner message={getBannerErrorMessage(issues.error, 'Unable to load issues right now.')} /> : null}
         {issues.data && issues.data.items.length === 0 ? (
           <EmptyState title="No issues found" description="No issues match the current filters. Try changing or resetting filters." />
         ) : null}

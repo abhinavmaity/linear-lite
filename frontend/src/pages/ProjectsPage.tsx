@@ -9,7 +9,7 @@ import { PageHeader } from 'components/common/PageHeader';
 import { Spinner } from 'components/common/Spinner';
 import { projectsApi, ProjectCreateInput, ProjectUpdateInput } from 'services/projectsApi';
 import { useUIStore } from 'store/uiStore';
-import { ApiError } from 'types/api';
+import { getBannerErrorMessage, parseUiError } from 'utils/errorPresentation';
 import { formatDate } from 'utils/format';
 
 export function ProjectsPage() {
@@ -58,7 +58,7 @@ export function ProjectsPage() {
     },
     onError: (error) => {
       const parsed = parseApiError(error, 'Failed to create project.');
-      setActionError(parsed.message);
+      setActionError(parsed.summary);
       setFieldErrors(parsed.fields);
     },
   });
@@ -76,7 +76,7 @@ export function ProjectsPage() {
     },
     onError: (error) => {
       const parsed = parseApiError(error, 'Failed to update project.');
-      setActionError(parsed.message);
+      setActionError(parsed.summary);
       setFieldErrors(parsed.fields);
     },
   });
@@ -93,7 +93,7 @@ export function ProjectsPage() {
     },
     onError: (error) => {
       const parsed = parseApiError(error, 'Failed to delete project.');
-      setActionError(parsed.message);
+      setActionError(parsed.summary);
       setFieldErrors(parsed.fields);
     },
   });
@@ -142,6 +142,7 @@ export function ProjectsPage() {
               Name
             </div>
             <Input value={createName} onChange={(event) => setCreateName(event.target.value)} placeholder="Platform" required />
+            {fieldErrors?.name ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.name}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
@@ -153,12 +154,14 @@ export function ProjectsPage() {
               placeholder="PLAT"
               required
             />
+            {fieldErrors?.key ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.key}</div> : null}
           </div>
           <div>
             <div className="label" style={{ marginBottom: 8 }}>
               Description
             </div>
             <Input value={createDescription} onChange={(event) => setCreateDescription(event.target.value)} placeholder="Optional description" />
+            {fieldErrors?.description ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.description}</div> : null}
           </div>
           <Button type="submit" disabled={createProject.isPending}>
             {createProject.isPending ? 'Creating' : 'Create'}
@@ -193,7 +196,7 @@ export function ProjectsPage() {
         }
       >
         {projects.isFetching && !projects.isLoading ? <div style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>Refreshing projects...</div> : null}
-        {projects.isError ? <ErrorBanner message={(projects.error as Error).message} /> : null}
+        {projects.isError ? <ErrorBanner message={getBannerErrorMessage(projects.error, 'Unable to load projects right now.')} /> : null}
         {projects.data?.length ? (
           <div style={{ display: 'grid', gap: 12 }}>
             <div style={{ color: 'var(--text-secondary)' }}>{sortedCount} projects</div>
@@ -269,11 +272,5 @@ export function ProjectsPage() {
 }
 
 function parseApiError(error: unknown, fallback: string) {
-  if (error instanceof ApiError) {
-    return {
-      message: error.message || fallback,
-      fields: error.fields ?? null,
-    };
-  }
-  return { message: fallback, fields: null };
+  return parseUiError(error, fallback);
 }

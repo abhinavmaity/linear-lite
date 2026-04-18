@@ -145,15 +145,15 @@ func (s *IssueService) Get(ctx context.Context, id string, includeArchived bool)
 func (s *IssueService) Create(ctx context.Context, actorID string, input CreateIssueInput) (*IssueDetail, *apperrors.AppError) {
 	title := strings.TrimSpace(input.Title)
 	if title == "" {
-		return nil, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{"title": "is required"})
+		return nil, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{"title": "Title is required."})
 	}
 	if len(title) > maxIssueTitleLength {
-		return nil, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{"title": "must be less than or equal to 500 characters"})
+		return nil, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{"title": "Title must be 500 characters or fewer."})
 	}
 
 	description := normalizeOptional(input.Description)
 	if description != nil && len(*description) > maxIssueDescriptionLength {
-		return nil, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{"description": "must be less than or equal to 50000 characters"})
+		return nil, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{"description": "Description must be 50000 characters or fewer."})
 	}
 
 	status := models.IssueStatusBacklog
@@ -197,25 +197,25 @@ func (s *IssueService) Create(ctx context.Context, actorID string, input CreateI
 
 func (s *IssueService) Update(ctx context.Context, actorID string, input UpdateIssueInput) (*IssueDetail, *apperrors.AppError) {
 	if input.Archived != nil && *input.Archived {
-		return nil, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
-			"archived": "archiving must use DELETE /issues/:id",
+		return nil, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+			"archived": "Use the archive action instead of setting archived=true.",
 		})
 	}
 
 	if input.Title != nil {
 		title := strings.TrimSpace(*input.Title)
 		if title == "" {
-			return nil, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{"title": "is required"})
+			return nil, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{"title": "Title is required."})
 		}
 		if len(title) > maxIssueTitleLength {
-			return nil, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{"title": "must be less than or equal to 500 characters"})
+			return nil, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{"title": "Title must be 500 characters or fewer."})
 		}
 		*input.Title = title
 	}
 	if input.Description != nil {
 		desc := normalizeOptional(*input.Description)
 		if desc != nil && len(*desc) > maxIssueDescriptionLength {
-			return nil, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{"description": "must be less than or equal to 50000 characters"})
+			return nil, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{"description": "Description must be 50000 characters or fewer."})
 		}
 		*input.Description = desc
 	}
@@ -260,13 +260,13 @@ func (s *IssueService) Update(ctx context.Context, actorID string, input UpdateI
 		if input.ProjectID != nil && input.SprintID == nil && current.SprintID != nil {
 			sprint, err := s.sprints.FindByID(ctx, *current.SprintID)
 			if err != nil {
-				return nil, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
-					"sprint_id": "must belong to the issue project",
+				return nil, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+					"sprint_id": "Select a sprint that belongs to the selected project.",
 				})
 			}
 			if sprint.ProjectID != targetProjectID {
-				return nil, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
-					"sprint_id": "must be cleared or replaced when project changes",
+				return nil, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+					"sprint_id": "Clear or replace sprint when changing the project.",
 				})
 			}
 		}
@@ -291,8 +291,8 @@ func (s *IssueService) Update(ctx context.Context, actorID string, input UpdateI
 			return nil, apperrors.NotFound("issue not found")
 		}
 		if errors.Is(err, repositories.ErrConflict) {
-			return nil, apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
-				"archived": "only archived issues may be restored",
+			return nil, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+				"archived": "Only archived issues can be restored.",
 			})
 		}
 		return nil, apperrors.Internal("failed to update issue")
@@ -348,8 +348,8 @@ func (s *IssueService) validateIssueReferences(
 			return apperrors.Internal("failed to validate sprint")
 		}
 		if sprint.ProjectID != projectID {
-			return apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
-				"sprint_id": "must belong to the selected project",
+			return apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+				"sprint_id": "Select a sprint that belongs to the selected project.",
 			})
 		}
 	}
@@ -368,8 +368,8 @@ func (s *IssueService) validateIssueReferences(
 		distinct := make(map[string]struct{}, len(labelIDs))
 		for _, id := range labelIDs {
 			if _, ok := distinct[id]; ok {
-				return apperrors.Validation("one or more fields are invalid", apperrors.FieldErrors{
-					"label_ids": "must not contain duplicates",
+				return apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+					"label_ids": "Remove duplicate labels.",
 				})
 			}
 			distinct[id] = struct{}{}
