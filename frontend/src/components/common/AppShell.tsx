@@ -38,7 +38,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="label" style={{ fontSize: 28 }}>
             Linear Lite
           </div>
-          <div style={{ color: 'var(--text-secondary)', marginTop: 8 }}>Issue tracking for focused team workflows</div>
         </div>
         <nav style={{ display: 'grid', gap: 10 }}>
           {links.map(([label, to]) => (
@@ -80,7 +79,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           }}
         >
           <div className="label" style={{ fontSize: 13 }}>
-            Core user workflow
+              Issue tracking for focused team workflows
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <Button variant="secondary" onClick={toggleTheme}>

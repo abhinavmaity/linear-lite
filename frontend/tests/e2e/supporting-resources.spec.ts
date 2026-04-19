@@ -49,12 +49,12 @@ test.describe('M6-10 Supporting Resources Journey', () => {
     const labelsCreateForm = page.locator('form').first();
     const labelName = `label-${seed}`;
     await labelsCreateForm.getByPlaceholder('bug').fill(labelName);
-    await labelsCreateForm.getByPlaceholder('#3B82F6').fill('#22C55E');
+    await labelsCreateForm.locator('select').first().selectOption('#22C55E');
     await labelsCreateForm.getByRole('button', { name: 'Create' }).click();
     await expect(page.getByText('Label created.')).toBeVisible();
 
     await labelsCreateForm.getByPlaceholder('bug').fill(labelName);
-    await labelsCreateForm.getByPlaceholder('#3B82F6').fill('#EF4444');
+    await labelsCreateForm.locator('select').first().selectOption('#EF4444');
     await labelsCreateForm.getByRole('button', { name: 'Create' }).click();
     await expect(labelsCreateForm.getByText(/already exists|already in use/i).first()).toBeVisible();
   });
