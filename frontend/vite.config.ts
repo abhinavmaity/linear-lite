@@ -10,6 +10,7 @@ export default defineConfig({
     alias: {
       app: src('app'),
       components: src('components'),
+      constants: src('constants'),
       features: src('features'),
       hooks: src('hooks'),
       pages: src('pages'),

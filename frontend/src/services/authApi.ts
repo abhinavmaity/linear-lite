@@ -9,6 +9,9 @@ export const authApi = {
   register(payload: { name: string; email: string; password: string }) {
     return apiClient.post<SingleResponse<AuthResponse>>('/auth/register', payload);
   },
+  loginWithGoogle(payload: { id_token: string }) {
+    return apiClient.post<SingleResponse<AuthResponse>>('/auth/google', payload);
+  },
   me() {
     return apiClient.get<SingleResponse<UserSummary>>('/auth/me');
   },

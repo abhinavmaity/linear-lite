@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FormEvent, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Skeleton } from 'boneyard-js/react';
 import { Button } from 'components/common/Button';
 import { EmptyState } from 'components/common/EmptyState';
@@ -14,6 +15,7 @@ import { formatDate } from 'utils/format';
 
 export function ProjectsPage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const pushToast = useUIStore((state) => state.pushToast);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'created_at' | 'updated_at'>('name');
@@ -27,6 +29,7 @@ export function ProjectsPage() {
   const [editDescription, setEditDescription] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string> | null>(null);
+  const [createdProjectName, setCreatedProjectName] = useState<string | null>(null);
 
   const projects = useQuery({
     queryKey: ['projects', 'page', search, sortBy, sortOrder],
@@ -45,10 +48,11 @@ export function ProjectsPage() {
 
   const createProject = useMutation({
     mutationFn: (payload: ProjectCreateInput) => projectsApi.create(payload),
-    onSuccess: () => {
+    onSuccess: (response) => {
       setCreateName('');
       setCreateKey('');
       setCreateDescription('');
+      setCreatedProjectName(response.data.name);
       setActionError(null);
       setFieldErrors(null);
       pushToast({ tone: 'success', message: 'Project created.' });
@@ -135,6 +139,16 @@ export function ProjectsPage() {
   return (
     <div>
       <PageHeader title="Projects" subtitle="Track project ownership, keys, and progress at a glance." />
+      {createdProjectName ? (
+        <div className="panel-soft" style={{ padding: 14, marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+          <div>
+            <strong>{createdProjectName}</strong> was created. Next step: create a sprint for this project.
+          </div>
+          <Button type="button" onClick={() => navigate('/sprints')}>
+            Go To Sprints
+          </Button>
+        </div>
+      ) : null}
       <div className="panel" style={{ padding: 18, marginBottom: 18 }}>
         <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr auto', gap: 12, alignItems: 'end' }}>
           <div>

@@ -13,6 +13,7 @@ import (
 type AuthService interface {
 	Register(ctx context.Context, input services.RegisterInput) (*services.AuthSession, *apperrors.AppError)
 	Login(ctx context.Context, input services.LoginInput) (*services.AuthSession, *apperrors.AppError)
+	LoginWithGoogle(ctx context.Context, input services.GoogleLoginInput) (*services.AuthSession, *apperrors.AppError)
 	Me(ctx context.Context, userID string) (*services.AuthUser, *apperrors.AppError)
 }
 
@@ -33,6 +34,10 @@ type registerRequest struct {
 type loginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type googleLoginRequest struct {
+	IDToken string `json:"id_token"`
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
@@ -69,6 +74,26 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	session, appErr := h.service.Login(c, services.LoginInput{
 		Email:    req.Email,
 		Password: req.Password,
+	})
+	if appErr != nil {
+		apperrors.Write(c, appErr, requestID(c))
+		return
+	}
+
+	WriteResource(c, http.StatusOK, session)
+}
+
+func (h *AuthHandler) LoginWithGoogle(c *gin.Context) {
+	var req googleLoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		apperrors.Write(c, apperrors.Validation("Request body is invalid.", apperrors.FieldErrors{
+			"body": "Body must be valid JSON.",
+		}), requestID(c))
+		return
+	}
+
+	session, appErr := h.service.LoginWithGoogle(c, services.GoogleLoginInput{
+		IDToken: req.IDToken,
 	})
 	if appErr != nil {
 		apperrors.Write(c, appErr, requestID(c))

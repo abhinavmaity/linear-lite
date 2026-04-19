@@ -50,9 +50,26 @@ type LoginInput struct {
 	Password string
 }
 
+type GoogleLoginInput struct {
+	IDToken string
+}
+
+type GoogleIdentity struct {
+	Subject   string
+	Email     string
+	Name      string
+	AvatarURL *string
+}
+
+type GoogleTokenVerifier interface {
+	VerifyIDToken(ctx context.Context, idToken, audience string) (*GoogleIdentity, error)
+}
+
 type UserAuthRepository interface {
 	Create(ctx context.Context, user *models.User) error
 	FindByEmail(ctx context.Context, email string) (*models.User, error)
+	FindByGoogleSubject(ctx context.Context, subject string) (*models.User, error)
+	SetGoogleSubject(ctx context.Context, userID, subject string) error
 	FindByID(ctx context.Context, id string) (*models.User, error)
 }
 
@@ -67,6 +84,8 @@ type AuthService struct {
 	jwtSecret  []byte
 	jwtTTL     time.Duration
 	bcryptCost int
+	googleID   string
+	verifier   GoogleTokenVerifier
 	now        func() time.Time
 }
 
@@ -75,6 +94,8 @@ func NewAuthService(
 	jwtSecret string,
 	jwtTTL time.Duration,
 	bcryptCost int,
+	googleClientID string,
+	verifier GoogleTokenVerifier,
 	cache *cachepkg.Store,
 ) *AuthService {
 	return &AuthService{
@@ -83,6 +104,8 @@ func NewAuthService(
 		jwtSecret:  []byte(strings.TrimSpace(jwtSecret)),
 		jwtTTL:     jwtTTL,
 		bcryptCost: bcryptCost,
+		googleID:   strings.TrimSpace(googleClientID),
+		verifier:   verifier,
 		now:        time.Now,
 	}
 }
@@ -116,10 +139,11 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (*AuthS
 		return nil, apperrors.Internal("failed to process password")
 	}
 
+	hash := string(passwordHash)
 	user := &models.User{
 		Name:         name,
 		Email:        email,
-		PasswordHash: string(passwordHash),
+		PasswordHash: &hash,
 	}
 
 	if err := s.users.Create(ctx, user); err != nil {
@@ -172,7 +196,11 @@ func (s *AuthService) Login(ctx context.Context, input LoginInput) (*AuthSession
 		return nil, apperrors.Internal("failed to authenticate user")
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(input.Password)); err != nil {
+	if user.PasswordHash == nil {
+		return nil, invalidCredentialsError()
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(*user.PasswordHash), []byte(input.Password)); err != nil {
 		return nil, invalidCredentialsError()
 	}
 
@@ -181,6 +209,96 @@ func (s *AuthService) Login(ctx context.Context, input LoginInput) (*AuthSession
 		return nil, appErr
 	}
 
+	return &AuthSession{
+		Token:     token,
+		ExpiresAt: expiresAt,
+		User:      mapAuthUser(user),
+	}, nil
+}
+
+func (s *AuthService) LoginWithGoogle(ctx context.Context, input GoogleLoginInput) (*AuthSession, *apperrors.AppError) {
+	idToken := strings.TrimSpace(input.IDToken)
+	if idToken == "" {
+		return nil, apperrors.Validation("Please correct the highlighted fields and try again.", apperrors.FieldErrors{
+			"id_token": "Google credential is required.",
+		})
+	}
+	if s.googleID == "" || s.verifier == nil {
+		return nil, apperrors.Internal("google authentication is not configured")
+	}
+
+	identity, err := s.verifier.VerifyIDToken(ctx, idToken, s.googleID)
+	if err != nil {
+		return nil, apperrors.Unauthorized("Google authentication failed.")
+	}
+	if identity == nil || strings.TrimSpace(identity.Subject) == "" {
+		return nil, apperrors.Unauthorized("Google authentication failed.")
+	}
+
+	email := strings.ToLower(strings.TrimSpace(identity.Email))
+	if err := validateEmail(email); err != nil {
+		return nil, apperrors.Unauthorized("Google authentication failed.")
+	}
+
+	user, err := s.users.FindByGoogleSubject(ctx, identity.Subject)
+	if err != nil && !errors.Is(err, repositories.ErrNotFound) {
+		return nil, apperrors.Internal("failed to authenticate user")
+	}
+
+	if user == nil {
+		user, err = s.users.FindByEmail(ctx, email)
+		if err != nil && !errors.Is(err, repositories.ErrNotFound) {
+			return nil, apperrors.Internal("failed to authenticate user")
+		}
+	}
+
+	if user == nil {
+		name := strings.TrimSpace(identity.Name)
+		if name == "" {
+			name = strings.Split(email, "@")[0]
+		}
+		if utf8.RuneCountInString(name) > maxNameLength {
+			return nil, apperrors.Unauthorized("Google authentication failed.")
+		}
+		newUser := &models.User{
+			Name:          name,
+			Email:         email,
+			GoogleSubject: strPtr(strings.TrimSpace(identity.Subject)),
+			AvatarURL:     identity.AvatarURL,
+		}
+		if err := s.users.Create(ctx, newUser); err != nil {
+			if errors.Is(err, repositories.ErrEmailConflict) {
+				return nil, apperrors.Conflict("email is already registered", apperrors.FieldErrors{
+					"email": "This email address is already in use.",
+				})
+			}
+			if errors.Is(err, repositories.ErrConflict) {
+				return nil, apperrors.Conflict("google account is already linked", nil)
+			}
+			return nil, apperrors.Internal("failed to create user")
+		}
+		user = newUser
+	} else {
+		if user.GoogleSubject == nil || strings.TrimSpace(*user.GoogleSubject) == "" {
+			if err := s.users.SetGoogleSubject(ctx, user.ID, identity.Subject); err != nil {
+				if errors.Is(err, repositories.ErrConflict) {
+					return nil, apperrors.Conflict("google account is already linked", nil)
+				}
+				if !errors.Is(err, repositories.ErrNotFound) {
+					return nil, apperrors.Internal("failed to link google account")
+				}
+			}
+		}
+	}
+
+	if s.cache != nil {
+		_ = s.cache.DeleteByPrefix(ctx, "users:")
+	}
+
+	token, expiresAt, appErr := s.issueAccessToken(user.ID, user.Email)
+	if appErr != nil {
+		return nil, appErr
+	}
 	return &AuthSession{
 		Token:     token,
 		ExpiresAt: expiresAt,
@@ -274,4 +392,8 @@ func validatePassword(password string) error {
 
 func invalidCredentialsError() *apperrors.AppError {
 	return apperrors.Unauthorized("Email or password is incorrect.")
+}
+
+func strPtr(v string) *string {
+	return &v
 }

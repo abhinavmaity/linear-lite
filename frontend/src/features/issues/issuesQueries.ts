@@ -21,11 +21,16 @@ export function useUpdateIssue(id: string) {
 
   return useMutation({
     mutationFn: (payload: IssueUpsertInput) => issuesApi.update(id, payload).then((response) => response.data),
-    onSuccess: (issue) => {
+    onSuccess: (issue, variables) => {
       queryClient.setQueryData(['issue', id, false], issue);
       queryClient.setQueryData(['issue', id, true], issue);
-      queryClient.invalidateQueries({ queryKey: ['issues'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+
+      if (shouldInvalidateIssuesList(variables)) {
+        queryClient.invalidateQueries({ queryKey: ['issues'] });
+      }
+      if (shouldInvalidateDashboard(variables)) {
+        queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      }
     },
   });
 }
@@ -40,4 +45,16 @@ export function useArchiveIssue(id: string) {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
+}
+
+function shouldInvalidateIssuesList(payload: IssueUpsertInput) {
+  const keys = Object.keys(payload);
+  if (keys.length === 0) return false;
+  return keys.some((key) => key !== 'title' && key !== 'description');
+}
+
+function shouldInvalidateDashboard(payload: IssueUpsertInput) {
+  return ['status', 'priority', 'project_id', 'sprint_id', 'assignee_id', 'label_ids', 'archived'].some((key) =>
+    Object.prototype.hasOwnProperty.call(payload, key),
+  );
 }

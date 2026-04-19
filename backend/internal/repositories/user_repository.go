@@ -29,6 +29,9 @@ func (r *UserRepository) Create(ctx context.Context, user *models.User) error {
 		if isUniqueViolation(err, "uq_users_lower_email") {
 			return ErrEmailConflict
 		}
+		if isUniqueViolation(err, "uq_users_google_subject") {
+			return ErrConflict
+		}
 		return err
 	}
 	return nil
@@ -48,6 +51,41 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*models
 	}
 
 	return &user, nil
+}
+
+func (r *UserRepository) FindByGoogleSubject(ctx context.Context, subject string) (*models.User, error) {
+	var user models.User
+	query := r.db.WithContext(ctx).
+		Where("google_subject = ?", strings.TrimSpace(subject)).
+		First(&user)
+
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		return nil, ErrNotFound
+	}
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
+	return &user, nil
+}
+
+func (r *UserRepository) SetGoogleSubject(ctx context.Context, userID, subject string) error {
+	cleanUserID := strings.TrimSpace(userID)
+	cleanSubject := strings.TrimSpace(subject)
+	query := r.db.WithContext(ctx).
+		Model(&models.User{}).
+		Where("id = ?", cleanUserID).
+		Update("google_subject", cleanSubject)
+	if query.Error != nil {
+		if isUniqueViolation(query.Error, "uq_users_google_subject") {
+			return ErrConflict
+		}
+		return query.Error
+	}
+	if query.RowsAffected == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
 
 func (r *UserRepository) FindByID(ctx context.Context, id string) (*models.User, error) {

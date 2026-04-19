@@ -10,15 +10,16 @@ import (
 )
 
 type Config struct {
-	AppEnv      string
-	Port        string
-	DatabaseURL string
-	RedisURL    string
-	JWTSecret   string
-	JWTTTL      time.Duration
-	CORSOrigins []string
-	LogLevel    string
-	BcryptCost  int
+	AppEnv         string
+	Port           string
+	DatabaseURL    string
+	RedisURL       string
+	JWTSecret      string
+	GoogleClientID string
+	JWTTTL         time.Duration
+	CORSOrigins    []string
+	LogLevel       string
+	BcryptCost     int
 
 	HTTPReadHeaderTimeout time.Duration
 	HTTPReadTimeout       time.Duration
@@ -34,12 +35,13 @@ type Config struct {
 
 func Load() (Config, error) {
 	cfg := Config{
-		AppEnv:      getString("APP_ENV", "development"),
-		Port:        getString("PORT", "8080"),
-		DatabaseURL: strings.TrimSpace(os.Getenv("DATABASE_URL")),
-		RedisURL:    strings.TrimSpace(os.Getenv("REDIS_URL")),
-		JWTSecret:   strings.TrimSpace(os.Getenv("JWT_SECRET")),
-		LogLevel:    getString("LOG_LEVEL", "info"),
+		AppEnv:         getString("APP_ENV", "development"),
+		Port:           getString("PORT", "8080"),
+		DatabaseURL:    strings.TrimSpace(os.Getenv("DATABASE_URL")),
+		RedisURL:       strings.TrimSpace(os.Getenv("REDIS_URL")),
+		JWTSecret:      strings.TrimSpace(os.Getenv("JWT_SECRET")),
+		GoogleClientID: strings.TrimSpace(os.Getenv("GOOGLE_CLIENT_ID")),
+		LogLevel:       getString("LOG_LEVEL", "info"),
 	}
 
 	jwtTTL, err := getDuration("JWT_TTL", 24*time.Hour)

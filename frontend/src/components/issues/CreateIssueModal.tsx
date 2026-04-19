@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FormEvent, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from 'components/common/Button';
 import { ErrorBanner } from 'components/common/ErrorBanner';
 import { Input } from 'components/common/Input';
@@ -191,6 +191,11 @@ export function CreateIssueModal() {
               ))}
             </Select>
             {!projectId ? <div style={{ color: 'var(--text-secondary)', marginTop: 6 }}>Select a project first.</div> : null}
+            {projectId && !sprints.isLoading && selectedProjectSprints.length === 0 ? (
+              <div style={{ color: 'var(--text-secondary)', marginTop: 6 }}>
+                This project has no sprints yet. <Link to="/sprints">Create one from Sprints.</Link>
+              </div>
+            ) : null}
             {fieldErrors?.sprint_id ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.sprint_id}</div> : null}
           </div>
           <div>
