@@ -27,8 +27,9 @@ func New(cfg config.Config, deps Dependencies) *gin.Engine {
 	sprintRepo := repositories.NewSprintRepository(deps.DB)
 	labelRepo := repositories.NewLabelRepository(deps.DB)
 	issueRepo := repositories.NewIssueRepository(deps.DB)
+	googleVerifier := services.NewGoogleIDTokenVerifier()
 
-	authService := services.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTTTL, cfg.BcryptCost, cacheStore)
+	authService := services.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTTTL, cfg.BcryptCost, cfg.GoogleClientID, googleVerifier, cacheStore)
 	userService := services.NewUserService(userRepo, cacheStore)
 	projectService := services.NewProjectService(projectRepo, userRepo, cacheStore)
 	sprintService := services.NewSprintService(sprintRepo, projectRepo, cacheStore)
@@ -77,6 +78,7 @@ func registerRoutes(
 	public := v1.Group("")
 	public.POST("/auth/register", authHandler.Register)
 	public.POST("/auth/login", authHandler.Login)
+	public.POST("/auth/google", authHandler.LoginWithGoogle)
 
 	protected := v1.Group("")
 	protected.Use(middleware.RequireAuth(cfg.JWTSecret))

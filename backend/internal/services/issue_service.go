@@ -190,7 +190,7 @@ func (s *IssueService) Create(ctx context.Context, actorID string, input CreateI
 		return nil, apperrors.Internal("failed to create issue")
 	}
 
-	s.invalidateIssueMutationCaches(ctx)
+	s.invalidateIssueMutationCaches(ctx, true)
 
 	return s.Get(ctx, created.ID, true)
 }
@@ -298,7 +298,7 @@ func (s *IssueService) Update(ctx context.Context, actorID string, input UpdateI
 		return nil, apperrors.Internal("failed to update issue")
 	}
 
-	s.invalidateIssueMutationCaches(ctx)
+	s.invalidateIssueMutationCaches(ctx, shouldInvalidateIssueAggregates(input))
 
 	return s.Get(ctx, updated.ID, true)
 }
@@ -311,17 +311,45 @@ func (s *IssueService) Archive(ctx context.Context, actorID string, id string) *
 		}
 		return apperrors.Internal("failed to archive issue")
 	}
-	s.invalidateIssueMutationCaches(ctx)
+	s.invalidateIssueMutationCaches(ctx, true)
 	return nil
 }
 
-func (s *IssueService) invalidateIssueMutationCaches(ctx context.Context) {
+func (s *IssueService) invalidateIssueMutationCaches(ctx context.Context, invalidateAggregates bool) {
 	if s.cache == nil {
+		return
+	}
+	if !invalidateAggregates {
 		return
 	}
 	_ = s.cache.DeleteByPrefix(ctx, "dashboard:")
 	_ = s.cache.DeleteByPrefix(ctx, "projects:")
 	_ = s.cache.DeleteByPrefix(ctx, "sprints:")
+}
+
+func shouldInvalidateIssueAggregates(input UpdateIssueInput) bool {
+	if input.Status != nil {
+		return true
+	}
+	if input.Priority != nil {
+		return true
+	}
+	if input.ProjectID != nil {
+		return true
+	}
+	if input.SprintID != nil {
+		return true
+	}
+	if input.AssigneeID != nil {
+		return true
+	}
+	if input.LabelIDs != nil {
+		return true
+	}
+	if input.Archived != nil {
+		return true
+	}
+	return false
 }
 
 func (s *IssueService) validateIssueReferences(

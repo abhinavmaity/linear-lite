@@ -6,7 +6,9 @@ import { EmptyState } from 'components/common/EmptyState';
 import { ErrorBanner } from 'components/common/ErrorBanner';
 import { Input } from 'components/common/Input';
 import { PageHeader } from 'components/common/PageHeader';
+import { Select } from 'components/common/Select';
 import { Spinner } from 'components/common/Spinner';
+import { DEFAULT_LABEL_COLOR, LABEL_COLOR_OPTIONS } from 'constants/labelColors';
 import { labelsApi, LabelCreateInput, LabelUpdateInput } from 'services/labelsApi';
 import { useUIStore } from 'store/uiStore';
 import { getBannerErrorMessage, parseUiError } from 'utils/errorPresentation';
@@ -17,11 +19,11 @@ export function LabelsPage() {
   const pushToast = useUIStore((state) => state.pushToast);
   const [search, setSearch] = useState('');
   const [name, setName] = useState('');
-  const [color, setColor] = useState('#3B82F6');
+  const [color, setColor] = useState<string>(DEFAULT_LABEL_COLOR);
   const [description, setDescription] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
-  const [editColor, setEditColor] = useState('#3B82F6');
+  const [editColor, setEditColor] = useState<string>(DEFAULT_LABEL_COLOR);
   const [editDescription, setEditDescription] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string> | null>(null);
@@ -35,7 +37,7 @@ export function LabelsPage() {
     mutationFn: (payload: LabelCreateInput) => labelsApi.create(payload),
     onSuccess: () => {
       setName('');
-      setColor('#3B82F6');
+      setColor(DEFAULT_LABEL_COLOR);
       setDescription('');
       setActionError(null);
       setFieldErrors(null);
@@ -132,7 +134,13 @@ export function LabelsPage() {
             <div className="label" style={{ marginBottom: 8 }}>
               Color
             </div>
-            <Input value={color} onChange={(event) => setColor(event.target.value)} placeholder="#3B82F6" required />
+            <Select value={color} onChange={(event) => setColor(event.target.value)} required>
+              {LABEL_COLOR_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label} ({option.value})
+                </option>
+              ))}
+            </Select>
             {fieldErrors?.color ? <div style={{ color: 'var(--danger)', marginTop: 6 }}>{fieldErrors.color}</div> : null}
           </div>
           <div>
@@ -174,7 +182,13 @@ export function LabelsPage() {
                 {editingId === label.id ? (
                   <form onSubmit={(event) => handleUpdate(event, label.id)} style={{ display: 'grid', gap: 10 }}>
                     <Input value={editName} onChange={(event) => setEditName(event.target.value)} required />
-                    <Input value={editColor} onChange={(event) => setEditColor(event.target.value)} required />
+                    <Select value={editColor} onChange={(event) => setEditColor(event.target.value)} required>
+                      {LABEL_COLOR_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label} ({option.value})
+                        </option>
+                      ))}
+                    </Select>
                     <Input value={editDescription} onChange={(event) => setEditDescription(event.target.value)} placeholder="Optional description" />
                     {fieldErrors?.name ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.name}</div> : null}
                     {fieldErrors?.color ? <div style={{ color: 'var(--danger)' }}>{fieldErrors.color}</div> : null}

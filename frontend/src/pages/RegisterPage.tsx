@@ -5,12 +5,10 @@ import { Button } from 'components/common/Button';
 import { ErrorBanner } from 'components/common/ErrorBanner';
 import { Input } from 'components/common/Input';
 import { authApi } from 'services/authApi';
-import { useAuthStore } from 'store/authStore';
 import { parseUiError } from 'utils/errorPresentation';
 
 export function RegisterPage() {
   const navigate = useNavigate();
-  const setSession = useAuthStore((state) => state.setSession);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,9 +17,11 @@ export function RegisterPage() {
 
   const mutation = useMutation({
     mutationFn: () => authApi.register({ name, email, password }),
-    onSuccess: (response) => {
-      setSession(response.data.token, response.data.user);
-      navigate('/dashboard', { replace: true });
+    onSuccess: () => {
+      navigate('/login', {
+        replace: true,
+        state: { registrationSuccess: true, email },
+      });
     },
   });
 

@@ -17,6 +17,7 @@ import (
 type fakeAuthService struct {
 	registerFn func(ctx context.Context, input services.RegisterInput) (*services.AuthSession, *apperrors.AppError)
 	loginFn    func(ctx context.Context, input services.LoginInput) (*services.AuthSession, *apperrors.AppError)
+	googleFn   func(ctx context.Context, input services.GoogleLoginInput) (*services.AuthSession, *apperrors.AppError)
 	meFn       func(ctx context.Context, userID string) (*services.AuthUser, *apperrors.AppError)
 }
 
@@ -26,6 +27,13 @@ func (f *fakeAuthService) Register(ctx context.Context, input services.RegisterI
 
 func (f *fakeAuthService) Login(ctx context.Context, input services.LoginInput) (*services.AuthSession, *apperrors.AppError) {
 	return f.loginFn(ctx, input)
+}
+
+func (f *fakeAuthService) LoginWithGoogle(ctx context.Context, input services.GoogleLoginInput) (*services.AuthSession, *apperrors.AppError) {
+	if f.googleFn == nil {
+		return nil, nil
+	}
+	return f.googleFn(ctx, input)
 }
 
 func (f *fakeAuthService) Me(ctx context.Context, userID string) (*services.AuthUser, *apperrors.AppError) {
