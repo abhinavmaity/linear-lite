@@ -14,6 +14,15 @@ export function getApiBaseUrl() {
   return '/api/v1';
 }
 
+export function getGoogleClientId() {
+  const runtimeClientId = window.__APP_CONFIG__?.GOOGLE_CLIENT_ID?.trim();
+  if (runtimeClientId) {
+    return runtimeClientId;
+  }
+
+  return import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() ?? '';
+}
+
 export function shouldUseMockForPath(path: string) {
   if (!isMockDataEnabled) {
     return false;

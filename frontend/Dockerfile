@@ -19,4 +19,4 @@ COPY --from=builder /app/dist ./dist
 
 EXPOSE 4173
 
-CMD ["sh", "-c", "printf 'window.__APP_CONFIG__ = { API_BASE_URL: \"%s\" };\\n' \"${VITE_API_BASE_URL:-}\" > /app/dist/runtime-config.js && serve -s dist -l ${PORT:-4173}"]
+CMD ["sh", "-c", "printf 'window.__APP_CONFIG__ = { API_BASE_URL: \"%s\", GOOGLE_CLIENT_ID: \"%s\" };\\n' \"${VITE_API_BASE_URL:-}\" \"${VITE_GOOGLE_CLIENT_ID:-}\" > /app/dist/runtime-config.js && serve -s dist -l ${PORT:-4173}"]
