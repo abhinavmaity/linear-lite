@@ -5,6 +5,7 @@ import { Button } from 'components/common/Button';
 import { ErrorBanner } from 'components/common/ErrorBanner';
 import { Input } from 'components/common/Input';
 import { authApi } from 'services/authApi';
+import { getGoogleClientId } from 'services/env';
 import { useAuthStore } from 'store/authStore';
 import { parseUiError } from 'utils/errorPresentation';
 
@@ -24,7 +25,7 @@ export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const googleButtonRef = useRef<HTMLDivElement | null>(null);
-  const googleClientID = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim();
+  const googleClientID = getGoogleClientId();
   const [googleReady, setGoogleReady] = useState(false);
 
   const mutation = useMutation({
