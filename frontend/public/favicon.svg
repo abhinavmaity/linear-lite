@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <pattern id="scan-lines" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(-35)">
+      <rect width="2.1" height="4" fill="#66f6d4" />
+      <rect x="2.1" width="1.9" height="4" fill="transparent" />
+    </pattern>
+  </defs>
+
+  <rect width="64" height="64" rx="10" fill="#031f2c" />
+  <g opacity="0.5" stroke="#0e3345" stroke-width="0.5">
+    <path d="M0 16h64M0 32h64M0 48h64" />
+    <path d="M16 0v64M32 0v64M48 0v64" />
+  </g>
+
+  <g transform="translate(6 6)">
+    <path
+      fill="url(#scan-lines)"
+      d="M4 22c9-1 19-2 29-3l11-11c0.5-0.5 1.4-0.5 1.9 0l0.6 0.6c0.5 0.5 0.5 1.4 0 1.9l-8 8 11-1
+      c0.8-0.1 1.5 0.5 1.6 1.3s-0.5 1.5-1.2 1.6l-14 2-10 10 6 9c0.4 0.6 0.2 1.5-0.4 1.9l-0.7 0.4
+      c-0.6 0.4-1.5 0.2-1.9-0.4l-7-9-10 10c-0.5 0.5-1.4 0.5-1.9 0l-0.6-0.6c-0.5-0.5-0.5-1.4 0-1.9l8-8
+      -8-8c-0.5-0.5-0.5-1.4 0-1.9l0.6-0.6c0.5-0.5 1.4-0.5 1.9 0l8 8 8-8-10 1c-0.8 0.1-1.5-0.5-1.6-1.3
+      s0.5-1.5 1.3-1.6z"
+    />
+  </g>
+</svg>
